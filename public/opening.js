@@ -44,16 +44,16 @@ class OpeningScreen {
 
     handleClick() {
         if (this.isProcessing) return;
-        
+
         this.isProcessing = true;
         this.clickCount++;
-        
+
         if (this.clickCount === 1) {
             this.enableAudio();
         }
-        
+
         this.updateMessage();
-        
+
         if (this.clickCount >= this.totalClicksNeeded) {
             this.completeOpening();
         } else {
@@ -66,10 +66,10 @@ class OpeningScreen {
     updateMessage() {
         const titleElement = document.getElementById('openingTitle');
         const messageElement = document.getElementById('openingMessage');
-        
+
         if (this.clickCount < this.totalClicksNeeded) {
             titleElement.textContent = this.messages[this.clickCount - 1] || this.messages[this.messages.length - 1];
-            
+
             if (this.clickCount === Math.floor(this.totalClicksNeeded / 2)) {
                 messageElement.innerHTML = 'Tuloy mo lang';
             } else if (this.clickCount === this.totalClicksNeeded - 1) {
@@ -101,7 +101,7 @@ class OpeningScreen {
     fadeOutAndReveal() {
         const openingScreen = document.getElementById('openingScreen');
         openingScreen.classList.add('fade-out');
-        
+
         setTimeout(() => {
             openingScreen.remove();
             document.body.style.opacity = '0';
