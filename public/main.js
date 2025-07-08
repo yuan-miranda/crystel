@@ -23,7 +23,7 @@ function initializeMusicPlayer() {
     audio.volume = 0.3;
     playBtn.addEventListener('click', toggleMusic);
 
-    setTrackInfo('I Like U', 'NIKI', 'I Like U.mp4', 'I like U Cover.jpg');
+    setTrackInfo('I Like U', 'NIKI', 'I Like U.mp4', 'I_Like_U_Cover.jpg');
 }
 
 function setTrackInfo(title, artist, audioSrc, coverImage = null) {
