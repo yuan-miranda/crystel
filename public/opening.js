@@ -55,7 +55,7 @@ class OpeningScreen {
                     `MALAPIT NA!! 🔥`;
             }
         } else {
-            document.getElementById('openingTitle').textContent = "AYYYY PERFECT!! 🎉";
+            document.getElementById('openingTitle').textContent = "There we go!! 🎉";
             document.getElementById('openingMessage').innerHTML = 
                 `Finally!!! HAHAHA 💕`;
             
