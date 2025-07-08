@@ -4,10 +4,10 @@ class OpeningScreen {
         this.totalClicksNeeded = 7;
         this.messages = [
             "Hey Crystel ❤️",
-            "Sup!! I made something lmao",
+            "loww there",
             "Keep clicking HAHAHA",
             "Oi almost there na!",
-            "Just konti pa promise",
+            "konti nalang promise",
             "Last na to!!",
             "Ready ka na ba??"
         ];
@@ -28,7 +28,7 @@ class OpeningScreen {
                         I made something for you<br>
                         Click ${this.totalClicksNeeded} times to see it
                     </p>
-                    <p class="click-instruction">Click anywhere dali!!</p>
+                    <p class="click-instruction">Click anywhere</p>
                 </div>
             </div>
         `;
@@ -49,15 +49,15 @@ class OpeningScreen {
             
             if (this.clickCount === Math.floor(this.totalClicksNeeded / 2)) {
                 document.getElementById('openingMessage').innerHTML = 
-                    `Halfway na tayo! 🎯<br>Tuloy mo lang HAHAHA`;
+                    `Tuloy mo lang HAHAHA`;
             } else if (this.clickCount === this.totalClicksNeeded - 1) {
                 document.getElementById('openingMessage').innerHTML = 
-                    `MALAPIT NA!! 🔥<br>Isa pa lang talaga!!`;
+                    `MALAPIT NA!! 🔥`;
             }
         } else {
             document.getElementById('openingTitle').textContent = "AYYYY PERFECT!! 🎉";
             document.getElementById('openingMessage').innerHTML = 
-                `Loading mo na surprise... HAHAHA 💕`;
+                `Finally!!! HAHAHA 💕`;
             
             setTimeout(() => {
                 this.fadeOutAndReveal();
