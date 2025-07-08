@@ -1,38 +1,36 @@
-const selectors = {
-    audio: '#backgroundMusic',
-    playBtn: '#playBtn',
-    musicPlayer: '.music-player',
-    albumArt: '.album-art',
-    trackTitle: '.track-title',
-    trackArtist: '.track-artist'
-};
-
-const icons = {
-    play: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
-    pause: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
-};
-
 document.addEventListener('DOMContentLoaded', initializeMusicPlayer);
 
 function initializeMusicPlayer() {
-    const audio = document.querySelector(selectors.audio);
-    const playBtn = document.querySelector(selectors.playBtn);
+    const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
+    const playBtn = document.querySelector(UI_CONSTANTS.SELECTORS.playBtn);
 
     if (!audio || !playBtn) return;
 
     audio.volume = 0.3;
     playBtn.addEventListener('click', toggleMusic);
 
-    setTrackInfo('I Like U', 'NIKI', 'I Like U.mp4', 'I_Like_U_Cover.jpg');
+    setTrackInfo('I Like U', 'NIKI', 'media/I Like U.mp4', 'media/I_Like_U_Cover.jpg');
 }
 
+function startAutoplay() {
+    const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
+
+    if (!audio) return;
+
+    audio.play().then(() => {
+        updateMusicPlayerState(true);
+    }).catch(console.error);
+}
+
+window.startAutoplay = startAutoplay;
+
 function setTrackInfo(title, artist, audioSrc, coverImage = null) {
-    const elements = {
-        trackTitle: document.querySelector(selectors.trackTitle),
-        trackArtist: document.querySelector(selectors.trackArtist),
-        albumArt: document.querySelector(selectors.albumArt),
-        audio: document.querySelector(selectors.audio)
-    };
+    const elements = getElements({
+        trackTitle: UI_CONSTANTS.SELECTORS.trackTitle,
+        trackArtist: UI_CONSTANTS.SELECTORS.trackArtist,
+        albumArt: UI_CONSTANTS.SELECTORS.albumArt,
+        audio: UI_CONSTANTS.SELECTORS.audio
+    });
 
     if (!Object.values(elements).every(el => el)) return;
 
@@ -51,28 +49,17 @@ function setTrackInfo(title, artist, audioSrc, coverImage = null) {
 }
 
 function toggleMusic() {
-    const elements = {
-        audio: document.querySelector(selectors.audio),
-        playBtn: document.querySelector(selectors.playBtn),
-        musicPlayer: document.querySelector(selectors.musicPlayer),
-        albumArt: document.querySelector(selectors.albumArt)
-    };
+    const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
 
-    if (!Object.values(elements).every(el => el)) return;
+    if (!audio) return;
 
-    const isPlaying = !elements.audio.paused;
+    const isPlaying = !audio.paused;
 
     if (isPlaying) {
-        elements.audio.pause();
-        elements.playBtn.innerHTML = icons.play;
-        elements.musicPlayer.classList.remove('playing');
-        elements.albumArt.classList.remove('playing');
-        elements.playBtn.setAttribute('aria-label', 'Play music');
+        audio.pause();
+        updateMusicPlayerState(false);
     } else {
-        elements.audio.play().catch(console.error);
-        elements.playBtn.innerHTML = icons.pause;
-        elements.musicPlayer.classList.add('playing');
-        elements.albumArt.classList.add('playing');
-        elements.playBtn.setAttribute('aria-label', 'Pause music');
+        audio.play().catch(console.error);
+        updateMusicPlayerState(true);
     }
 }

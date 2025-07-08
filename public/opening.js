@@ -2,6 +2,7 @@ class OpeningScreen {
     constructor() {
         this.clickCount = 0;
         this.totalClicksNeeded = 7;
+        this.isProcessing = false;
         this.messages = [
             "Hey Crystel ❤️",
             "loww there",
@@ -38,30 +39,62 @@ class OpeningScreen {
 
     bindEvents() {
         const openingScreen = document.getElementById('openingScreen');
-        openingScreen.addEventListener('click', (e) => this.handleClick(e));
+        openingScreen.addEventListener('click', () => this.handleClick());
     }
 
-    handleClick(e) {
+    handleClick() {
+        if (this.isProcessing) return;
+        
+        this.isProcessing = true;
         this.clickCount++;
         
+        if (this.clickCount === 1) {
+            this.enableAudio();
+        }
+        
+        this.updateMessage();
+        
+        if (this.clickCount >= this.totalClicksNeeded) {
+            this.completeOpening();
+        } else {
+            setTimeout(() => {
+                this.isProcessing = false;
+            }, 500);
+        }
+    }
+
+    updateMessage() {
+        const titleElement = document.getElementById('openingTitle');
+        const messageElement = document.getElementById('openingMessage');
+        
         if (this.clickCount < this.totalClicksNeeded) {
-            document.getElementById('openingTitle').textContent = this.messages[this.clickCount - 1] || this.messages[this.messages.length - 1];
+            titleElement.textContent = this.messages[this.clickCount - 1] || this.messages[this.messages.length - 1];
             
             if (this.clickCount === Math.floor(this.totalClicksNeeded / 2)) {
-                document.getElementById('openingMessage').innerHTML = 
-                    `Tuloy mo lang`;
+                messageElement.innerHTML = 'Tuloy mo lang';
             } else if (this.clickCount === this.totalClicksNeeded - 1) {
-                document.getElementById('openingMessage').innerHTML = 
-                    `MALAPIT NA!! 🔥`;
+                messageElement.innerHTML = 'MALAPIT NA!! 🔥';
             }
         } else {
-            document.getElementById('openingTitle').textContent = "There we go!! 🎉";
-            document.getElementById('openingMessage').innerHTML = 
-                `Finally!!! HAHAHA 💕`;
-            
-            setTimeout(() => {
-                this.fadeOutAndReveal();
-            }, 1000);
+            titleElement.textContent = "There we go!! 🎉";
+            messageElement.innerHTML = 'Finally!!! HAHAHA 💕';
+        }
+    }
+
+    completeOpening() {
+        setTimeout(() => {
+            this.fadeOutAndReveal();
+        }, 1000);
+    }
+
+    enableAudio() {
+        const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
+        if (audio) {
+            audio.play().then(() => {
+                updateMusicPlayerState(true);
+            }).catch(() => {
+                // Audio permission denied, continue anyway
+            });
         }
     }
 
@@ -75,6 +108,9 @@ class OpeningScreen {
             setTimeout(() => {
                 document.body.style.transition = 'opacity 0.8s ease';
                 document.body.style.opacity = '1';
+                if (window.startAutoplay) {
+                    window.startAutoplay();
+                }
             }, 100);
         }, 500);
     }
