@@ -49,7 +49,7 @@ class OpeningScreen {
             
             if (this.clickCount === Math.floor(this.totalClicksNeeded / 2)) {
                 document.getElementById('openingMessage').innerHTML = 
-                    `Tuloy mo lang HAHAHA`;
+                    `Tuloy mo lang`;
             } else if (this.clickCount === this.totalClicksNeeded - 1) {
                 document.getElementById('openingMessage').innerHTML = 
                     `MALAPIT NA!! 🔥`;

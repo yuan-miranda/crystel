@@ -63,6 +63,7 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    display: block;
 }
 
 .track-info {
@@ -439,6 +440,13 @@ body {
     .album-art {
         width: 2.5rem;
         height: 2.5rem;
+    }
+
+    .album-art img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
     }
 
     .play-btn {
