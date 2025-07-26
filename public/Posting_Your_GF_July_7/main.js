@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', initializeMusicPlayer);
+import { setupOpeningScreen } from "./opening.js";
+import { UI_CONSTANTS, getElements, updateMusicPlayerState } from "./utils.js";
 
 function initializeMusicPlayer() {
     const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
@@ -9,7 +10,7 @@ function initializeMusicPlayer() {
     audio.volume = 0.3;
     playBtn.addEventListener('click', toggleMusic);
 
-    setTrackInfo('I Like U', 'NIKI', 'media/I Like U.mp4', 'media/I_Like_U_Cover.jpg');
+    setTrackInfo('I Like U', 'NIKI', '/public/media/I Like U.mp4', '/public/media/I_Like_U_Cover.jpg');
 }
 
 function startAutoplay() {
@@ -21,8 +22,6 @@ function startAutoplay() {
         updateMusicPlayerState(true);
     }).catch(console.error);
 }
-
-window.startAutoplay = startAutoplay;
 
 function setTrackInfo(title, artist, audioSrc, coverImage = null) {
     const elements = getElements({
@@ -63,3 +62,9 @@ function toggleMusic() {
         updateMusicPlayerState(true);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeMusicPlayer();
+    startAutoplay();
+    setupOpeningScreen();
+});

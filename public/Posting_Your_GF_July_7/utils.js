@@ -31,13 +31,13 @@ function updateMusicPlayerState(isPlaying) {
         elements.playBtn.innerHTML = UI_CONSTANTS.ICONS.pause;
         elements.musicPlayer.classList.add('playing');
         elements.albumArt.classList.add('playing');
-        elements.playBtn.setAttribute('aria-label', 'Pause music');
     } else {
         elements.playBtn.innerHTML = UI_CONSTANTS.ICONS.play;
         elements.musicPlayer.classList.remove('playing');
         elements.albumArt.classList.remove('playing');
-        elements.playBtn.setAttribute('aria-label', 'Play music');
     }
 
     return true;
 }
+
+export { UI_CONSTANTS, getElements, updateMusicPlayerState };
