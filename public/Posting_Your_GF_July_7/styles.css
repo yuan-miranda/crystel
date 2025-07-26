@@ -9,9 +9,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    font-family: Arial, sans-serif;
     padding: 2rem 0 6rem;
     background: #fafafa;
+    font-family: Arial, sans-serif;
+    user-select: none;
+}
+
+.content,
+.music-player {
+    display: none;
 }
 
 .content {
@@ -29,7 +35,7 @@ body {
     border-radius: 2rem;
     padding: 0.5rem 1rem 0.5rem 0.5rem;
     color: white;
-    display: flex;
+    /* display: flex; */
     align-items: center;
     gap: 1rem;
     min-width: 15rem;

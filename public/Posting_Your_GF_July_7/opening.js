@@ -74,6 +74,8 @@ function updateOpeningMessage() {
 function completeOpening() {
     setTimeout(() => {
         document.getElementById('openingScreen').classList.add('fade-out');
+        document.querySelector('.content').style.display = 'block';
+        document.querySelector('.music-player').style.display = 'flex';
     }, 1000);
 }
 
