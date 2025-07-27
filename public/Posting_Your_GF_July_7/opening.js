@@ -14,22 +14,6 @@ const messages = [
     "Ready ka na ba bebii??"
 ];
 
-function createOpeningScreen() {
-    const openingHTML = `
-        <div class="opening-screen" id="openingScreen">
-            <div class="opening-content">
-                <h1 class="opening-title" id="openingTitle">${messages[0]}</h1>
-                <p class="opening-message" id="openingMessage">
-                    I made something for you<br>
-                    Click ${totalClicksNeeded} times to see it
-                </p>
-                <p class="click-instruction">Click anywhere</p>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', openingHTML);
-}
-
 function eventListeners() {
     document.getElementById('openingScreen').addEventListener('click', openingClicks);
 }
@@ -92,7 +76,6 @@ function enableOpeningAudio() {
 }
 
 function setupOpeningScreen() {
-    createOpeningScreen();
     eventListeners();
 }
 
