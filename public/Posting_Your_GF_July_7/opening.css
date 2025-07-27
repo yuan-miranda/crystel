@@ -1,16 +1,14 @@
-
-
 .opening-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    background: white;
     z-index: 1;
     cursor: pointer;
     transition: opacity 0.5s ease;
@@ -29,7 +27,7 @@
 
 .opening-title {
     font-size: 2rem;
-    font-weight: normal;
+    font-weight: bold;
     margin-bottom: 1rem;
     color: #666;
 }
@@ -42,21 +40,6 @@
 }
 
 .click-instruction {
-    font-size: 0.9rem;
     color: #999;
     opacity: 0.8;
-}
-
-@media (max-width: 50rem) {
-    .opening-title {
-        font-size: 1.5rem;
-    }
-
-    .opening-message {
-        font-size: 1rem;
-    }
-
-    .click-instruction {
-        font-size: 0.8rem;
-    }
 }

@@ -9,7 +9,7 @@ const messages = [
     "loww there",
     "Keep clicking HAHAHA",
     "Oi almost there na!",
-    "konti nalang promise",
+    "konti nalang",
     "Last na to!!",
     "Ready ka na ba bebii??"
 ];
@@ -58,7 +58,7 @@ function updateOpeningMessage() {
     if (!titleElement || !messageElement) return;
 
     if (clickCount < totalClicksNeeded) {
-        titleElement.textContent = messages[clickCount - 1] || messages[messages.length - 1];
+        titleElement.textContent = messages[clickCount] || messages[messages.length - 1];
 
         if (clickCount === Math.floor(totalClicksNeeded / 2)) {
             messageElement.innerHTML = 'Tuloy mo lang';
@@ -76,6 +76,7 @@ function completeOpening() {
         document.getElementById('openingScreen').classList.add('fade-out');
         document.querySelector('.content').style.display = 'block';
         document.querySelector('.music-player').style.display = 'flex';
+        document.querySelector('.footer').style.display = 'flex';
     }, 1000);
 }
 
