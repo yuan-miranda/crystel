@@ -17,6 +17,7 @@ let index = 0;
 
 function showCarousel() {
     document.getElementById("carousel").style.display = "block";
+    document.querySelector(".heart-button").style.display = "none";
 
     // 🎉 Confetti explosion
     confetti({
