@@ -1,11 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0, user-scalable=no">
     <title>Happy 4th Monthsary!</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    Still making this page, but I just wanted to say Happy 4th Monthsary! I love you so much Crystel❤️, and I can't wait to celebrate many more months with you muahhhh.
+    <div class="floating-hearts" id="heartContainer"></div>
+
+    <h1>Happy 4th Monthsary Crystel ❤️</h1>
+    <p>
+        I just wanted to say how much I love you and how grateful I am to spend every moment with you.
+        You've made the past 4 months so special, and I can't wait for all the months and years ahead 🥺💕.
+    </p>
+
+    <button class="heart-button" onclick="startHearts(); showCarousel();">Click meeeeeeee</button>
+
+    <div class="carousel" id="carousel">
+        <p id="carousel-text">I loveee youuuuu 😄</p>
+        <div class="carousel-buttons">
+            <button onclick="prev()">Prev</button>
+            <button onclick="next()">Next</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="../index.html">← Go back to selection</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="main.js"></script>
 </body>
+
 </html>

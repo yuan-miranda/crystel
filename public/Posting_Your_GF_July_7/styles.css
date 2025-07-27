@@ -7,8 +7,9 @@
 body {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 2rem 0 6rem;
     background: #fafafa;
     font-family: Arial, sans-serif;
@@ -321,6 +322,23 @@ body {
     animation-delay: 10s;
 }
 
+.footer {
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.footer a {
+    color: #d63384;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #e754a3;
+    text-decoration: underline;
+}
+
 @keyframes nameRotate {
     0% {
         opacity: 0;
@@ -340,9 +358,7 @@ body {
     }
 }
 
-/* Media Queries */
-
-@media (max-width: 48rem) {
+@media (max-width: 50rem) {
     body {
         padding: 1rem 0 5rem;
     }
@@ -364,7 +380,7 @@ body {
 
     .love-letter {
         padding: 1.5rem;
-        margin: 0 0.5rem;
+        margin: 0 auto;
     }
 
     .love-letter p {
@@ -396,41 +412,5 @@ body {
 
     .photo-placeholder span {
         font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 30rem) {
-    .section-title {
-        font-size: 1.6rem;
-    }
-
-    .love-letter {
-        padding: 1rem;
-        margin: 0 0.25rem;
-    }
-
-    .love-letter p {
-        font-size: 0.95rem;
-    }
-
-    .photo-placeholder {
-        height: 18rem;
-    }
-
-    .music-player {
-        bottom: 1rem;
-        right: 1rem;
-        min-width: 12rem;
-        padding: 0.4rem 0.8rem 0.4rem 0.4rem;
-    }
-
-    .album-art {
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-
-    .play-btn {
-        width: 2.25rem;
-        height: 2.25rem;
     }
 }
