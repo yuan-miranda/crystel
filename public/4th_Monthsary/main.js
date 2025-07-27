@@ -19,7 +19,7 @@ function showCarousel() {
     document.getElementById("carousel").style.display = "block";
     document.querySelector(".heart-button").style.display = "none";
 
-    // 🎉 Confetti explosion
+    // confetti explosion
     confetti({
         particleCount: 150,
         spread: 80,
