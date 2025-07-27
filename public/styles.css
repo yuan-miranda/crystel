@@ -44,3 +44,11 @@ body {
     color: #666;
     font-size: 1rem;
 }
+
+.link-actions {
+    position: fixed;
+    margin: 1rem;
+    z-index: 1;
+    bottom: 10px;
+    right: 10px;
+}
