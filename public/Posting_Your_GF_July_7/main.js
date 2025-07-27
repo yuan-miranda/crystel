@@ -13,16 +13,6 @@ function initializeMusicPlayer() {
     setTrackInfo('I Like U', 'NIKI', 'media/I Like U.mp4', 'media/I_Like_U_Cover.jpg');
 }
 
-function startAutoplay() {
-    const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
-
-    if (!audio) return;
-
-    audio.play().then(() => {
-        updateMusicPlayerState(true);
-    }).catch(console.error);
-}
-
 function setTrackInfo(title, artist, audioSrc, coverImage = null) {
     const elements = getElements({
         trackTitle: UI_CONSTANTS.SELECTORS.trackTitle,
@@ -65,6 +55,5 @@ function toggleMusic() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeMusicPlayer();
-    startAutoplay();
     setupOpeningScreen();
 });
