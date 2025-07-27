@@ -63,7 +63,7 @@ function updateOpeningMessage() {
         if (clickCount === Math.floor(totalClicksNeeded / 2)) {
             messageElement.innerHTML = 'Tuloy mo lang';
         } else if (clickCount === totalClicksNeeded - 1) {
-            messageElement.innerHTML = 'MALAPIT NA!! 🔥';
+            messageElement.innerHTML = 'One more!!';
         }
     } else {
         titleElement.textContent = "There we go!! 🎉";
