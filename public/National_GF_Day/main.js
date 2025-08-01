@@ -62,8 +62,8 @@ function shuffle(arr) {
 }
 
 function resetWord(el) {
-    // 10% chance to show an image, otherwise show text
-    const isImage = Math.random() < 0.1;
+    // chance to show an image, otherwise show text
+    const isImage = Math.random() < 0.3;
 
     if (isImage) {
         const img = document.createElement("img");
