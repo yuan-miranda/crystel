@@ -1,15 +1,18 @@
 const words = [];
+let currentImageCount = 0;
+const activeImages = new Set();
 const config = {
-    wordCount: 64,
-    minSpeed: 1,
-    maxSpeed: 2.4,
+    wordCount: 128,
+    maxImageOnScreen: 16,
+    minSpeed: 2.4,
+    maxSpeed: 3.2,
     minFontSize: 24,
     maxFontSize: 32,
     minDepth: -2048,
     maxDepth: 1024,
     minStartY: -window.innerHeight,
     fallThreshold: window.innerHeight + 512,
-    resetStartY: -128,
+    resetStartY: -256,
     widthPadding: 516,
     texts: shuffle([
         "I lovee youuuuu", "Hii supp", "Pogi ni yuan", "Mahal kita", "Ingat ka palagi",
@@ -61,26 +64,39 @@ function shuffle(arr) {
     return arr.sort(() => Math.random() - 0.5);
 }
 
-function resetWord(el) {
-    // chance to show an image, otherwise show text
-    const isImage = Math.random() < 0.3;
+function resetWord(element) {
+    if (element.firstChild && element.firstChild.tagName === "IMG") {
+        const prevImgSrc = element.firstChild.src;
+        const imgFile = prevImgSrc.substring(prevImgSrc.lastIndexOf("media/"));
+        activeImages.delete(imgFile);
+        currentImageCount--;
+    }
+
+    element.innerHTML = "";
+
+    const canAddImage = currentImageCount < config.maxImageOnScreen;
+    const availableImages = config.images.filter(img => !activeImages.has(img));
+
+    const isImage = canAddImage && availableImages.length > 0 && Math.random() < 0.2;
 
     if (isImage) {
+        const randomImg = availableImages[Math.floor(Math.random() * availableImages.length)];
         const img = document.createElement("img");
-        img.src = config.images[Math.floor(Math.random() * config.images.length)];
-        el.innerHTML = "";
-        el.appendChild(img);
+        img.src = randomImg;
+        element.appendChild(img);
+        activeImages.add(randomImg);
+        currentImageCount++;
     } else {
-        el.innerHTML = config.texts[Math.random() * config.texts.length | 0];
-        el.style.fontSize = config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize) + 'px';
+        element.textContent = config.texts[Math.random() * config.texts.length | 0];
+        element.style.fontSize = config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize) + 'px';
     }
 
     const paddedWidth = window.innerWidth + config.widthPadding;
     const x = Math.random() * paddedWidth - config.widthPadding / 2;
-    el.style.left = `${x}px`;
+    element.style.left = `${x}px`;
 
     const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-    el.style.transform = `translateZ(${depth}px)`;
+    element.style.transform = `translateZ(${depth}px)`;
 }
 
 function animate() {
@@ -88,9 +104,9 @@ function animate() {
         w.y += w.speed;
         if (w.y > config.fallThreshold) {
             w.y = config.resetStartY - Math.random() * 100;
-            resetWord(w.el);
+            resetWord(w.element);
         }
-        w.el.style.top = w.y + 'px';
+        w.element.style.top = w.y + 'px';
     }
     requestAnimationFrame(animate);
 }
@@ -99,15 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const scene = document.getElementById('scene');
 
     for (let i = 0; i < config.wordCount; i++) {
-        const el = document.createElement('div');
-        el.className = 'word';
-        scene.appendChild(el);
+        const element = document.createElement('div');
+        element.className = 'word';
+        scene.appendChild(element);
 
         const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
         const startY = config.minStartY * Math.random();
 
-        resetWord(el);
-        words.push({ el, y: startY, speed });
+        resetWord(element);
+        words.push({ element, y: startY, speed });
     }
 
     animate();

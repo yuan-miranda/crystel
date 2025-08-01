@@ -10,6 +10,7 @@ body {
     perspective: 1200px;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
     background: linear-gradient(135deg, black, #333);
     user-select: none;
 }
