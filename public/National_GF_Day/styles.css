@@ -29,7 +29,7 @@ h3 {
 
 #scene {
     width: 100vw;
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.1s ease-out;
@@ -47,7 +47,6 @@ h3 {
     width: auto;
     display: block;
 }
-
 
 .footer {
     position: fixed;

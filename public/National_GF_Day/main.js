@@ -1,17 +1,16 @@
 const words = [];
 let currentImageCount = 0;
 const activeImages = new Set();
+
 const config = {
-    wordCount: 128,
+    wordCount: 96,
     maxImageOnScreen: 16,
     minSpeed: 2.4,
     maxSpeed: 3.2,
     minFontSize: 24,
     maxFontSize: 32,
-    minDepth: -2048,
+    minDepth: -1024,
     maxDepth: 1024,
-    minStartY: -window.innerHeight,
-    fallThreshold: window.innerHeight + 512,
     resetStartY: -256,
     widthPadding: 516,
     texts: shuffle([
@@ -59,6 +58,18 @@ const config = {
         "media/startofall.png"
     ]
 };
+
+function updateViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    config.minStartY = -window.innerHeight;
+    config.fallThreshold = window.innerHeight + 512;
+}
+
+window.addEventListener('resize', updateViewportHeight);
+window.addEventListener('orientationchange', updateViewportHeight);
+
+updateViewportHeight();
 
 function shuffle(arr) {
     return arr.sort(() => Math.random() - 0.5);
