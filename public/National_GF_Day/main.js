@@ -3,7 +3,7 @@ const config = {
     wordCount: 64,
     minSpeed: 1,
     maxSpeed: 2.4,
-    minFontSize: 16,
+    minFontSize: 24,
     maxFontSize: 32,
     minDepth: -2048,
     maxDepth: 1024,
