@@ -59,40 +59,24 @@ const config = {
     ]
 };
 
-let cachedWidth = window.innerWidth;
-let cachedHeight = window.innerHeight;
-
 function updateViewportHeight() {
-    cachedWidth = window.innerWidth;
-    cachedHeight = window.innerHeight;
-    const vh = cachedHeight * 0.01;
+    const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
-    config.minStartY = -cachedHeight;
-    config.fallThreshold = cachedHeight + 512;
+    config.minStartY = -window.innerHeight;
+    config.fallThreshold = window.innerHeight + 512;
 }
 
 function updateMaxStuffOnScreen() {
-    if (cachedWidth < 800) {
+    if (window.innerWidth < 800) {
         config.maxImageOnScreen = 8;
         config.wordCount = 64;
     }
 }
 
-function throttle(fn, limit) {
-    let inThrottle;
-    return function () {
-        if (!inThrottle) {
-            fn.apply(this, arguments);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-window.addEventListener('resize', throttle(updateViewportHeight, 200));
-window.addEventListener('orientationchange', throttle(updateViewportHeight, 200));
-window.addEventListener('resize', throttle(updateMaxStuffOnScreen, 200));
-window.addEventListener('orientationchange', throttle(updateMaxStuffOnScreen, 200));
+window.addEventListener('resize', updateViewportHeight);
+window.addEventListener('orientationchange', updateViewportHeight);
+window.addEventListener('resize', updateMaxStuffOnScreen);
+window.addEventListener('orientationchange', updateMaxStuffOnScreen);
 
 updateViewportHeight();
 updateMaxStuffOnScreen();
@@ -102,11 +86,18 @@ function shuffle(arr) {
 }
 
 function resetWord(element) {
-    element.textContent = "";
+    if (element.firstChild && element.firstChild.tagName === "IMG") {
+        const prevImgSrc = element.firstChild.src;
+        const imgFile = prevImgSrc.substring(prevImgSrc.lastIndexOf("media/"));
+        activeImages.delete(imgFile);
+        currentImageCount--;
+    }
+
     element.innerHTML = "";
 
     const canAddImage = currentImageCount < config.maxImageOnScreen;
     const availableImages = config.images.filter(img => !activeImages.has(img));
+
     const isImage = canAddImage && availableImages.length > 0 && Math.random() < 0.2;
 
     if (isImage) {
@@ -116,15 +107,16 @@ function resetWord(element) {
         element.appendChild(img);
         activeImages.add(randomImg);
         currentImageCount++;
-        img.onload = () => { img.dataset.loaded = "true"; };
     } else {
         element.textContent = config.texts[Math.random() * config.texts.length | 0];
         element.style.fontSize = config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize) + 'px';
     }
 
-    const paddedWidth = cachedWidth + config.widthPadding;
+    const paddedWidth = window.innerWidth + config.widthPadding;
     const x = Math.random() * paddedWidth - config.widthPadding / 2;
     element.style.left = `${x}px`;
+
+    const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
 }
 
 function animate() {
@@ -134,7 +126,7 @@ function animate() {
             w.y = config.resetStartY - Math.random() * 100;
             resetWord(w.element);
         }
-        w.element.style.transform = `translate3d(0, ${w.y}px, ${w.depth}px)`;
+        w.element.style.transform = `translateY(${w.y}px) translateZ(${w.depth}px)`;
     }
     requestAnimationFrame(animate);
 }
@@ -149,16 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
         const startY = config.minStartY * Math.random();
-        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
 
         resetWord(element);
+
+        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
         words.push({ element, y: startY, speed, depth });
-        element.style.transform = `translate3d(0, ${startY}px, ${depth}px)`;
+        element.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
     }
 
     animate();
 
-    // mouse rotate
+    // mouse drag to rotate the scene
     let isDragging = false, lastX = 0, lastY = 0, rotX = 0, rotY = 0;
 
     document.addEventListener('mousedown', e => {
@@ -178,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('mouseup', () => isDragging = false);
 
-    // 1 finger touch rotate
+    // 1 finger touch to rotate the scene
     let lastTouchX = 0, lastTouchY = 0;
 
     document.addEventListener('touchstart', e => {
