@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pinchStartDistance = null;
 
             // suppress 1-finger rotate for 500ms
-            suppressSingleTouchUntil = Date.now() + 500;
+            suppressSingleTouchUntil = Date.now() + 200;
         }
     });
 });
