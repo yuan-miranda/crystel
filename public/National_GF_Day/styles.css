@@ -85,11 +85,6 @@ h3 {
 }
 
 @media (max-width: 50rem) {
-    .word img {
-        max-width: 128px;
-
-    }
-
     #toggleImages {
         padding: 0.25rem 0.5rem;
         font-size: 0.8rem;

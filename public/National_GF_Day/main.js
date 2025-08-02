@@ -15,10 +15,10 @@ const config = {
     maxImageOnScreen: 16,
     minSpeed: 2.4,
     maxSpeed: 3.2,
-    minFontSize: 24,
-    maxFontSize: 32,
-    minDepth: -2048,
-    maxDepth: 1024,
+    minFontSize: 48,
+    maxFontSize: 96,
+    minDepth: -4096,
+    maxDepth: 2048,
     resetStartY: -1024,
     widthPadding: 1024,
     minZoom: 0.2,
@@ -113,7 +113,7 @@ function updateViewportHeight() {
 
 function updateMaxStuffOnScreen() {
     if (window.innerWidth < 800) {
-        config.wordCount = 48;
+        config.wordCount = 32;
         config.maxImageOnScreen = 6;
     }
 }
@@ -156,13 +156,8 @@ function animate() {
             word.y = config.resetStartY - Math.random() * 100;
             resetWord(word.element);
         }
-        word.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
+        word.element.style.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
     }
-
-    for (const word of words) {
-        word.element.style.transform = word.transform;
-    }
-
     requestAnimationFrame(animate);
 }
 
