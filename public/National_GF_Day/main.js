@@ -242,11 +242,16 @@ function eventListeners() {
     }, { passive: true });
 
     document.addEventListener('touchend', e => {
-        if (e.touches.length < 2) {
+        if (e.touches.length === 1) {
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
             pinchStartDistance = null;
             suppressSingleTouchUntil = Date.now() + 200;
+        } else if (e.touches.length < 1) {
+            pinchStartDistance = null;
         }
     });
+
 
     document.addEventListener('wheel', e => {
         e.preventDefault();
