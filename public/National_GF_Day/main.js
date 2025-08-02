@@ -187,15 +187,35 @@ function animate(now = performance.now()) {
     requestAnimationFrame(animate);
 }
 
+function clampPan() {
+    const scene = document.getElementById('scene');
+    const rect = scene.getBoundingClientRect();
+    const viewWidth = window.innerWidth;
+    const viewHeight = window.innerHeight;
+
+    const xAllowance = 1280;
+    const yAllowance = 768;
+
+    const maxOffsetX = Math.max(0, (rect.width * scale - viewWidth) / 2 + xAllowance);
+    const maxOffsetY = Math.max(0, (rect.height * scale - viewHeight) / 2 + yAllowance);
+
+    targetPanX = Math.max(-maxOffsetX, Math.min(maxOffsetX, targetPanX));
+    targetPanY = Math.max(-maxOffsetY, Math.min(maxOffsetY, targetPanY));
+}
+
+
 
 function animateSceneTransform() {
     rotX += (targetRotX - rotX) * 0.1;
     rotY += (targetRotY - rotY) * 0.1;
     panX += (targetPanX - panX) * 0.1;
     panY += (targetPanY - panY) * 0.1;
+
+    clampPan();
     updateSceneTransform();
     requestAnimationFrame(animateSceneTransform);
 }
+
 
 function eventListeners() {
     const toggleImagesButton = document.getElementById('toggleImages');
