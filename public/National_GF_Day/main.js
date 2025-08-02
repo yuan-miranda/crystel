@@ -1,4 +1,3 @@
-// Global Variables
 const words = [];
 let currentImageCount = 0;
 const activeImages = new Set();
@@ -9,7 +8,6 @@ let rotX = 0, rotY = 0;
 let targetRotX = 0, targetRotY = 0;
 let scale = 1;
 
-// Configuration
 const config = {
     wordCount: 256,
     maxImageOnScreen: 16,
@@ -28,7 +26,15 @@ const config = {
         "you meant alot to me", "Hii bebiii kooooooo", "Forever bagay", "Laging ikaw lang!!", "Asawa ko",
         "Kiss kiss muahh", "Dionelaaaa", "Love", "Ganda mo crystal", "Crystel", "Tutel", "Yuan", "YxC",
         "Crysan", "Wattpad", "Prom", "4th monthsary", "03.27.25", "No bingot allowed!!", "Hailey", "Miaaaaa",
-        "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day"
+        "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day",
+        "Miss na miss na kita", "Hug pls 🥺", "Goodmorning mahal", "Ikaw lang sapat na", "Puro ikaw nasa isip ko",
+        "Cutiee mo always", "Dito lang ako", "Sama tayo forever", "Uwi ka na pls", "Balik ka na",
+        "Hawak kamay", "Gigil kita eh", "Smile mo cure ko", "Kwentuhan tayo ulit", "Iloveyou always always",
+        "Lambing pls", "Tulog na love", "Proud of youuu", "You're my peace", "Di ako magsasawa",
+        "Yung boses mo 😭", "Kahit kailan ikaw", "Sabay tayo kumain", "Tara na love", "Kahit saan basta ikaw",
+        "May date tayo mamaya", "Pa-kiss dyan", "Yakapin mo ako", "Wala nang iba", "Ikaw lang talaga",
+        "My safe place", "My baby", "Soft hours", "Iyakin kong love", "Chika mo sakin lahat",
+        "Wag ka na tampo pls", "I-ready mo na cheeks mo", "Grabe ka maka-miss", "My person 🫶"
     ]),
     images: [
         "media/startofall.png",
