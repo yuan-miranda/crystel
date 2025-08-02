@@ -156,6 +156,7 @@ function animate() {
 document.addEventListener('DOMContentLoaded', () => {
     const scene = document.getElementById('scene');
     const toggleImagesButton = document.getElementById('toggleImages');
+    let suppressSingleTouchUntil = 0;
 
     toggleImagesButton.addEventListener('click', () => {
         imagesEnabled = !imagesEnabled;
@@ -228,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-        if (e.touches.length === 1) {
+        if (e.touches.length === 1 && Date.now() > suppressSingleTouchUntil) {
             const touchX = e.touches[0].clientX;
             const touchY = e.touches[0].clientY;
 
@@ -251,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2-finger pinch zoom
     let pinchStartDistance = null;
-    let wasPinching = false;
 
     function getTouchDistance(touches) {
         const dx = touches[0].clientX - touches[1].clientX;
@@ -262,28 +262,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchstart', e => {
         if (e.touches.length === 2) {
             pinchStartDistance = getTouchDistance(e.touches);
-            wasPinching = true;
         }
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-        if (!wasPinching || e.touches.length !== 2 || pinchStartDistance === null) return;
-
-        const pinchCurrentDistance = getTouchDistance(e.touches);
-        if (!isFinite(pinchCurrentDistance)) return;
-
-        const pinchDelta = pinchCurrentDistance - pinchStartDistance;
-        scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + pinchDelta * 0.002));
-
-        pinchStartDistance = pinchCurrentDistance;
-        updateSceneTransform();
+        if (e.touches.length === 2 && pinchStartDistance !== null) {
+            const pinchCurrentDistance = getTouchDistance(e.touches);
+            const pinchDelta = pinchCurrentDistance - pinchStartDistance;
+            scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + pinchDelta * 0.002));
+            pinchStartDistance = pinchCurrentDistance;
+            updateSceneTransform();
+        }
     }, { passive: true });
-
 
     document.addEventListener('touchend', e => {
         if (e.touches.length < 2) {
             pinchStartDistance = null;
-            wasPinching = false;
+
+            // suppress 1-finger rotate for 500ms
+            suppressSingleTouchUntil = Date.now() + 500;
         }
     });
 });
