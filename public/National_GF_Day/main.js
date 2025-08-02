@@ -1,8 +1,15 @@
+// Global Variables
 const words = [];
 let currentImageCount = 0;
 const activeImages = new Set();
 let imagesEnabled = true;
+let isDragging = false;
+let lastX = 0, lastY = 0;
+let rotX = 0, rotY = 0;
+let targetRotX = 0, targetRotY = 0;
+let scale = 1;
 
+// Configuration
 const config = {
     wordCount: 256,
     maxImageOnScreen: 16,
@@ -14,7 +21,7 @@ const config = {
     maxDepth: 1024,
     resetStartY: -1024,
     widthPadding: 1024,
-    minZoom: 0.1,
+    minZoom: 0.2,
     maxZoom: 3,
     texts: shuffle([
         "I lovee youuuuu", "Hii supp", "Pogi ni yuan", "Mahal kita", "Ingat ka palagi",
@@ -82,6 +89,21 @@ const config = {
     ]
 };
 
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+function getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+}
+
+function updateSceneTransform() {
+    const scene = document.getElementById('scene');
+    scene.style.transform = `scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+}
+
 function updateViewportHeight() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -96,23 +118,12 @@ function updateMaxStuffOnScreen() {
     }
 }
 
-window.addEventListener('resize', updateViewportHeight);
-window.addEventListener('orientationchange', updateViewportHeight);
-window.addEventListener('resize', updateMaxStuffOnScreen);
-window.addEventListener('orientationchange', updateMaxStuffOnScreen);
-
-updateViewportHeight();
-updateMaxStuffOnScreen();
-
-function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5);
-}
-
 function resetWord(element) {
-    if (element.firstChild && element.firstChild.tagName === "IMG") {
-        const prevImgSrc = element.firstChild.src;
-        const imgFile = prevImgSrc.substring(prevImgSrc.lastIndexOf("media/"));
-        activeImages.delete(imgFile);
+    // remove existing image if present
+    const img = element.querySelector("img");
+    if (img) {
+        const src = img.src.substring(img.src.lastIndexOf("media/"));
+        activeImages.delete(src);
         currentImageCount--;
     }
 
@@ -124,80 +135,67 @@ function resetWord(element) {
 
     if (isImage) {
         const randomImg = availableImages[Math.floor(Math.random() * availableImages.length)];
-        const img = document.createElement("img");
-        img.src = randomImg;
-        element.appendChild(img);
+        const imgElement = document.createElement("img");
+        imgElement.src = randomImg;
+        element.appendChild(imgElement);
         activeImages.add(randomImg);
         currentImageCount++;
     } else {
-        element.textContent = config.texts[Math.random() * config.texts.length | 0];
-        element.style.fontSize = config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize) + 'px';
+        element.textContent = config.texts[Math.floor(Math.random() * config.texts.length)];
+        element.style.fontSize = `${config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize)}px`;
     }
 
     const paddedWidth = window.innerWidth + config.widthPadding;
-    const x = Math.random() * paddedWidth - config.widthPadding / 2;
-    element.style.left = `${x}px`;
-
-    const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
+    element.style.left = `${Math.random() * paddedWidth - config.widthPadding / 2}px`;
 }
 
 function animate() {
-    for (let w of words) {
-        w.y += w.speed;
-        if (w.y > config.fallThreshold) {
-            w.y = config.resetStartY - Math.random() * 100;
-            resetWord(w.element);
+    for (const word of words) {
+        word.y += word.speed;
+        if (word.y > config.fallThreshold) {
+            word.y = config.resetStartY - Math.random() * 100;
+            resetWord(word.element);
         }
-        w.element.style.transform = `translateY(${w.y}px) translateZ(${w.depth}px)`;
+        word.element.style.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
     }
     requestAnimationFrame(animate);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const scene = document.getElementById('scene');
+function animateSceneTransform() {
+    rotX += (targetRotX - rotX) * 0.1;
+    rotY += (targetRotY - rotY) * 0.1;
+    updateSceneTransform();
+    requestAnimationFrame(animateSceneTransform);
+}
+
+function eventListeners() {
     const toggleImagesButton = document.getElementById('toggleImages');
     let suppressSingleTouchUntil = 0;
+    let pinchStartDistance = null;
+    let lastTouchX = 0, lastTouchY = 0;
+
+    window.addEventListener('resize', () => {
+        updateViewportHeight();
+        updateMaxStuffOnScreen();
+    });
+
+    window.addEventListener('orientationchange', () => {
+        updateViewportHeight();
+        updateMaxStuffOnScreen();
+    });
 
     toggleImagesButton.addEventListener('click', () => {
         imagesEnabled = !imagesEnabled;
-
-        for (let word of words) {
-            const img = word.element.querySelector('img');
-            if (img) {
-                if (!imagesEnabled) {
-                    img.remove();
-                    currentImageCount--;
-                    activeImages.delete(img.src.substring(img.src.lastIndexOf("media/")));
-                }
+        for (const word of words) {
+            const img = word.element.querySelector("img");
+            if (img && !imagesEnabled) {
+                img.remove();
+                activeImages.delete(img.src.substring(img.src.lastIndexOf("media/")));
+                currentImageCount--;
             }
         }
-
-        toggleImagesButton.textContent = imagesEnabled ? 'Disable Images' : 'Enable Images';
+        toggleImagesButton.textContent = imagesEnabled ? "Disable Images" : "Enable Images";
     });
-
-    for (let i = 0; i < config.wordCount; i++) {
-        const element = document.createElement('div');
-        element.className = 'word';
-        scene.appendChild(element);
-
-        const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
-        const startY = Math.random() * config.fallThreshold;
-        resetWord(element);
-
-        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-        words.push({ element, y: startY, speed, depth });
-        element.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
-    }
-
-    animate();
-
-    // mouse and touch rotation
-    let isDragging = false, lastX = 0, lastY = 0, rotX = 0, rotY = 0;
-    let scale = 1;
-
-    function updateSceneTransform() {
-        scene.style.transform = `scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-    }
 
     document.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -209,22 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('mousemove', e => {
         if (!isDragging) return;
-        rotY += (e.clientX - lastX) * 0.3;
-        rotX -= (e.clientY - lastY) * 0.3;
-        updateSceneTransform();
+        targetRotY += (e.clientX - lastX) * 0.3;
+        targetRotX -= (e.clientY - lastY) * 0.3;
         lastX = e.clientX;
         lastY = e.clientY;
     });
 
     document.addEventListener('mouseup', () => isDragging = false);
 
-    // 1-finger touch rotation
-    let lastTouchX = 0, lastTouchY = 0;
-
     document.addEventListener('touchstart', e => {
         if (e.touches.length === 1) {
             lastTouchX = e.touches[0].clientX;
             lastTouchY = e.touches[0].clientY;
+        } else if (e.touches.length === 2) {
+            pinchStartDistance = getTouchDistance(e.touches);
         }
     }, { passive: true });
 
@@ -232,45 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.touches.length === 1 && Date.now() > suppressSingleTouchUntil) {
             const touchX = e.touches[0].clientX;
             const touchY = e.touches[0].clientY;
-
-            rotY += (touchX - lastTouchX) * 0.3;
-            rotX -= (touchY - lastTouchY) * 0.3;
-            updateSceneTransform();
-
+            targetRotY += (touchX - lastTouchX) * 0.3;
+            targetRotX -= (touchY - lastTouchY) * 0.3;
             lastTouchX = touchX;
             lastTouchY = touchY;
-        }
-    }, { passive: true });
-
-    // mouse wheel zoom
-    document.addEventListener('wheel', e => {
-        e.preventDefault();
-        const delta = -e.deltaY * 0.001;
-        scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta));
-        updateSceneTransform();
-    }, { passive: false });
-
-    // 2-finger pinch zoom
-    let pinchStartDistance = null;
-
-    function getTouchDistance(touches) {
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    document.addEventListener('touchstart', e => {
-        if (e.touches.length === 2) {
-            pinchStartDistance = getTouchDistance(e.touches);
-        }
-    }, { passive: true });
-
-    document.addEventListener('touchmove', e => {
-        if (e.touches.length === 2 && pinchStartDistance !== null) {
-            const pinchCurrentDistance = getTouchDistance(e.touches);
-            const pinchDelta = pinchCurrentDistance - pinchStartDistance;
-            scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + pinchDelta * 0.002));
-            pinchStartDistance = pinchCurrentDistance;
+        } else if (e.touches.length === 2 && pinchStartDistance !== null) {
+            const currentDistance = getTouchDistance(e.touches);
+            const delta = currentDistance - pinchStartDistance;
+            scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta * 0.002));
+            pinchStartDistance = currentDistance;
             updateSceneTransform();
         }
     }, { passive: true });
@@ -278,9 +244,39 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchend', e => {
         if (e.touches.length < 2) {
             pinchStartDistance = null;
-
-            // suppress 1-finger rotate for 500ms
             suppressSingleTouchUntil = Date.now() + 200;
         }
     });
+
+    document.addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = -e.deltaY * 0.001;
+        scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta));
+        updateSceneTransform();
+    }, { passive: false });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const scene = document.getElementById('scene');
+
+    updateViewportHeight();
+    updateMaxStuffOnScreen();
+    animateSceneTransform();
+
+    for (let i = 0; i < config.wordCount; i++) {
+        const el = document.createElement('div');
+        el.className = 'word';
+        scene.appendChild(el);
+
+        const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
+        const startY = Math.random() * config.fallThreshold;
+        resetWord(el);
+
+        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
+        words.push({ element: el, y: startY, speed, depth });
+        el.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
+    }
+
+    animate();
+    eventListeners();
 });
