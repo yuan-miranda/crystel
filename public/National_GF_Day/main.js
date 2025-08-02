@@ -10,6 +10,7 @@ let targetRotX = 0, targetRotY = 0;
 let scale = 1;
 let panX = 0, panY = 0;
 let targetPanX = 0, targetPanY = 0;
+let isInteracting = false;
 
 const config = {
     wordCount: 256,
@@ -168,23 +169,24 @@ function resetWord(element) {
 let lastFrame = performance.now();
 function animate(now = performance.now()) {
     const delta = now - lastFrame;
-    // 60fps target (1000ms / 60 = 16.67ms)
     if (delta >= 16) {
         lastFrame = now;
 
-        for (const word of words) {
-            word.y += word.speed;
-            if (word.y > config.fallThreshold) {
-                word.y = config.resetStartY - Math.random() * 100;
-                resetWord(word.element);
+        if (!isInteracting) {
+            for (const word of words) {
+                word.y += word.speed;
+                if (word.y > config.fallThreshold) {
+                    word.y = config.resetStartY - Math.random() * 100;
+                    resetWord(word.element);
+                }
+                const x = word.element.dataset.x || 0;
+                word.element.style.transform = `translate3d(${x}px, ${word.y}px, ${word.depth}px)`;
             }
-            const x = word.element.dataset.x || 0;
-            word.element.style.transform = `translate3d(${x}px, ${word.y}px, ${word.depth}px)`;
-
         }
     }
     requestAnimationFrame(animate);
 }
+
 
 function animateSceneTransform() {
     rotX += (targetRotX - rotX) * 0.1;
@@ -201,6 +203,8 @@ function eventListeners() {
     let pinchStartDistance = null;
     let lastTouchX = 0, lastTouchY = 0;
     let lastTouchMidX = 0, lastTouchMidY = 0;
+
+    let wheelTimeout;
 
     window.addEventListener('resize', () => {
         updateViewportHeight();
@@ -229,6 +233,7 @@ function eventListeners() {
 
     document.addEventListener('mousedown', e => {
         isDragging = true;
+        isInteracting = true;
         isRightClick = e.button === 2;
         lastX = e.clientX;
         lastY = e.clientY;
@@ -254,9 +259,12 @@ function eventListeners() {
     document.addEventListener('mouseup', () => {
         isDragging = false;
         isRightClick = false;
+        isInteracting = false;
     });
 
     document.addEventListener('touchstart', e => {
+        isInteracting = true;
+
         if (e.touches.length === 1) {
             lastTouchX = e.touches[0].clientX;
             lastTouchY = e.touches[0].clientY;
@@ -302,11 +310,18 @@ function eventListeners() {
             suppressSingleTouchUntil = Date.now() + 200;
         } else if (e.touches.length < 1) {
             pinchStartDistance = null;
+            isInteracting = false;
         }
     });
 
     document.addEventListener('wheel', e => {
         e.preventDefault();
+        isInteracting = true;
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+            isInteracting = false;
+        }, 300);
+
         const delta = -e.deltaY * 0.001;
         scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta));
         updateSceneTransform();
