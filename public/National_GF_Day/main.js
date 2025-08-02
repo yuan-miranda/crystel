@@ -75,6 +75,8 @@ function updateMaxStuffOnScreen() {
 
 window.addEventListener('resize', updateViewportHeight);
 window.addEventListener('orientationchange', updateViewportHeight);
+window.addEventListener('resize', updateMaxStuffOnScreen);
+window.addEventListener('orientationchange', updateMaxStuffOnScreen);
 
 updateViewportHeight();
 updateMaxStuffOnScreen();
@@ -125,8 +127,7 @@ function animate() {
             w.y = config.resetStartY - Math.random() * 100;
             resetWord(w.element);
         }
-        w.element.style.transform = `translateY(${w.y}px) translateZ(${w.depth}px)`;
-
+        w.element.style.top = w.y + 'px';
     }
     requestAnimationFrame(animate);
 }
@@ -143,9 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const startY = config.minStartY * Math.random();
 
         resetWord(element);
-        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-        words.push({ element, y: startY, speed, depth });
-        element.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
+        words.push({ element, y: startY, speed });
     }
 
     animate();
