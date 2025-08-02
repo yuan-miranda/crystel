@@ -249,8 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSceneTransform();
     }, { passive: false });
 
-    // 2-finger pinch zoom
     let pinchStartDistance = null;
+    let pinchStartScale = null;
 
     function getTouchDistance(touches) {
         const dx = touches[0].clientX - touches[1].clientX;
@@ -261,15 +261,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchstart', e => {
         if (e.touches.length === 2) {
             pinchStartDistance = getTouchDistance(e.touches);
+            pinchStartScale = scale;
         }
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-        if (e.touches.length === 2 && pinchStartDistance !== null) {
-            const pinchCurrentDistance = getTouchDistance(e.touches);
-            const pinchDelta = pinchCurrentDistance - pinchStartDistance;
-            scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + pinchDelta * 0.002));
-            pinchStartDistance = pinchCurrentDistance;
+        if (e.touches.length === 2 && pinchStartDistance !== null && pinchStartScale !== null) {
+            const currentDistance = getTouchDistance(e.touches);
+            const pinchRatio = currentDistance / pinchStartDistance;
+
+            scale = Math.min(config.maxZoom, Math.max(config.minZoom, pinchStartScale * pinchRatio));
             updateSceneTransform();
         }
     }, { passive: true });
@@ -277,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchend', e => {
         if (e.touches.length < 2) {
             pinchStartDistance = null;
+            pinchStartScale = null;
         }
     });
 });
