@@ -266,10 +266,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-        if (e.touches.length === 2 && pinchStartDistance !== null && pinchStartScale !== null) {
-            const currentDistance = getTouchDistance(e.touches);
-            const pinchRatio = currentDistance / pinchStartDistance;
+        if (e.touches.length !== 2 || !pinchStartDistance || !pinchStartScale) return;
 
+        const currentDistance = getTouchDistance(e.touches);
+        if (!isFinite(currentDistance) || currentDistance === 0) return;
+
+        const pinchRatio = currentDistance / pinchStartDistance;
+
+        if (isFinite(pinchRatio)) {
             scale = Math.min(config.maxZoom, Math.max(config.minZoom, pinchStartScale * pinchRatio));
             updateSceneTransform();
         }
