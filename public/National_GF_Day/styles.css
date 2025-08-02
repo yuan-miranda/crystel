@@ -51,9 +51,11 @@ h3 {
 }
 
 .word {
+    will-change: transform;
     position: absolute;
     color: white;
-    will-change: transform;
+    top: 0;
+    left: 0;
 }
 
 .word img {

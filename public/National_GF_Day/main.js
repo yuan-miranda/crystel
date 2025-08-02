@@ -140,7 +140,7 @@ function resetWord(element) {
         currentImageCount--;
     }
 
-    element.innerHTML = "";
+    while (element.firstChild) element.removeChild(element.firstChild);
 
     const canAddImage = currentImageCount < config.maxImageOnScreen;
     const availableImages = config.images.filter(img => !activeImages.has(img));
@@ -159,17 +159,29 @@ function resetWord(element) {
     }
 
     const paddedWidth = window.innerWidth + config.widthPadding;
-    element.style.left = `${Math.random() * paddedWidth - config.widthPadding / 2}px`;
+    const x = Math.random() * paddedWidth - config.widthPadding / 2;
+    element.dataset.x = x;
+    element.style.transform = `translate3d(${x}px, ${element.y}px, ${element.depth}px)`;
+
 }
 
-function animate() {
-    for (const word of words) {
-        word.y += word.speed;
-        if (word.y > config.fallThreshold) {
-            word.y = config.resetStartY - Math.random() * 100;
-            resetWord(word.element);
+let lastFrame = performance.now();
+function animate(now = performance.now()) {
+    const delta = now - lastFrame;
+    // 60fps target (1000ms / 60 = 16.67ms)
+    if (delta >= 16) {
+        lastFrame = now;
+
+        for (const word of words) {
+            word.y += word.speed;
+            if (word.y > config.fallThreshold) {
+                word.y = config.resetStartY - Math.random() * 100;
+                resetWord(word.element);
+            }
+            const x = word.element.dataset.x || 0;
+            word.element.style.transform = `translate3d(${x}px, ${word.y}px, ${word.depth}px)`;
+
         }
-        word.element.style.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
     }
     requestAnimationFrame(animate);
 }
@@ -309,17 +321,19 @@ document.addEventListener('DOMContentLoaded', () => {
     animateSceneTransform();
 
     for (let i = 0; i < config.wordCount; i++) {
-        const el = document.createElement('div');
-        el.className = 'word';
-        scene.appendChild(el);
+        const element = document.createElement('div');
+        element.className = 'word';
+        scene.appendChild(element);
 
         const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
         const startY = Math.random() * config.fallThreshold;
-        resetWord(el);
+        resetWord(element);
 
         const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-        words.push({ element: el, y: startY, speed, depth });
-        el.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
+        words.push({ element: element, y: startY, speed, depth });
+        const x = element.dataset.x || 0;
+        element.style.transform = `translate3d(${x}px, ${startY}px, ${depth}px)`;
+
     }
 
     animate();
