@@ -156,8 +156,13 @@ function animate() {
             word.y = config.resetStartY - Math.random() * 100;
             resetWord(word.element);
         }
-        word.element.style.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
+        word.transform = `translateY(${word.y}px) translateZ(${word.depth}px)`;
     }
+
+    for (const word of words) {
+        word.element.style.transform = word.transform;
+    }
+
     requestAnimationFrame(animate);
 }
 
