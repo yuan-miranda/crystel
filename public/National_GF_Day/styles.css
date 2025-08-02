@@ -27,6 +27,20 @@ h3 {
     background-clip: text;
 }
 
+#toggleImages {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+    background-color: #d63384;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 #scene {
     width: 100vw;
     height: calc(var(--vh, 1vh) * 100);
