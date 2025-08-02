@@ -13,14 +13,14 @@ let scale = 1;
 const config = {
     wordCount: 256,
     maxImageOnScreen: 16,
-    minSpeed: 2.4,
-    maxSpeed: 3.2,
+    minSpeed: 3.2,
+    maxSpeed: 6.4,
     minFontSize: 48,
     maxFontSize: 96,
     minDepth: -4096,
     maxDepth: 2048,
     resetStartY: -1024,
-    widthPadding: 1024,
+    widthPadding: 3072,
     minZoom: 0.2,
     maxZoom: 3,
     texts: shuffle([
@@ -108,12 +108,12 @@ function updateViewportHeight() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
     config.minStartY = -window.innerHeight;
-    config.fallThreshold = window.innerHeight + 512;
+    config.fallThreshold = window.innerHeight + 2048;
 }
 
 function updateMaxStuffOnScreen() {
     if (window.innerWidth < 800) {
-        config.wordCount = 32;
+        config.wordCount = 48;
         config.maxImageOnScreen = 6;
     }
 }
