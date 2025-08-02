@@ -24,7 +24,7 @@ const config = {
     texts: shuffle([
         "I lovee youuuuu", "Hii supp", "Pogi ni yuan", "Mahal kita", "Ingat ka palagi",
         "you meant alot to me", "Hii bebiii kooooooo", "Forever bagay", "Laging ikaw lang!!", "Asawa ko",
-        "Kiss kiss muahh", "Dionelaaaa", "Love", "Ganda mo crystal", "Crystel", "Tutel", "Yuan", "YxC",
+        "Kiss kiss muahh", "Dionelaaaa", "Love", "Ganda mo crystel", "Crystel", "Tutel", "Yuan", "YxC",
         "Crysan", "Wattpad", "Prom", "4th monthsary", "03.27.25", "No bingot allowed!!", "Hailey", "Miaaaaa",
         "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day",
         "Miss na miss na kita", "Hug pls 🥺", "Goodmorning mahal", "Ikaw lang sapat na", "Puro ikaw nasa isip ko",
