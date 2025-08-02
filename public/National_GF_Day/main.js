@@ -21,6 +21,7 @@ const config = {
         "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day"
     ]),
     images: [
+        "media/startofall.png",
         "media/IMG_20250707_220134_775.jpg",
         "media/IMG_20250707_220147_271.jpg",
         "media/IMG_20250707_220156_793.jpg",
@@ -55,7 +56,26 @@ const config = {
         "media/IMG_20250801_193315_911.jpg",
         "media/IMG_20250801_193328_496.jpg",
         "media/IMG_20250801_193354_524.jpg",
-        "media/startofall.png"
+        "media/IMG_20250802_082912_316.jpg",
+        "media/IMG_20250802_082912_411.jpg",
+        "media/IMG_20250802_082912_459.jpg",
+        "media/IMG_20250802_082912_547.jpg",
+        "media/IMG_20250802_082912_549.jpg",
+        "media/IMG_20250802_082912_710.jpg",
+        "media/IMG_20250802_082912_733.jpg",
+        "media/IMG_20250802_082912_750.jpg",
+        "media/IMG_20250802_082912_955.jpg",
+        "media/IMG_20250802_082913_024.jpg",
+        "media/IMG_20250802_082938_686.jpg",
+        "media/IMG_20250802_082938_805.jpg",
+        "media/IMG_20250802_082938_851.jpg",
+        "media/IMG_20250802_082938_966.jpg",
+        "media/IMG_20250802_082939_003.jpg",
+        "media/IMG_20250802_082939_194.jpg",
+        "media/IMG_20250802_082939_254.jpg",
+        "media/IMG_20250802_082939_257.jpg",
+        "media/IMG_20250802_082939_259.jpg",
+        "media/IMG_20250802_082939_280.jpg"
     ]
 };
 
