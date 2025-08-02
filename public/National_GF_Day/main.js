@@ -3,10 +3,13 @@ let currentImageCount = 0;
 const activeImages = new Set();
 let imagesEnabled = true;
 let isDragging = false;
+let isRightClick = false;
 let lastX = 0, lastY = 0;
 let rotX = 0, rotY = 0;
 let targetRotX = 0, targetRotY = 0;
 let scale = 1;
+let panX = 0, panY = 0;
+let targetPanX = 0, targetPanY = 0;
 
 const config = {
     wordCount: 256,
@@ -107,7 +110,12 @@ function getTouchDistance(touches) {
 
 function updateSceneTransform() {
     const scene = document.getElementById('scene');
-    scene.style.transform = `scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    scene.style.transform = `
+        translate(${panX}px, ${panY}px)
+        scale(${scale})
+        rotateX(${rotX}deg)
+        rotateY(${rotY}deg)
+    `;
 }
 
 function updateViewportHeight() {
@@ -125,7 +133,6 @@ function updateMaxStuffOnScreen() {
 }
 
 function resetWord(element) {
-    // remove existing image if present
     const img = element.querySelector("img");
     if (img) {
         const src = img.src.substring(img.src.lastIndexOf("media/"));
@@ -170,6 +177,8 @@ function animate() {
 function animateSceneTransform() {
     rotX += (targetRotX - rotX) * 0.1;
     rotY += (targetRotY - rotY) * 0.1;
+    panX += (targetPanX - panX) * 0.1;
+    panY += (targetPanY - panY) * 0.1;
     updateSceneTransform();
     requestAnimationFrame(animateSceneTransform);
 }
@@ -179,6 +188,7 @@ function eventListeners() {
     let suppressSingleTouchUntil = 0;
     let pinchStartDistance = null;
     let lastTouchX = 0, lastTouchY = 0;
+    let lastTouchMidX = 0, lastTouchMidY = 0;
 
     window.addEventListener('resize', () => {
         updateViewportHeight();
@@ -207,19 +217,32 @@ function eventListeners() {
 
     document.addEventListener('mousedown', e => {
         isDragging = true;
+        isRightClick = e.button === 2;
         lastX = e.clientX;
         lastY = e.clientY;
     });
 
     document.addEventListener('mousemove', e => {
         if (!isDragging) return;
-        targetRotY += (e.clientX - lastX) * 0.3;
-        targetRotX -= (e.clientY - lastY) * 0.3;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+
+        if (isRightClick) {
+            targetPanX += dx;
+            targetPanY += dy;
+        } else {
+            targetRotY += dx * 0.3;
+            targetRotX -= dy * 0.3;
+        }
+
         lastX = e.clientX;
         lastY = e.clientY;
     });
 
-    document.addEventListener('mouseup', () => isDragging = false);
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        isRightClick = false;
+    });
 
     document.addEventListener('touchstart', e => {
         if (e.touches.length === 1) {
@@ -227,6 +250,8 @@ function eventListeners() {
             lastTouchY = e.touches[0].clientY;
         } else if (e.touches.length === 2) {
             pinchStartDistance = getTouchDistance(e.touches);
+            lastTouchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            lastTouchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         }
     }, { passive: true });
 
@@ -243,6 +268,16 @@ function eventListeners() {
             const delta = currentDistance - pinchStartDistance;
             scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta * 0.002));
             pinchStartDistance = currentDistance;
+
+            const currentMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const currentMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            const dx = currentMidX - lastTouchMidX;
+            const dy = currentMidY - lastTouchMidY;
+            targetPanX += dx;
+            targetPanY += dy;
+            lastTouchMidX = currentMidX;
+            lastTouchMidY = currentMidY;
+
             updateSceneTransform();
         }
     }, { passive: true });
@@ -257,7 +292,6 @@ function eventListeners() {
             pinchStartDistance = null;
         }
     });
-
 
     document.addEventListener('wheel', e => {
         e.preventDefault();
