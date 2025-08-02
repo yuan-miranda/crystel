@@ -249,10 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSceneTransform();
     }, { passive: false });
 
-    let lastPinchTime = 0;
-    let lastPinchRatio = 1;
-    const pinchDebounceMs = 16;
-    const maxPinchJump = 2.5;
+    // 2-finger pinch zoom
+    let pinchStartDistance = null;
+    let wasPinching = false;
 
     function getTouchDistance(touches) {
         const dx = touches[0].clientX - touches[1].clientX;
@@ -263,36 +262,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchstart', e => {
         if (e.touches.length === 2) {
             pinchStartDistance = getTouchDistance(e.touches);
-            pinchStartScale = scale;
+            wasPinching = true;
         }
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
-        if (e.touches.length !== 2 || !pinchStartDistance || !pinchStartScale) return;
+        if (!wasPinching || e.touches.length !== 2 || pinchStartDistance === null) return;
 
-        const now = Date.now();
-        if (now - lastPinchTime < pinchDebounceMs) return;
+        const pinchCurrentDistance = getTouchDistance(e.touches);
+        if (!isFinite(pinchCurrentDistance)) return;
 
-        const currentDistance = getTouchDistance(e.touches);
-        if (!isFinite(currentDistance) || currentDistance === 0) return;
+        const pinchDelta = pinchCurrentDistance - pinchStartDistance;
+        scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + pinchDelta * 0.002));
 
-        const pinchRatio = currentDistance / pinchStartDistance;
-
-        if (!isFinite(pinchRatio) || Math.abs(pinchRatio - lastPinchRatio) > maxPinchJump) return;
-
-        lastPinchRatio = pinchRatio;
-        lastPinchTime = now;
-
-        scale = Math.min(config.maxZoom, Math.max(config.minZoom, pinchStartScale * pinchRatio));
+        pinchStartDistance = pinchCurrentDistance;
         updateSceneTransform();
     }, { passive: true });
+
 
     document.addEventListener('touchend', e => {
         if (e.touches.length < 2) {
             pinchStartDistance = null;
-            pinchStartScale = null;
-            lastPinchRatio = 1;
-            lastPinchTime = 0;
+            wasPinching = false;
         }
     });
 });
