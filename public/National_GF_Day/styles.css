@@ -38,6 +38,7 @@ h3 {
 .word {
     position: absolute;
     color: white;
+    will-change: transform;
 }
 
 .word img {

@@ -69,7 +69,7 @@ function updateViewportHeight() {
 function updateMaxStuffOnScreen() {
     if (window.innerWidth < 800) {
         config.maxImageOnScreen = 8;
-        config.wordCount = 48;
+        config.wordCount = 64;
     }
 }
 
@@ -117,7 +117,6 @@ function resetWord(element) {
     element.style.left = `${x}px`;
 
     const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-    element.style.transform = `translateZ(${depth}px)`;
 }
 
 function animate() {
@@ -127,7 +126,7 @@ function animate() {
             w.y = config.resetStartY - Math.random() * 100;
             resetWord(w.element);
         }
-        w.element.style.top = w.y + 'px';
+        w.element.style.transform = `translateY(${w.y}px) translateZ(${w.depth}px)`;
     }
     requestAnimationFrame(animate);
 }
@@ -144,7 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const startY = config.minStartY * Math.random();
 
         resetWord(element);
-        words.push({ element, y: startY, speed });
+
+        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
+        words.push({ element, y: startY, speed, depth });
+        element.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
     }
 
     animate();
