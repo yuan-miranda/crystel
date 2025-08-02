@@ -249,8 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSceneTransform();
     }, { passive: false });
 
-    let pinchStartDistance = null;
-    let pinchStartScale = null;
+    let lastPinchTime = 0;
+    let lastPinchRatio = 1;
+    const pinchDebounceMs = 16;
+    const maxPinchJump = 2.5;
 
     function getTouchDistance(touches) {
         const dx = touches[0].clientX - touches[1].clientX;
@@ -268,21 +270,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchmove', e => {
         if (e.touches.length !== 2 || !pinchStartDistance || !pinchStartScale) return;
 
+        const now = Date.now();
+        if (now - lastPinchTime < pinchDebounceMs) return;
+
         const currentDistance = getTouchDistance(e.touches);
         if (!isFinite(currentDistance) || currentDistance === 0) return;
 
         const pinchRatio = currentDistance / pinchStartDistance;
 
-        if (isFinite(pinchRatio)) {
-            scale = Math.min(config.maxZoom, Math.max(config.minZoom, pinchStartScale * pinchRatio));
-            updateSceneTransform();
-        }
+        if (!isFinite(pinchRatio) || Math.abs(pinchRatio - lastPinchRatio) > maxPinchJump) return;
+
+        lastPinchRatio = pinchRatio;
+        lastPinchTime = now;
+
+        scale = Math.min(config.maxZoom, Math.max(config.minZoom, pinchStartScale * pinchRatio));
+        updateSceneTransform();
     }, { passive: true });
 
     document.addEventListener('touchend', e => {
         if (e.touches.length < 2) {
             pinchStartDistance = null;
             pinchStartScale = null;
+            lastPinchRatio = 1;
+            lastPinchTime = 0;
         }
     });
 });
