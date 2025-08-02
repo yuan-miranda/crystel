@@ -7,12 +7,13 @@
 body {
     height: 100%;
     overflow: hidden;
-    perspective: 1200px;
+    perspective: 4096px;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-weight: bold;
     background: linear-gradient(135deg, black, #333);
     user-select: none;
+    overscroll-behavior: none;
 }
 
 h3 {
@@ -25,6 +26,20 @@ h3 {
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
     color: transparent;
     background-clip: text;
+}
+
+#toggleImages {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+    background-color: #d63384;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 #scene {
@@ -47,6 +62,7 @@ h3 {
     height: auto;
     width: auto;
     display: block;
+    pointer-events: none;
 }
 
 .footer {
@@ -71,5 +87,17 @@ h3 {
 @media (max-width: 50rem) {
     .word img {
         max-width: 128px;
+
+    }
+
+    #toggleImages {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    h3 {
+        font-size: 0.9rem;
+        left: 0.5rem;
+        top: 0.5rem;
     }
 }
