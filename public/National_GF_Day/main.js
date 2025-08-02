@@ -21,41 +21,41 @@ const config = {
         "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day"
     ]),
     images: [
-        // "media/IMG_20250707_220134_775.jpg",
-        // "media/IMG_20250707_220147_271.jpg",
-        // "media/IMG_20250707_220156_793.jpg",
-        // "media/IMG_20250707_220308_684.jpg",
-        // "media/IMG_20250707_220404_419.jpg",
-        // "media/IMG_20250707_220439_401.jpg",
-        // "media/IMG_20250707_222802_345.jpg",
-        // "media/IMG_20250707_233534_418.jpg",
-        // "media/IMG_20250801_192839_257.jpg",
-        // "media/IMG_20250801_192851_118.jpg",
-        // "media/IMG_20250801_192859_657.jpg",
-        // "media/IMG_20250801_192926_393.jpg",
-        // "media/IMG_20250801_192934_237.jpg",
-        // "media/IMG_20250801_192956_794.jpg",
-        // "media/IMG_20250801_193017_835.jpg",
-        // "media/IMG_20250801_193024_312.jpg",
-        // "media/IMG_20250801_193034_238.jpg",
-        // "media/IMG_20250801_193054_305.jpg",
-        // "media/IMG_20250801_193101_123.jpg",
-        // "media/IMG_20250801_193103_577.jpg",
-        // "media/IMG_20250801_193115_716.jpg",
-        // "media/IMG_20250801_193125_430.jpg",
-        // "media/IMG_20250801_193138_800.jpg",
-        // "media/IMG_20250801_193146_478.jpg",
-        // "media/IMG_20250801_193159_292.jpg",
-        // "media/IMG_20250801_193206_740.jpg",
-        // "media/IMG_20250801_193218_857.jpg",
-        // "media/IMG_20250801_193225_751.jpg",
-        // "media/IMG_20250801_193239_573.jpg",
-        // "media/IMG_20250801_193301_698.jpg",
-        // "media/IMG_20250801_193312_418.jpg",
-        // "media/IMG_20250801_193315_911.jpg",
-        // "media/IMG_20250801_193328_496.jpg",
-        // "media/IMG_20250801_193354_524.jpg",
-        // "media/startofall.png"
+        "media/IMG_20250707_220134_775.jpg",
+        "media/IMG_20250707_220147_271.jpg",
+        "media/IMG_20250707_220156_793.jpg",
+        "media/IMG_20250707_220308_684.jpg",
+        "media/IMG_20250707_220404_419.jpg",
+        "media/IMG_20250707_220439_401.jpg",
+        "media/IMG_20250707_222802_345.jpg",
+        "media/IMG_20250707_233534_418.jpg",
+        "media/IMG_20250801_192839_257.jpg",
+        "media/IMG_20250801_192851_118.jpg",
+        "media/IMG_20250801_192859_657.jpg",
+        "media/IMG_20250801_192926_393.jpg",
+        "media/IMG_20250801_192934_237.jpg",
+        "media/IMG_20250801_192956_794.jpg",
+        "media/IMG_20250801_193017_835.jpg",
+        "media/IMG_20250801_193024_312.jpg",
+        "media/IMG_20250801_193034_238.jpg",
+        "media/IMG_20250801_193054_305.jpg",
+        "media/IMG_20250801_193101_123.jpg",
+        "media/IMG_20250801_193103_577.jpg",
+        "media/IMG_20250801_193115_716.jpg",
+        "media/IMG_20250801_193125_430.jpg",
+        "media/IMG_20250801_193138_800.jpg",
+        "media/IMG_20250801_193146_478.jpg",
+        "media/IMG_20250801_193159_292.jpg",
+        "media/IMG_20250801_193206_740.jpg",
+        "media/IMG_20250801_193218_857.jpg",
+        "media/IMG_20250801_193225_751.jpg",
+        "media/IMG_20250801_193239_573.jpg",
+        "media/IMG_20250801_193301_698.jpg",
+        "media/IMG_20250801_193312_418.jpg",
+        "media/IMG_20250801_193315_911.jpg",
+        "media/IMG_20250801_193328_496.jpg",
+        "media/IMG_20250801_193354_524.jpg",
+        "media/startofall.png"
     ]
 };
 
@@ -66,10 +66,18 @@ function updateViewportHeight() {
     config.fallThreshold = window.innerHeight + 512;
 }
 
+function updateMaxStuffOnScreen() {
+    if (window.innerWidth < 800) {
+        config.maxImageOnScreen = 8;
+        config.wordCount = 48;
+    }
+}
+
 window.addEventListener('resize', updateViewportHeight);
 window.addEventListener('orientationchange', updateViewportHeight);
 
 updateViewportHeight();
+updateMaxStuffOnScreen();
 
 function shuffle(arr) {
     return arr.sort(() => Math.random() - 0.5);
@@ -117,7 +125,8 @@ function animate() {
             w.y = config.resetStartY - Math.random() * 100;
             resetWord(w.element);
         }
-        w.element.style.top = w.y + 'px';
+        w.element.style.transform = `translateY(${w.y}px) translateZ(${w.depth}px)`;
+
     }
     requestAnimationFrame(animate);
 }
@@ -134,7 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const startY = config.minStartY * Math.random();
 
         resetWord(element);
-        words.push({ element, y: startY, speed });
+        const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
+        words.push({ element, y: startY, speed, depth });
+        element.style.transform = `translateY(${startY}px) translateZ(${depth}px)`;
     }
 
     animate();
