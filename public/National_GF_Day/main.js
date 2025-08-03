@@ -129,7 +129,7 @@ function clampPan() {
     const viewHeight = window.innerHeight;
 
     const xAllowance = isMobile ? 512 : 1280;
-    const yAllowance = isMobile ? 384 : 768;
+    const yAllowance = 768;
 
     const maxOffsetX = Math.max(0, (rect.width * scale - viewWidth) / 2 + xAllowance);
     const maxOffsetY = Math.max(0, (rect.height * scale - viewHeight) / 2 + yAllowance);
