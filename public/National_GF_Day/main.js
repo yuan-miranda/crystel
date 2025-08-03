@@ -4,13 +4,16 @@ const activeImages = new Set();
 let imagesEnabled = true;
 let isDragging = false;
 let isRightClick = false;
+let isInteracting = false;
+
 let lastX = 0, lastY = 0;
 let rotX = 0, rotY = 0;
 let targetRotX = 0, targetRotY = 0;
 let scale = 1;
 let panX = 0, panY = 0;
 let targetPanX = 0, targetPanY = 0;
-let isInteracting = false;
+let lastFrame = performance.now();
+const isMobile = window.innerWidth < 800;
 
 const config = {
     wordCount: 256,
@@ -119,6 +122,22 @@ function updateSceneTransform() {
     `;
 }
 
+function clampPan() {
+    const scene = document.getElementById('scene');
+    const rect = scene.getBoundingClientRect();
+    const viewWidth = window.innerWidth;
+    const viewHeight = window.innerHeight;
+
+    const xAllowance = isMobile ? 512 : 1280;
+    const yAllowance = isMobile ? 384 : 768;
+
+    const maxOffsetX = Math.max(0, (rect.width * scale - viewWidth) / 2 + xAllowance);
+    const maxOffsetY = Math.max(0, (rect.height * scale - viewHeight) / 2 + yAllowance);
+
+    targetPanX = Math.max(-maxOffsetX, Math.min(maxOffsetX, targetPanX));
+    targetPanY = Math.max(-maxOffsetY, Math.min(maxOffsetY, targetPanY));
+}
+
 function updateViewportHeight() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -127,7 +146,7 @@ function updateViewportHeight() {
 }
 
 function updateMaxStuffOnScreen() {
-    if (window.innerWidth < 800) {
+    if (isMobile) {
         config.wordCount = 48;
         config.maxImageOnScreen = 6;
     }
@@ -141,7 +160,8 @@ function resetWord(element) {
         currentImageCount--;
     }
 
-    while (element.firstChild) element.removeChild(element.firstChild);
+    element.textContent = '';
+    element.innerHTML = '';
 
     const canAddImage = currentImageCount < config.maxImageOnScreen;
     const availableImages = config.images.filter(img => !activeImages.has(img));
@@ -155,7 +175,8 @@ function resetWord(element) {
         activeImages.add(randomImg);
         currentImageCount++;
     } else {
-        element.textContent = config.texts[Math.floor(Math.random() * config.texts.length)];
+        const randomText = config.texts[Math.floor(Math.random() * config.texts.length)];
+        element.textContent = randomText;
         element.style.fontSize = `${config.minFontSize + Math.random() * (config.maxFontSize - config.minFontSize)}px`;
     }
 
@@ -163,47 +184,40 @@ function resetWord(element) {
     const x = Math.random() * paddedWidth - config.widthPadding / 2;
     element.dataset.x = x;
     element.style.transform = `translate3d(${x}px, ${element.y}px, ${element.depth}px)`;
-
 }
 
-let lastFrame = performance.now();
 function animate(now = performance.now()) {
     const delta = now - lastFrame;
     if (delta >= 16) {
         lastFrame = now;
-
         if (!isInteracting) {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
             for (const word of words) {
                 word.y += word.speed;
                 if (word.y > config.fallThreshold) {
                     word.y = config.resetStartY - Math.random() * 100;
                     resetWord(word.element);
                 }
-                const x = word.element.dataset.x || 0;
+
+                const x = parseFloat(word.element.dataset.x) || 0;
                 word.element.style.transform = `translate3d(${x}px, ${word.y}px, ${word.depth}px)`;
+
+                // hide elements that are out of viewport
+                const boundingBox = word.element.getBoundingClientRect();
+                const isVisible = (
+                    boundingBox.right >= 0 &&
+                    boundingBox.bottom >= 0 &&
+                    boundingBox.left <= viewportWidth &&
+                    boundingBox.top <= viewportHeight
+                );
+                word.element.style.visibility = isVisible ? 'visible' : 'hidden';
             }
         }
     }
     requestAnimationFrame(animate);
 }
-
-function clampPan() {
-    const scene = document.getElementById('scene');
-    const rect = scene.getBoundingClientRect();
-    const viewWidth = window.innerWidth;
-    const viewHeight = window.innerHeight;
-
-    const xAllowance = 1280;
-    const yAllowance = 768;
-
-    const maxOffsetX = Math.max(0, (rect.width * scale - viewWidth) / 2 + xAllowance);
-    const maxOffsetY = Math.max(0, (rect.height * scale - viewHeight) / 2 + yAllowance);
-
-    targetPanX = Math.max(-maxOffsetX, Math.min(maxOffsetX, targetPanX));
-    targetPanY = Math.max(-maxOffsetY, Math.min(maxOffsetY, targetPanY));
-}
-
-
 
 function animateSceneTransform() {
     rotX += (targetRotX - rotX) * 0.1;
@@ -216,14 +230,12 @@ function animateSceneTransform() {
     requestAnimationFrame(animateSceneTransform);
 }
 
-
 function eventListeners() {
     const toggleImagesButton = document.getElementById('toggleImages');
     let suppressSingleTouchUntil = 0;
     let pinchStartDistance = null;
     let lastTouchX = 0, lastTouchY = 0;
     let lastTouchMidX = 0, lastTouchMidY = 0;
-
     let wheelTimeout;
 
     window.addEventListener('resize', () => {
@@ -251,6 +263,7 @@ function eventListeners() {
 
     document.addEventListener('contextmenu', e => e.preventDefault());
 
+    // mouse interaction
     document.addEventListener('mousedown', e => {
         isDragging = true;
         isInteracting = true;
@@ -263,7 +276,6 @@ function eventListeners() {
         if (!isDragging) return;
         const dx = e.clientX - lastX;
         const dy = e.clientY - lastY;
-
         if (isRightClick) {
             targetPanX += dx;
             targetPanY += dy;
@@ -271,7 +283,6 @@ function eventListeners() {
             targetRotY += dx * 0.3;
             targetRotX -= dy * 0.3;
         }
-
         lastX = e.clientX;
         lastY = e.clientY;
     });
@@ -282,9 +293,9 @@ function eventListeners() {
         isInteracting = false;
     });
 
+    // touch interaction
     document.addEventListener('touchstart', e => {
         isInteracting = true;
-
         if (e.touches.length === 1) {
             lastTouchX = e.touches[0].clientX;
             lastTouchY = e.touches[0].clientY;
@@ -311,10 +322,8 @@ function eventListeners() {
 
             const currentMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
             const currentMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            const dx = currentMidX - lastTouchMidX;
-            const dy = currentMidY - lastTouchMidY;
-            targetPanX += dx;
-            targetPanY += dy;
+            targetPanX += currentMidX - lastTouchMidX;
+            targetPanY += currentMidY - lastTouchMidY;
             lastTouchMidX = currentMidX;
             lastTouchMidY = currentMidY;
 
@@ -338,9 +347,7 @@ function eventListeners() {
         e.preventDefault();
         isInteracting = true;
         clearTimeout(wheelTimeout);
-        wheelTimeout = setTimeout(() => {
-            isInteracting = false;
-        }, 300);
+        wheelTimeout = setTimeout(() => isInteracting = false, 300);
 
         const delta = -e.deltaY * 0.001;
         scale = Math.min(config.maxZoom, Math.max(config.minZoom, scale + delta));
@@ -362,13 +369,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const speed = config.minSpeed + Math.random() * (config.maxSpeed - config.minSpeed);
         const startY = Math.random() * config.fallThreshold;
-        resetWord(element);
-
         const depth = config.minDepth + Math.random() * (config.maxDepth - config.minDepth);
-        words.push({ element: element, y: startY, speed, depth });
+
+        resetWord(element);
+        words.push({ element, y: startY, speed, depth });
         const x = element.dataset.x || 0;
         element.style.transform = `translate3d(${x}px, ${startY}px, ${depth}px)`;
-
     }
 
     animate();
