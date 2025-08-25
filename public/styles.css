@@ -6,11 +6,11 @@
 
 body {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    margin-top: 4rem;
-    padding: 0 2rem;
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+    overflow-y: auto;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #fafafa;
@@ -20,62 +20,54 @@ body {
 h1 {
     font-weight: bold;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
     color: transparent;
     background-clip: text;
 }
 
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 1rem;
-    width: 100%;
-    max-width: 800px;
+.selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 42rem;
+    margin: auto;
 }
 
-.card-container {
-    position: relative;
+
+.selection-item {
     background: white;
-    border-radius: 1rem;
-    border: 1px solid #ddd;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-    overflow: hidden;
-    padding-bottom: 0.5rem;
-}
-
-.card-container:hover {
-    transform: translateY(-0.5rem);
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
-}
-
-.card-container pre {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin: 1rem;
-    color: #999;
-}
-
-.card {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 128px;
+    position: relative;
 }
 
-.card h2 {
-    margin-bottom: 0.5rem;
-    color: #222;
+.selection-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.card p {
-    color: #666;
-    font-size: 1rem;
-    line-height: 1.5;
-    padding: 0 1.5rem;
+.title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.description {
+    font-size: 14px;
+    color: #555;
+}
+
+.selection-item #date {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #777;
+    margin: 0;
 }
 
 .link-actions {
@@ -84,14 +76,4 @@ h1 {
     z-index: 1;
     bottom: 10px;
     right: 10px;
-}
-
-@media (max-width: 50rem) {
-    .grid-container {
-        grid-template-columns: 1fr;
-    }
-
-    .card-container {
-        margin-bottom: 1rem;
-    }
 }
