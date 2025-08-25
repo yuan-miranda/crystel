@@ -1,4 +1,4 @@
-import { UI_CONSTANTS, updateMusicPlayerState } from "./utils.js";
+import { initMusicPlayer } from "./musicPlayer.js";
 
 const messages = [
     "Hey Crystel ❤️",
@@ -8,7 +8,7 @@ const messages = [
     "Keep clicking HAHAHA",
     "Konti nalang",
     "Last na to!!",
-    "Ready ka na ba bebii??"
+    "Ready ka na??"
 ];
 
 const totalClicksNeeded = messages.length;
@@ -35,7 +35,6 @@ function handleClick() {
     isCooldown = true;
     clickCount++;
 
-    enableOpeningAudio();
     updateOpeningMessage();
 
     if (clickCount >= totalClicksNeeded) {
@@ -54,7 +53,10 @@ function updateOpeningMessage() {
 
     if (clickCount < totalClicksNeeded) {
         titleElement.textContent = messages[clickCount] || messages[messages.length - 1];
-    } else titleElement.textContent = "There we go!! 🎉";
+    } else {
+        titleElement.textContent = "There we go!! 🎉";
+        initMusicPlayer();
+    }
 }
 
 function closeOpening() {
@@ -66,20 +68,10 @@ function closeOpening() {
     }, 1000);
 }
 
-function enableOpeningAudio() {
-    const audio = document.querySelector(UI_CONSTANTS.SELECTORS.audio);
-    if (!audio) return;
 
-    audio.play()
-        .then(() => updateMusicPlayerState(true))
-        .catch(() => {
-            // user denied autoplay
-        });
-}
-
-function setupOpeningScreen() {
+function initOpeningScreen() {
     createOpeningScreen();
     eventListeners();
 }
 
-export { setupOpeningScreen };
+export { initOpeningScreen };

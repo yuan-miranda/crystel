@@ -74,22 +74,23 @@
     </div>
 
     <div class="music-player">
-        <div class="album-art" aria-label="Album artwork">♪</div>
+        <audio id="musicAudio" loop>
+            <source src="" type="audio/mp4">
+            Your browser does not support the audio element.
+        </audio>
+
+        <div class="album-art">♪</div>
         <div class="track-info">
             <p class="track-title">Background Music</p>
             <p class="track-artist">Author</p>
         </div>
-        <button class="play-btn" id="playBtn" aria-label="Play/Pause music">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+
+        <button class="play-btn" id="playBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z"></path>
             </svg>
         </button>
     </div>
-
-    <audio id="backgroundMusic" loop>
-        <source src="" type="audio/mp4">
-        Your browser does not support the audio element.
-    </audio>
 
     <footer class="footer">
         <a href="../index.html">← Go back to selection</a>
