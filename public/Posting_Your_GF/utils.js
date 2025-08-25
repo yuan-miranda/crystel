@@ -24,7 +24,6 @@ function getElements(selectorMap) {
 
 function updateMusicPlayerState(isPlaying) {
     const elements = getElements(UI_CONSTANTS.SELECTORS);
-
     if (!Object.values(elements).every(el => el)) return false;
 
     if (isPlaying) {
