@@ -21,7 +21,6 @@ footer {
     display: none;
 }
 
-/* CHECKED */
 .content {
     flex-direction: column;
     text-align: justify;
@@ -31,15 +30,12 @@ footer {
     margin: auto;
 }
 
-
-/* CHECKED */
 .read-me-section,
 .memories-section {
     margin: 2rem 0;
     padding: 1rem;
 }
 
-/* CHECKED */
 .section-title {
     font-size: 2rem;
     text-align: center;
@@ -50,7 +46,6 @@ footer {
     background-clip: text;
 }
 
-/* CHECKED */
 .love-letter {
     position: relative;
     background: linear-gradient(135deg, #fff5f5, #ffe0e0);
@@ -62,7 +57,6 @@ footer {
     margin: 0 auto;
 }
 
-/* CHECKED */
 .love-letter::before {
     content: '💖';
     position: absolute;
@@ -75,33 +69,28 @@ footer {
     border-radius: 5px;
 }
 
-/* CHECKED */
 .love-letter p {
     font-size: 1.2rem;
     color: #333;
     margin-bottom: 1.5rem;
 }
 
-/* CHECKED */
 .love-letter p:first-child,
 .name-item {
     font-style: italic;
     color: #d63384;
 }
 
-/* CHECKED */
 .love-letter .signature {
     text-align: right;
     margin-top: 2rem;
     margin-bottom: 0;
 }
 
-/* CHECKED */
 .cycling-names {
     position: relative;
 }
 
-/* CHECKED */
 .name-cycle {
     display: inline-block;
     min-width: 5rem;
@@ -136,7 +125,7 @@ footer {
     }
 }
 
-.photo-gallery {
+.photo-container {
     display: grid;
     justify-items: center;
     grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
@@ -144,69 +133,28 @@ footer {
     margin-top: 2rem;
 }
 
-.photo-frame {
+.photo-item {
     background: white;
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     padding: 1rem;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
     width: 100%;
     max-width: 20rem;
 }
 
-.photo-frame:hover {
-    transform: translateY(-0.5rem);
+.photo-item:hover {
+    transform: scale(1.02);
     box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.15);
 }
 
-.memory-photo,
-.photo-placeholder {
+.photo-item img {
     width: 100%;
     border-radius: 0.75rem;
-    transition: transform 0.3s ease;
-}
-
-.memory-photo {
-    object-fit: contain;
-    object-position: center;
-}
-
-.photo-frame:hover .memory-photo {
-    transform: scale(1.05);
-}
-
-.photo-placeholder {
-    height: 24rem;
-    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-    border: 2px dashed #ccc;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-}
-
-.photo-frame:hover .photo-placeholder {
-    background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
-    border-color: #bbb;
-}
-
-.placeholder-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.7;
-}
-
-.photo-placeholder span {
-    font-size: 1rem;
-    font-weight: bold;
-    text-align: center;
-    opacity: 0.8;
 }
 
 .photo-caption {
-    margin: 1rem 0 0;
+    margin-top: 1rem;
     text-align: center;
     color: #666;
     font-size: 1rem;
@@ -232,58 +180,30 @@ footer a:hover {
 }
 
 @media (max-width: 50rem) {
-    body {
+        body {
         padding: 1rem 0 5rem;
     }
 
-    .content {
+        .content {
         padding: 0 0.5rem;
     }
 
-    .read-me-section,
+        .read-me-section,
     .memories-section {
         padding: 0.5rem;
         margin: 1.5rem 0;
     }
 
-    .section-title {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .love-letter {
+        .love-letter {
         padding: 1.5rem;
-        margin: 0 auto;
     }
 
-    .love-letter p {
+        .love-letter p {
         font-size: 1rem;
         line-height: 1.5;
     }
 
-    .photo-gallery {
-        grid-template-columns: 1fr;
-        margin-top: 1rem;
-    }
-
-    .photo-frame {
+    .photo-item {
         max-width: 100%;
-    }
-
-    .photo-placeholder {
-        height: 20rem;
-    }
-
-    .photo-caption {
-        font-size: 1rem;
-        margin-top: 1rem;
-    }
-
-    .placeholder-icon {
-        font-size: 2rem;
-    }
-
-    .photo-placeholder span {
-        font-size: 1rem;
     }
 }
