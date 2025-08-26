@@ -1,4 +1,4 @@
-import { initOpeningScreen } from "./opening.js";
+import { initOpeningScreen } from "./openingScreen.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     initOpeningScreen();

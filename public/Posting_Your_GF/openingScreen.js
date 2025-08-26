@@ -62,9 +62,9 @@ function updateOpeningMessage() {
 function closeOpening() {
     setTimeout(() => {
         document.getElementById('openingScreen').classList.add('fade-out');
-        document.querySelector('.content').style.display = 'block';
+        document.querySelector('.content').style.display = 'flex';
         document.querySelector('.music-player').style.display = 'flex';
-        document.querySelector('.footer').style.display = 'flex';
+        document.querySelector('footer').style.display = 'flex';
     }, 1000);
 }
 

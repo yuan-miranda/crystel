@@ -67,7 +67,7 @@ h3 {
     pointer-events: none;
 }
 
-.footer {
+footer {
     position: fixed;
     margin: 1rem;
     z-index: 1;
@@ -75,13 +75,13 @@ h3 {
     right: 10px;
 }
 
-.footer a {
+footer a {
     color: #d63384;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.footer a:hover {
+footer a:hover {
     color: #e754a3;
     text-decoration: underline;
 }
