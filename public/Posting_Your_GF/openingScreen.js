@@ -68,7 +68,6 @@ function closeOpening() {
     }, 1000);
 }
 
-
 function initOpeningScreen() {
     createOpeningScreen();
     eventListeners();

@@ -27,7 +27,6 @@ function showCarousel() {
     });
 }
 
-
 function next() {
     index = (index + 1) % messages.length;
     document.getElementById("carousel-text").textContent = messages[index];
