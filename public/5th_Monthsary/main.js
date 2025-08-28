@@ -25,9 +25,6 @@ const messages = [
     { text: "To make this entry more interesting" },
     { text: "So naisip ko why not make it yapteractive?" },
     { text: "Yung babasahin mo lahat AAHHAHAHAH" },
-
-
-
     { text: "Going back, its been five months" },
     { text: "Cant imagine how fast time flies" },
     { text: "Yeah its been fun~" },
