@@ -14,6 +14,8 @@ body {
     justify-content: center;
     text-align: center;
     min-height: 100vh;
+    padding: 2rem;
+    color: #333;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
@@ -101,7 +103,6 @@ body {
 
 .opening-content {
     text-align: center;
-    color: #333;
     max-width: 80%;
     z-index: 1;
 }
