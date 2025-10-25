@@ -129,19 +129,16 @@ function fire() {
     setTimeout(() => gun.classList.remove('recoil'), 100);
 }
 
-// Controls
-window.addEventListener('click', e => {
+// Controls - unified click & touch handling
+function handleShoot() {
     startBgMusicOnce();
     fire();
-});
+}
+
+window.addEventListener('click', handleShoot);
 
 window.addEventListener('touchstart', e => {
-    e.preventDefault();
-    startBgMusicOnce();
-    fire();
+    e.preventDefault(); // ensures no double execution
+    handleShoot();
 }, { passive: false });
 
-// Resize adjusts speed
-window.addEventListener('resize', () => {
-    speed = innerWidth < 800 ? 2 : 5;
-});
