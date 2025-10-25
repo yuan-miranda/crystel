@@ -48,7 +48,23 @@ function startBgMusicOnce() {
     }
 }
 
-window.addEventListener('click', startBgMusicOnce);
+// --- INITIAL OVERLAY LOGIC ---
+const initialOverlay = document.getElementById('initialOverlay');
+let overlayActive = true;
+
+function hideInitialOverlay() {
+    initialOverlay.classList.add('hidden');
+    setTimeout(() => {
+        initialOverlay.style.display = 'none';
+        overlayActive = false;
+        captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
+        startBgMusicOnce();
+    }, 500);
+}
+
+initialOverlay.addEventListener('click', hideInitialOverlay);
+initialOverlay.addEventListener('touchstart', hideInitialOverlay);
+
 // Track bullet holes
 const holes = new Map();
 
@@ -101,7 +117,7 @@ function fire() {
     if (!target) return; // not a target → NO sound, NO caption
 
     // ✅ Only update caption when there is a REAL hit
-    captionBox.innerHTML = `<h1>${getRandomMessage()}</h1>`;
+    captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
 
     // ✅ Only play gun sound if it actually hit
     gunSound.cloneNode(true).play();
@@ -131,6 +147,7 @@ function fire() {
 
 // Controls - unified click & touch handling
 function handleShoot() {
+    if (overlayActive) return; // prevent shooting until overlay is gone
     startBgMusicOnce();
     fire();
 }
@@ -141,4 +158,3 @@ window.addEventListener('touchstart', e => {
     e.preventDefault(); // ensures no double execution
     handleShoot();
 }, { passive: false });
-
