@@ -1,5 +1,5 @@
 const targets = [...document.querySelectorAll('.target-img')];
-const speed = innerWidth < 800 ? 2 : 5;
+let speed = innerWidth < 800 ? 2 : 5;
 const crosshair = document.querySelector('.crosshair');
 
 const messages = [
@@ -22,21 +22,34 @@ const messages = [
 
 const captionBox = document.querySelector('.caption-box');
 let messagePool = [...messages];
-let firstClick = true;
 
 function getRandomMessage() {
-    if (messagePool.length === 0) {
-        messagePool = [...messages];
-    }
+    if (messagePool.length === 0) messagePool = [...messages];
     const index = Math.floor(Math.random() * messagePool.length);
     return messagePool.splice(index, 1)[0];
 }
 
-// Sound
+// Sounds
 const gunSound = new Audio('media/pistolShot.mp3');
 gunSound.volume = 1.0;
 
-// Store holes per target
+const bgMusic = new Audio('media/Tensionado_Soapdish.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.4;
+let bgMusicStarted = false;
+
+function startBgMusicOnce() {
+    if (!bgMusicStarted) {
+        bgMusic.play().then(() => {
+            bgMusicStarted = true;
+        }).catch((err) => {
+            console.warn('Background music failed to play:', err);
+        });
+    }
+}
+
+window.addEventListener('click', startBgMusicOnce);
+// Track bullet holes
 const holes = new Map();
 
 // Start targets off-screen right
@@ -46,6 +59,7 @@ targets.forEach(img => {
     img.style.top = '0px';
 });
 
+// Movement loop
 function moveTargets() {
     targets.forEach((img, i) => {
         let x = parseFloat(img.style.left);
@@ -74,20 +88,22 @@ function moveTargets() {
 }
 moveTargets();
 
+// Fire action
 function fire() {
-    captionBox.innerHTML = `<h1>${getRandomMessage()}</h1>`;
-    firstClick = false;
-
     const chRect = crosshair.getBoundingClientRect();
     const cx = chRect.left + chRect.width / 2;
     const cy = chRect.top + chRect.height / 2;
 
     const hit = document.elementFromPoint(cx, cy);
-    if (!hit) return;
+    if (!hit) return; // nothing under crosshair → NO sound, NO caption
 
     const target = hit.closest('.target-img');
-    if (!target) return;
+    if (!target) return; // not a target → NO sound, NO caption
 
+    // ✅ Only update caption when there is a REAL hit
+    captionBox.innerHTML = `<h1>${getRandomMessage()}</h1>`;
+
+    // ✅ Only play gun sound if it actually hit
     gunSound.cloneNode(true).play();
 
     const index = targets.indexOf(target);
@@ -108,43 +124,24 @@ function fire() {
     if (!holes.has(index)) holes.set(index, []);
     holes.get(index).push(hole);
 
-    // Gun recoil
     const gun = document.querySelector('.pointing-gun');
     gun.classList.add('recoil');
     setTimeout(() => gun.classList.remove('recoil'), 100);
 }
 
-
-window.addEventListener('click', fire);
-window.addEventListener('touchstart', e => {
-    e.preventDefault();
-    fire();
-}, { passive: false });
-
+// Controls
 window.addEventListener('click', e => {
-    startMusicOnce();
+    startBgMusicOnce();
     fire();
 });
 
-const bgMusic = new Audio('media/Tensionado_Soapdish.mp3');
-bgMusic.loop = true;
-bgMusic.volume = 0.4;
-let musicStarted = false;
-
-function startMusicOnce() {
-    if (!musicStarted) {
-        bgMusic.play().catch(() => { });
-        musicStarted = true;
-    }
-}
-
 window.addEventListener('touchstart', e => {
     e.preventDefault();
-    startMusicOnce();
+    startBgMusicOnce();
     fire();
 }, { passive: false });
 
-// resize handler for speed adjustment
+// Resize adjusts speed
 window.addEventListener('resize', () => {
     speed = innerWidth < 800 ? 2 : 5;
 });
