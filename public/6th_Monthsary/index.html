@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .hostage-target {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .target-img {
+            position: absolute;
+            top: 0;
+            height: 100%;
+        }
+
+
+        .crosshair {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .pointing-gun {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pointing-gun img {
+            transition: transform 0.07s ease;
+        }
+
+        .pointing-gun.recoil img {
+            transform: translateY(-20px);
+        }
+
+
+        .bullet-hole {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .caption-box {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            font-family: Arial, sans-serif;
+            z-index: 2;
+        }
+
+        /* 50rem width */
+        @media (max-width: 50rem) {
+            .caption-box h1 {
+                font-size: 1.5rem;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hostage-target">
+        <img src="media/hostageTarget.png" alt="" class="target-img">
+    </div>
+
+
+    <div class="crosshair">
+        <img src="media/crosshair.png" alt="" width="50px">
+    </div>
+
+    <div class="pointing-gun">
+        <img src="media/pointingGun.png" alt="">
+    </div>
+
+    <div class="caption-box">
+        <h1>Happy 6th Monthsary, My Love! Also, SAVE MEEEEE!!!</h1>
+        <h3>Click or Tap Anywhere to Shoot the Target</h3>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
