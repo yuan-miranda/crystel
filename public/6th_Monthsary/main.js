@@ -1,7 +1,3 @@
-const targets = [...document.querySelectorAll('.target-img')];
-let speed = innerWidth < 800 ? 2 : 5;
-const crosshair = document.querySelector('.crosshair');
-
 const messages = [
     "Pinahiram ko lang yung jacket ko kasi nilalamig siya.",
     "Mahal, nag-wave lang ako pabalik. Ang awkward kung hindi ko babatiin.",
@@ -19,8 +15,6 @@ const messages = [
     "Mahal, nakinig lang ako kasi nagkukwento siya. Hindi rin ako sumingit.",
     "Nag-'haha' lang ako. Hindi 'hehe'. May difference yun."
 ];
-
-const captionBox = document.querySelector('.caption-box');
 let messagePool = [...messages];
 
 function getRandomMessage() {
@@ -29,100 +23,41 @@ function getRandomMessage() {
     return messagePool.splice(index, 1)[0];
 }
 
-// Sounds
-const gunSound = new Audio('media/pistolShot.mp3');
-gunSound.volume = 1.0;
-
-const bgMusic = new Audio('media/Tensionado_Soapdish.mp3');
-bgMusic.loop = true;
-bgMusic.volume = 0.4;
-let bgMusicStarted = false;
-
-function startBgMusicOnce() {
-    if (!bgMusicStarted) {
-        bgMusic.play().then(() => {
-            bgMusicStarted = true;
-        }).catch((err) => {
-            console.warn('Background music failed to play:', err);
-        });
+function startBgMusicOnce(bgMusic, state) {
+    if (!state.started) {
+        bgMusic.play().then(() => state.started = true)
+            .catch(err => console.warn('Background music failed to play:', err));
     }
 }
 
-// --- INITIAL OVERLAY LOGIC ---
-const initialOverlay = document.getElementById('initialOverlay');
-let overlayActive = true;
-
-function hideInitialOverlay() {
-    initialOverlay.classList.add('hidden');
-    setTimeout(() => {
-        initialOverlay.style.display = 'none';
-        overlayActive = false;
-        captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
-        startBgMusicOnce();
-    }, 500);
+function resetTargetPosition(target) {
+    target.style.left = window.innerWidth + 'px';
 }
 
-initialOverlay.addEventListener('click', hideInitialOverlay);
-initialOverlay.addEventListener('touchstart', hideInitialOverlay);
-
-// Track bullet holes
-const holes = new Map();
-
-// Start targets off-screen right
-targets.forEach(img => {
-    img.style.position = 'absolute';
-    img.style.left = window.innerWidth + 'px';
-    img.style.top = '0px';
-});
-
-// Movement loop
-function moveTargets() {
-    targets.forEach((img, i) => {
-        let x = parseFloat(img.style.left);
-
-        if (x + img.width < 0) {
-            img.style.left = window.innerWidth + 'px';
-
-            if (holes.has(i)) {
-                holes.get(i).forEach(h => h.remove());
-                holes.delete(i);
-            }
-        } else {
-            img.style.left = (x - speed) + 'px';
-        }
-
-        if (holes.has(i)) {
-            const rect = img.getBoundingClientRect();
-            holes.get(i).forEach(hole => {
-                hole.style.left = rect.left + parseFloat(hole.dataset.localX) + 'px';
-                hole.style.top = rect.top + parseFloat(hole.dataset.localY) + 'px';
-            });
-        }
+function updateHoles(target, holes) {
+    const rect = target.getBoundingClientRect();
+    holes.forEach(hole => {
+        hole.style.left = rect.left + parseFloat(hole.dataset.localX) + 'px';
+        hole.style.top = rect.top + parseFloat(hole.dataset.localY) + 'px';
     });
-
-    requestAnimationFrame(moveTargets);
 }
-moveTargets();
 
-// Fire action
-function fire() {
-    const chRect = crosshair.getBoundingClientRect();
-    const cx = chRect.left + chRect.width / 2;
-    const cy = chRect.top + chRect.height / 2;
+function moveTarget(target, speed, holes) {
+    let x = parseFloat(target.style.left);
 
-    const hit = document.elementFromPoint(cx, cy);
-    if (!hit) return; // nothing under crosshair → NO sound, NO caption
+    if (x + target.width < 0) {
+        resetTargetPosition(target);
+        holes.forEach(hole => hole.remove());
+        holes.length = 0;
+    } else {
+        target.style.left = (x - speed) + 'px';
+    }
 
-    const target = hit.closest('.target-img');
-    if (!target) return; // not a target → NO sound, NO caption
+    updateHoles(target, holes);
+    requestAnimationFrame(() => moveTarget(target, speed, holes));
+}
 
-    // ✅ Only update caption when there is a REAL hit
-    captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
-
-    // ✅ Only play gun sound if it actually hit
-    gunSound.cloneNode(true).play();
-
-    const index = targets.indexOf(target);
+function createBulletHole(cx, cy, target, holes) {
     const rect = target.getBoundingClientRect();
     const localX = cx - rect.left;
     const localY = cy - rect.top;
@@ -137,24 +72,70 @@ function fire() {
     hole.style.left = cx + 'px';
     hole.style.top = cy + 'px';
 
-    if (!holes.has(index)) holes.set(index, []);
-    holes.get(index).push(hole);
+    holes.push(hole);
+}
+
+function fire(crosshair, target, captionBox, gunSound, holes) {
+    const chRect = crosshair.getBoundingClientRect();
+    const cx = chRect.left + chRect.width / 2;
+    const cy = chRect.top + chRect.height / 2;
+
+    const hit = document.elementFromPoint(cx, cy);
+    if (!hit || !hit.closest('.target-img')) return;
+
+    captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
 
     const gun = document.querySelector('.pointing-gun');
     gun.classList.add('recoil');
+    gunSound.cloneNode(true).play();
+    createBulletHole(cx, cy, target, holes);
+
     setTimeout(() => gun.classList.remove('recoil'), 100);
 }
 
-// Controls - unified click & touch handling
-function handleShoot() {
-    if (overlayActive) return; // prevent shooting until overlay is gone
-    startBgMusicOnce();
-    fire();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const target = document.querySelector('.target-img');
+    const crosshair = document.querySelector('.crosshair');
+    const captionBox = document.querySelector('.caption-box');
+    const initialOverlay = document.getElementById('initialOverlay');
 
-window.addEventListener('click', handleShoot);
+    const speed = innerWidth < 800 ? 2 : 5;
+    let holes = [];
+    let overlayActive = true;
 
-window.addEventListener('touchstart', e => {
-    e.preventDefault(); // ensures no double execution
-    handleShoot();
-}, { passive: false });
+    const gunSound = new Audio('media/pistolShot.mp3');
+    gunSound.volume = 1.0;
+
+    const bgMusic = new Audio('media/Tensionado_Soapdish.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.4;
+    let bgMusicState = { started: false };
+
+    const handleShoot = () => {
+        if (overlayActive) return;
+        startBgMusicOnce(bgMusic, bgMusicState);
+        fire(crosshair, target, captionBox, gunSound, holes);
+    };
+
+    const hideOverlay = () => {
+        initialOverlay.classList.add('hidden');
+        setTimeout(() => {
+            initialOverlay.style.display = 'none';
+            overlayActive = false;
+            captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
+            startBgMusicOnce(bgMusic, bgMusicState);
+        }, 500);
+    }
+    initialOverlay.addEventListener('click', hideOverlay);
+    initialOverlay.addEventListener('touchstart', hideOverlay);
+
+    target.style.position = 'absolute';
+    resetTargetPosition(target);
+    moveTarget(target, speed, holes);
+
+    window.addEventListener('click', handleShoot);
+    window.addEventListener('touchstart', e => {
+        e.preventDefault();
+        handleShoot();
+    }, { passive: false });
+});

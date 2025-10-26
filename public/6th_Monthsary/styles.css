@@ -10,21 +10,22 @@
 body {
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
-    user-select: none;
+    color: #333;
+
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
 }
 
 #initialOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
     z-index: 1;
     padding: 0 10%;
     cursor: pointer;
@@ -35,7 +36,6 @@ body {
     opacity: 0;
     pointer-events: none;
 }
-
 
 .hostage-target {
     width: 100%;
@@ -50,7 +50,6 @@ body {
     height: 100%;
 }
 
-
 .crosshair {
     position: absolute;
     top: 20%;
@@ -61,19 +60,19 @@ body {
 
 .pointing-gun {
     position: absolute;
-    bottom: -30px;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .pointing-gun img {
+    display: block;
     transition: transform 0.07s ease;
 }
 
 .pointing-gun.recoil img {
     transform: translateY(-20px);
 }
-
 
 .bullet-hole {
     position: absolute;
@@ -114,7 +113,6 @@ footer a:hover {
     text-decoration: underline;
 }
 
-/* 50rem width */
 @media (max-width: 50rem) {
     #initialOverlay h1 {
         font-size: 1rem;
