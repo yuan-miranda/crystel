@@ -71,6 +71,10 @@ h1 {
     color: #777;
 }
 
+.spacer {
+    margin-bottom: 4rem;
+}
+
 .link-actions {
     position: fixed;
     right: 10px;
