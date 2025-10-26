@@ -1,3 +1,4 @@
+let targetSpeed = innerWidth < 800 ? 3 : 5;
 const messages = [
     "Pinahiram ko lang yung jacket ko kasi nilalamig siya.",
     "Mahal, nag-wave lang ako pabalik. Ang awkward kung hindi ko babatiin.",
@@ -23,9 +24,9 @@ function getRandomMessage() {
     return messagePool.splice(index, 1)[0];
 }
 
-function startBgMusicOnce(bgMusic, state) {
-    if (!state.started) {
-        bgMusic.play().then(() => state.started = true)
+function startBgMusicOnce(bgMusic, bgMusicStarted) {
+    if (!bgMusicStarted) {
+        bgMusic.play().then(() => bgMusicStarted = true)
             .catch(err => console.warn('Background music failed to play:', err));
     }
 }
@@ -42,19 +43,19 @@ function updateHoles(target, holes) {
     });
 }
 
-function moveTarget(target, speed, holes) {
+function moveTarget(target, holes) {
     let x = parseFloat(target.style.left);
 
-    if (x + target.width < 0) {
+    if (x + target.offsetWidth < 0) {
         resetTargetPosition(target);
         holes.forEach(hole => hole.remove());
         holes.length = 0;
     } else {
-        target.style.left = (x - speed) + 'px';
+        target.style.left = (x - targetSpeed) + 'px';
     }
 
     updateHoles(target, holes);
-    requestAnimationFrame(() => moveTarget(target, speed, holes));
+    requestAnimationFrame(() => moveTarget(target, holes));
 }
 
 function createBulletHole(cx, cy, target, holes) {
@@ -75,7 +76,7 @@ function createBulletHole(cx, cy, target, holes) {
     holes.push(hole);
 }
 
-function fire(crosshair, target, captionBox, gunSound, holes) {
+function fire(crosshair, target, captionBox, gun, gunSound, holes) {
     const chRect = crosshair.getBoundingClientRect();
     const cx = chRect.left + chRect.width / 2;
     const cy = chRect.top + chRect.height / 2;
@@ -85,7 +86,6 @@ function fire(crosshair, target, captionBox, gunSound, holes) {
 
     captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
 
-    const gun = document.querySelector('.pointing-gun');
     gun.classList.add('recoil');
     gunSound.cloneNode(true).play();
     createBulletHole(cx, cy, target, holes);
@@ -99,22 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const captionBox = document.querySelector('.caption-box');
     const initialOverlay = document.getElementById('initialOverlay');
 
-    const speed = innerWidth < 800 ? 2 : 5;
     let holes = [];
     let overlayActive = true;
 
+    const gun = document.querySelector('.pointing-gun');
     const gunSound = new Audio('media/pistolShot.mp3');
     gunSound.volume = 1.0;
 
     const bgMusic = new Audio('media/Tensionado_Soapdish.mp3');
     bgMusic.loop = true;
     bgMusic.volume = 0.4;
-    let bgMusicState = { started: false };
+    let bgMusicStarted = false;
 
     const handleShoot = () => {
+        console.log('Shoot attempted');
         if (overlayActive) return;
-        startBgMusicOnce(bgMusic, bgMusicState);
-        fire(crosshair, target, captionBox, gunSound, holes);
+        startBgMusicOnce(bgMusic, bgMusicStarted);
+        fire(crosshair, target, captionBox, gun, gunSound, holes);
     };
 
     const hideOverlay = () => {
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             initialOverlay.style.display = 'none';
             overlayActive = false;
             captionBox.innerHTML = `<h3>${getRandomMessage()}</h3>`;
-            startBgMusicOnce(bgMusic, bgMusicState);
+            startBgMusicOnce(bgMusic, bgMusicStarted);
         }, 500);
     }
     initialOverlay.addEventListener('click', hideOverlay);
@@ -131,10 +132,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     target.style.position = 'absolute';
     resetTargetPosition(target);
-    moveTarget(target, speed, holes);
+    moveTarget(target, holes);
 
-    window.addEventListener('click', handleShoot);
-    window.addEventListener('touchstart', e => {
+    window.addEventListener('resize', () => {
+        targetSpeed = innerWidth < 800 ? 3 : 5;
+    });
+
+    gun.addEventListener('click', handleShoot);
+    gun.addEventListener('touchstart', e => {
         e.preventDefault();
         handleShoot();
     }, { passive: false });
