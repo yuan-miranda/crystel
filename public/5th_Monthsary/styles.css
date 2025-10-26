@@ -2,7 +2,6 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
 }
@@ -15,7 +14,6 @@ body {
     padding: 2rem;
     min-height: 100vh;
     color: #333;
-
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
     text-align: center;

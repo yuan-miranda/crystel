@@ -2,7 +2,6 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
 }
@@ -14,7 +13,6 @@ body {
     background: linear-gradient(135deg, #ffe6e6, #ffcccc);
     padding: 20px;
     min-height: 100vh;
-
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
 }
@@ -183,25 +181,25 @@ footer a:hover {
 }
 
 @media (max-width: 50rem) {
-        body {
+    body {
         padding: 1rem 0 5rem;
     }
 
-        .content {
+    .content {
         padding: 0 0.5rem;
     }
 
-        .read-me-section,
+    .read-me-section,
     .memories-section {
         margin: 1.5rem 0;
         padding: 0.5rem;
     }
 
-        .love-letter {
+    .love-letter {
         padding: 1.5rem;
     }
 
-        .love-letter p {
+    .love-letter p {
         font-size: 1rem;
         line-height: 1.5;
     }

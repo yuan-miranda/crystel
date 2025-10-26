@@ -2,7 +2,6 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
 }
@@ -14,7 +13,6 @@ body {
     overflow: hidden;
     overscroll-behavior: none;
     font-weight: bold;
-
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
 }
@@ -25,7 +23,6 @@ h3 {
     left: 10px;
     z-index: 1;
     margin: 1rem;
-
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
     background-clip: text;
     color: transparent;
