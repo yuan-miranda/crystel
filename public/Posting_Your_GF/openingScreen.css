@@ -1,17 +1,17 @@
 .opening-screen {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+    background: white;
     width: 100vw;
     height: 100vh;
-    background: white;
-    z-index: 1;
-    cursor: pointer;
-    transition: opacity 0.5s ease;
 }
 
 .opening-screen.fade-out {
@@ -20,19 +20,19 @@
 }
 
 .opening-content {
-    text-align: center;
-    color: #333;
     max-width: 80%;
+    color: #333;
+    text-align: center;
 }
 
 .opening-title {
-    font-size: 2rem;
-    font-weight: bold;
     margin-bottom: 1rem;
     color: #666;
+    font-weight: bold;
+    font-size: 2rem;
 }
 
 .click-instruction {
-    color: #999;
     opacity: 0.8;
+    color: #999;
 }

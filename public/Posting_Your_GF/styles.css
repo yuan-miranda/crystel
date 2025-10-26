@@ -1,7 +1,7 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -11,11 +11,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 100vh;
+    background: linear-gradient(135deg, #ffe6e6, #ffcccc);
     padding: 20px;
+    min-height: 100vh;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ffe6e6, #ffcccc);
     user-select: none;
 }
 
@@ -26,11 +26,11 @@ footer {
 
 .content {
     flex-direction: column;
-    text-align: justify;
     gap: 15px;
-    max-width: 42rem;
-    width: 100%;
     margin: auto;
+    width: 100%;
+    max-width: 42rem;
+    text-align: justify;
 }
 
 .read-me-section,
@@ -40,54 +40,54 @@ footer {
 }
 
 .section-title {
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
     font-size: 2rem;
     text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: bold;
-    background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
-    color: transparent;
-    background-clip: text;
 }
 
 .love-letter {
     position: relative;
-    background: linear-gradient(135deg, #fff5f5, #ffe0e0);
+    margin: 0 auto;
+    box-shadow: 0 1rem 2rem rgba(255, 179, 186, 0.3);
     border: 2px solid #ffb3ba;
     border-radius: 1.2rem;
+    background: linear-gradient(135deg, #fff5f5, #ffe0e0);
     padding: 2rem;
-    box-shadow: 0 1rem 2rem rgba(255, 179, 186, 0.3);
     max-width: 40rem;
-    margin: 0 auto;
 }
 
 .love-letter::before {
-    content: '💖';
     position: absolute;
     top: -1rem;
     left: 50%;
     transform: translateX(-50%);
+    border-radius: 5px;
     background: white;
     padding: 0 0.5rem;
+    content: '💖';
     font-size: 1.5rem;
-    border-radius: 5px;
 }
 
 .love-letter p {
-    font-size: 1.2rem;
-    color: #333;
     margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.2rem;
 }
 
 .love-letter p:first-child,
 .name-item {
-    font-style: italic;
     color: #d63384;
+    font-style: italic;
 }
 
 .love-letter .signature {
-    text-align: right;
     margin-top: 2rem;
     margin-bottom: 0;
+    text-align: right;
 }
 
 .cycling-names {
@@ -105,43 +105,43 @@ footer {
     left: 0;
     opacity: 0;
     animation: nameRotate 12s infinite;
-    white-space: nowrap;
     animation-delay: calc(var(--i) * 2s);
+    white-space: nowrap;
 }
 
 @keyframes nameRotate {
     0% {
-        opacity: 0;
         transform: translateY(20px);
+        opacity: 0;
     }
 
     8.33%,
     16.66% {
-        opacity: 1;
         transform: translateY(0);
+        opacity: 1;
     }
 
     25%,
     100% {
-        opacity: 0;
         transform: translateY(-20px);
+        opacity: 0;
     }
 }
 
 .photo-container {
     display: grid;
-    justify-items: center;
     grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    justify-items: center;
     gap: 1.5rem;
     margin-top: 2rem;
 }
 
 .photo-item {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    background: white;
+    padding: 1rem;
     width: 100%;
     max-width: 20rem;
 }
@@ -152,29 +152,29 @@ footer {
 }
 
 .photo-item img {
-    width: 100%;
     border-radius: 0.75rem;
+    width: 100%;
 }
 
 .photo-caption {
     margin-top: 1rem;
-    text-align: center;
-    color: #666;
-    font-size: 1rem;
-    font-style: italic;
-    line-height: 1.5;
     padding: 0 0.5rem;
+    color: #666;
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
 }
 
 footer {
-    margin-bottom: 1rem;
     justify-content: center;
+    margin-bottom: 1rem;
 }
 
 footer a {
+    transition: color 0.3s ease;
     color: #d63384;
     text-decoration: none;
-    transition: color 0.3s ease;
 }
 
 footer a:hover {
@@ -193,8 +193,8 @@ footer a:hover {
 
         .read-me-section,
     .memories-section {
-        padding: 0.5rem;
         margin: 1.5rem 0;
+        padding: 0.5rem;
     }
 
         .love-letter {

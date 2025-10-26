@@ -1,7 +1,7 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -10,46 +10,46 @@
 body {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    text-align: center;
-    min-height: 100vh;
+    align-items: center;
     padding: 2rem;
+    min-height: 100vh;
     color: #333;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
+    text-align: center;
 }
 
 .opening-screen {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    animation: gradientShift 15s ease infinite;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
     background: linear-gradient(270deg, #ffe6e6, #ffcccc, #ff9999);
     background-size: 800% 800%;
-    animation: gradientShift 15s ease infinite;
-    z-index: 1;
-    cursor: pointer;
-    transition: opacity 0.5s ease;
+    width: 100vw;
+    height: 100vh;
 }
 
 .rizz-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    transition: width 0.7s linear, height 0.7s linear;
+    border-radius: 50%;
+    background: black;
     width: 0;
     height: 0;
-    background: black;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.7s linear, height 0.7s linear;
-    z-index: 0;
 }
 
 .rizz-overlay.grow {
@@ -60,11 +60,11 @@ body {
 .heart {
     position: absolute;
     bottom: -20px;
-    color: red;
-    font-size: 1rem;
+    opacity: 1;
     animation: floatUp 1s ease-in forwards;
     animation-delay: var(--delay, 0s);
-    opacity: 1;
+    color: red;
+    font-size: 1rem;
 }
 
 .heart::before {
@@ -102,33 +102,33 @@ body {
 }
 
 .opening-content {
-    text-align: center;
-    max-width: 80%;
     z-index: 1;
+    max-width: 80%;
+    text-align: center;
 }
 
 .opening-title {
-    font-size: 2rem;
-    font-weight: bold;
     margin-bottom: 1rem;
     color: #666;
+    font-weight: bold;
+    font-size: 2rem;
 }
 
 .click-instruction {
-    color: #999;
     opacity: 0.8;
+    color: #999;
 }
 
 .choice-btn {
+    transition: background 0.3s;
+    cursor: pointer;
     margin: 10px;
-    padding: 10px 20px;
-    background: #ff9999;
     border: none;
     border-radius: 10px;
+    background: #ff9999;
+    padding: 10px 20px;
     color: white;
     font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
 }
 
 .choice-btn:hover {
@@ -136,16 +136,16 @@ body {
 }
 
 #dynamicButton {
+    transition: background 0.3s;
+    cursor: pointer;
     margin-top: 20px;
-    padding: 10px 20px;
-    background: #ff9999;
+    outline: 2px solid #ff6666;
     border: none;
     border-radius: 10px;
-    outline: 2px solid #ff6666;
+    background: #ff9999;
+    padding: 10px 20px;
     color: white;
     font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
 }
 
 footer {
@@ -154,9 +154,9 @@ footer {
 }
 
 footer a {
+    transition: color 0.3s ease;
     color: #d63384;
     text-decoration: none;
-    transition: color 0.3s ease;
 }
 
 footer a:hover {

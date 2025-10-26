@@ -4,16 +4,16 @@
 
 .music-player {
     position: fixed;
-    bottom: 1.5rem;
     right: 1.5rem;
+    bottom: 1.5rem;
     align-items: center;
     gap: 1rem;
-    min-width: 10rem;
-    border-radius: 2rem;
-    padding: 0.5rem 1rem 0.5rem 0.5rem;
-    color: white;
-    background: rgba(0, 0, 0, 0.8);
     transition: box-shadow 0.3s ease;
+    border-radius: 2rem;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    min-width: 10rem;
+    color: white;
 }
 
 .music-player.playing {
@@ -22,16 +22,16 @@
 
 .album-art {
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #1db954, #1ed760);
     width: 3rem;
     height: 3rem;
-    border-radius: 50%;
+    overflow: hidden;
     font-size: 1.125rem;
-    background: linear-gradient(45deg, #1db954, #1ed760);
-    transition: transform 0.3s ease;
 }
 
 .album-art.playing {
@@ -39,10 +39,10 @@
 }
 
 .album-art img {
+    border-radius: 50%;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 50%;
 }
 
 .track-info {
@@ -53,9 +53,9 @@
 .track-title,
 .track-artist {
     margin: 0;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .track-title {
@@ -70,17 +70,17 @@
 
 .play-btn {
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    background: #1db954;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease;
+    cursor: pointer;
     border: none;
-    color: white;
+    border-radius: 50%;
+    background: #1db954;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.3s ease;
+    color: white;
 }
 
 .play-btn:hover {

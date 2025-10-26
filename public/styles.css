@@ -1,7 +1,7 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -11,42 +11,42 @@ body {
     display: flex;
     justify-content: center;
     margin: 0;
-    min-height: 100vh;
+    background-color: #fafafa;
     padding: 20px;
+    min-height: 100vh;
     overflow-y: auto;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #fafafa;
     user-select: none;
 }
 
 h1 {
     margin-top: 8rem;
-    font-weight: bold;
-    text-align: center;
     margin-bottom: 1rem;
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
-    color: transparent;
     background-clip: text;
+    color: transparent;
+    font-weight: bold;
+    text-align: center;
 }
 
 .selection-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 42rem;
     margin: auto;
+    width: 42rem;
 }
 
 .selection-item {
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-height: 128px;
     position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: white;
+    padding: 15px;
+    min-height: 128px;
 }
 
 .selection-item:hover {
@@ -55,28 +55,28 @@ h1 {
 }
 
 .title {
-    font-size: 1.2rem;
-    font-weight: bold;
     margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 1.2rem;
 }
 
 .description {
-    font-size: 1rem;
     color: #555;
+    font-size: 1rem;
 }
 
 .selection-item #date {
     position: absolute;
-    bottom: 10px;
     right: 10px;
-    color: #777;
+    bottom: 10px;
     margin: 0;
+    color: #777;
 }
 
 .link-actions {
     position: fixed;
-    margin: 1rem;
-    z-index: 1;
-    bottom: 10px;
     right: 10px;
+    bottom: 10px;
+    z-index: 1;
+    margin: 1rem;
 }

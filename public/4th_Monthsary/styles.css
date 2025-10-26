@@ -1,7 +1,7 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -10,41 +10,41 @@
 body {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    text-align: center;
-    min-height: 100vh;
+    align-items: center;
+    background: linear-gradient(135deg, #ffe6e6, #ffcccc);
     padding: 2rem;
+    min-height: 100vh;
     color: #333;
 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ffe6e6, #ffcccc);
     user-select: none;
+    text-align: center;
 }
 
 h1 {
-    font-size: 2.5rem;
     margin-bottom: 1rem;
     background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
-    color: transparent;
     background-clip: text;
+    color: transparent;
+    font-size: 2.5rem;
 }
 
 p {
-    max-width: 30rem;
     margin-bottom: 2rem;
+    max-width: 30rem;
     line-height: 1.5;
 }
 
 .heart-button {
-    background-color: #d63384;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    border-radius: 2rem;
-    cursor: pointer;
     transition: background 0.5s ease;
+    cursor: pointer;
+    border: none;
+    border-radius: 2rem;
+    background-color: #d63384;
+    padding: 1rem 2rem;
+    color: white;
+    font-size: 1.2rem;
 }
 
 .heart-button:hover {
@@ -55,18 +55,18 @@ p {
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: none;
+    z-index: 1;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    z-index: 1;
+    pointer-events: none;
 }
 
 .heart {
     position: absolute;
+    animation: float 5s linear infinite;
     color: #ff6b81;
     font-size: 1.5rem;
-    animation: float 5s linear infinite;
 }
 
 @keyframes float {
@@ -83,17 +83,17 @@ p {
 
 .carousel {
     display: none;
-    max-width: 100%;
-    width: 300px;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
     background: white;
     padding: 1rem;
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    width: 300px;
+    max-width: 100%;
 }
 
 .carousel p {
-    font-size: 1rem;
     margin-bottom: 1rem;
+    font-size: 1rem;
 }
 
 .carousel-buttons {
@@ -102,12 +102,12 @@ p {
 }
 
 .carousel-buttons button {
-    background: #ff6b81;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
     cursor: pointer;
+    border: none;
+    border-radius: 1rem;
+    background: #ff6b81;
+    padding: 0.5rem 1rem;
+    color: white;
 }
 
 footer {
@@ -115,9 +115,9 @@ footer {
 }
 
 footer a {
+    transition: color 0.3s ease;
     color: #d63384;
     text-decoration: none;
-    transition: color 0.3s ease;
 }
 
 footer a:hover {
@@ -131,8 +131,8 @@ footer a:hover {
     }
 
     p {
-        font-size: 1rem;
         padding: 0 1rem;
+        font-size: 1rem;
     }
 
     .heart-button {
@@ -141,8 +141,8 @@ footer a:hover {
     }
 
     .carousel {
-        width: 90%;
         padding: 1rem;
+        width: 90%;
     }
 
     .carousel p {
