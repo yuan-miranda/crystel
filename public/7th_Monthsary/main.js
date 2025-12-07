@@ -99,11 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         /* ---------------- DOUBLE-CLICK TO EDIT ---------------- */
-        note.addEventListener("dblclick", () => {
+        note.addEventListener("dblclick", (e) => {
+            e.stopPropagation();
             if (note.querySelector("textarea")) return;
 
             const originalText = note.textContent;
-
             const textarea = document.createElement("textarea");
             textarea.value = originalText;
             textarea.style.width = "100%";
@@ -119,9 +119,12 @@ document.addEventListener("DOMContentLoaded", () => {
             note.innerHTML = "";
             note.appendChild(textarea);
 
+            // Prevent pointer events from causing blur during mobile keyboard
+            textarea.addEventListener('touchstart', e => e.stopPropagation());
+            textarea.addEventListener('mousedown', e => e.stopPropagation());
+
             textarea.focus();
 
-            /* ---------- AUTO RESIZE ---------- */
             function autoResize() {
                 textarea.style.height = "auto";
                 textarea.style.height = textarea.scrollHeight + "px";
