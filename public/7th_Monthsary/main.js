@@ -1,11 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
-
     const addBtn = document.getElementById("addBtn");
     const clearBtn = document.getElementById("clearBtn");
     const input = document.getElementById("noteInput");
     const board = document.getElementById("board");
 
     const GRID_SIZE = 32;
+
+    const supabase = supabase.createClient(
+        "https://mqgdwchkvbvurppqepnr.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZ2R3Y2hrdmJ2dXJwcHFlcG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMDEwODUsImV4cCI6MjA4MDY3NzA4NX0.6VaZkb5mGTCSztqXxBVY8YwHm6kKAHZr_jGD3EyWztQ"
+    )
 
     // Ask for password once (you can style this later)
     window.boardPassword = prompt("Enter board password (for editing):") || "";
@@ -70,28 +74,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 note.style.top = (e.clientY - offsetY) + "px";
             }
 
-            async function upHandler() {
-                let x = parseInt(note.style.left);
-                let y = parseInt(note.style.top);
+            function upHandler(e) {
+                // Detach first
+                note.removeEventListener("pointermove", moveHandler);
+                note.removeEventListener("pointerup", upHandler);
+                note.releasePointerCapture(e.pointerId);
 
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                // Then snap & save
+                let x = Math.round((note.offsetLeft) / GRID_SIZE) * GRID_SIZE;
+                let y = Math.round((note.offsetTop) / GRID_SIZE) * GRID_SIZE;
 
                 const maxX = board.offsetWidth - note.offsetWidth;
                 const maxY = board.offsetHeight - note.offsetHeight;
 
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                if (x > maxX) x = maxX;
-                if (y > maxY) y = maxY;
+                note.style.left = Math.min(maxX, Math.max(0, x)) + "px";
+                note.style.top = Math.min(maxY, Math.max(0, y)) + "px";
 
-                note.style.left = x + "px";
-                note.style.top = y + "px";
-
-                await saveNoteToServer(note, note.dataset.id);
-
-                note.removeEventListener("pointermove", moveHandler);
-                note.removeEventListener("pointerup", upHandler);
+                // async save after detaching events
+                saveNoteToServer(note, note.dataset.id);
             }
 
             note.addEventListener("pointermove", moveHandler);
@@ -190,5 +190,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ---------------- START ---------------- */
+    // Listen for realtime updates on the 'board' table
+    supabase
+        .from('board')
+        .on('INSERT', payload => {
+            const note = payload.new;
+            createNote({
+                id: note.id,
+                text: note.text,
+                left: note.left_pos,
+                top: note.top_pos
+            });
+        })
+        .on('UPDATE', payload => {
+            const note = payload.new;
+            const existing = document.querySelector(`.note[data-id='${note.id}']`);
+            if (existing) {
+                existing.textContent = note.text;
+                existing.style.left = note.left_pos + "px";
+                existing.style.top = note.top_pos + "px";
+            }
+        })
+        .on('DELETE', payload => {
+            const note = payload.old;
+            const existing = document.querySelector(`.note[data-id='${note.id}']`);
+            if (existing) existing.remove();
+        })
+        .subscribe();
+
     loadNotes();
 });
