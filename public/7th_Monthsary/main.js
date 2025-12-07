@@ -190,10 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ---------------- START ---------------- */
-    // Listen for realtime updates on the 'board' table
-    supabaseClient
-        .from('board')
-        .on('INSERT', payload => {
+    const boardChannel = supabaseClient
+        .channel('public:board')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'board' }, payload => {
             const note = payload.new;
             createNote({
                 id: note.id,
@@ -202,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 top: note.top_pos
             });
         })
-        .on('UPDATE', payload => {
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'board' }, payload => {
             const note = payload.new;
             const existing = document.querySelector(`.note[data-id='${note.id}']`);
             if (existing) {
@@ -211,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 existing.style.top = note.top_pos + "px";
             }
         })
-        .on('DELETE', payload => {
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'board' }, payload => {
             const note = payload.old;
             const existing = document.querySelector(`.note[data-id='${note.id}']`);
             if (existing) existing.remove();
