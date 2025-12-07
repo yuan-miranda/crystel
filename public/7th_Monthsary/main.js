@@ -133,13 +133,19 @@ function attachDragging(note) {
             note.releasePointerCapture(e.pointerId);
 
             // snap to grid
-            const snappedX = Math.round(note.offsetLeft / GRID_SIZE) * GRID_SIZE;
-            const snappedY = Math.round(note.offsetTop / GRID_SIZE) * GRID_SIZE;
+            let snappedX = Math.round(note.offsetLeft / GRID_SIZE) * GRID_SIZE;
+            let snappedY = Math.round(note.offsetTop / GRID_SIZE) * GRID_SIZE;
+
+            // constrain within board
+            const maxX = board.offsetWidth - note.offsetWidth;
+            const maxY = board.offsetHeight - note.offsetHeight;
+
+            snappedX = Math.min(maxX, Math.max(0, snappedX));
+            snappedY = Math.min(maxY, Math.max(0, snappedY));
 
             note.style.left = snappedX + "px";
             note.style.top = snappedY + "px";
 
-            // save only if position changed
             if (snappedX !== startX || snappedY !== startY) {
                 saveNoteToServer(
                     note,
