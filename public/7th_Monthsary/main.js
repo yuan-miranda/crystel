@@ -90,8 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
         note.addEventListener("pointerdown", (e) => {
             note.setPointerCapture(e.pointerId);
 
-            let offsetX = e.clientX - note.offsetLeft;
-            let offsetY = e.clientY - note.offsetTop;
+            // Store the original position
+            const startX = note.offsetLeft;
+            const startY = note.offsetTop;
+
+            let offsetX = e.clientX - startX;
+            let offsetY = e.clientY - startY;
 
             function moveHandler(e) {
                 note.style.left = (e.clientX - offsetX) + "px";
@@ -103,8 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 note.removeEventListener("pointerup", upHandler);
                 note.releasePointerCapture(e.pointerId);
 
-                let x = Math.round((note.offsetLeft) / GRID_SIZE) * GRID_SIZE;
-                let y = Math.round((note.offsetTop) / GRID_SIZE) * GRID_SIZE;
+                let x = Math.round(note.offsetLeft / GRID_SIZE) * GRID_SIZE;
+                let y = Math.round(note.offsetTop / GRID_SIZE) * GRID_SIZE;
 
                 const maxX = board.offsetWidth - note.offsetWidth;
                 const maxY = board.offsetHeight - note.offsetHeight;
@@ -112,7 +116,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 note.style.left = Math.min(maxX, Math.max(0, x)) + "px";
                 note.style.top = Math.min(maxY, Math.max(0, y)) + "px";
 
-                saveNoteToServer(note, note.dataset.id);
+                // Only save if the position actually changed
+                if (x !== startX || y !== startY) {
+                    saveNoteToServer(note, note.dataset.id);
+                }
             }
 
             note.addEventListener("pointermove", moveHandler);
