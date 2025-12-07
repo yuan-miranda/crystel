@@ -1,0 +1,60 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #f2efe5;
+}
+
+header {
+    height: 60px;
+    background: #ffb6c1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+#controls {
+    height: 56px;
+    padding: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+}
+
+#boardViewport {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    background: #f5deb3;
+}
+
+#board {
+    position: relative;
+    min-width: 1000px;
+    min-height: 1000px;
+    background: #f5deb3;
+}
+
+.note {
+    position: absolute;
+    padding: 10px;
+    min-width: 120px;
+    background: #fff8a6;
+    border: 1px solid #e1d374;
+    border-radius: 8px;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    user-select: none;
+    font-size: 14px;
+    white-space: pre-wrap;
+    touch-action: none;
+}
+
+.note:active {
+    cursor: grabbing;
+}
