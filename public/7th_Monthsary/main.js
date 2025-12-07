@@ -9,10 +9,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const supabaseClient = supabase.createClient(
         "https://mqgdwchkvbvurppqepnr.supabase.co",
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZ2R3Y2hrdmJ2dXJwcHFlcG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMDEwODUsImV4cCI6MjA4MDY3NzA4NX0.6VaZkb5mGTCSztqXxBVY8YwHm6kKAHZr_jGD3EyWztQ"
-    )
+    );
 
-    // Ask for password once (you can style this later)
-    window.boardPassword = prompt("Enter board password (for editing):") || "";
+    // ---------------- PASSWORD LOGIC ----------------
+    // Ask for password once and store it in localStorage
+    let storedPassword = localStorage.getItem("boardPassword");
+    if (!storedPassword) {
+        storedPassword = prompt("Enter board password (for editing):") || "";
+        localStorage.setItem("boardPassword", storedPassword);
+    }
+    window.boardPassword = storedPassword;
 
     /* ---------------- SAVE NOTE TO SERVER ---------------- */
     async function saveNoteToServer(note, id = null) {
@@ -31,12 +37,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const data = await res.json();
+
+        // If password is incorrect, prompt again
+        if (res.status === 403) {
+            alert("The password you entered is incorrect. Please try again.");
+            localStorage.removeItem("boardPassword");
+            window.boardPassword = prompt("Enter board password (for editing):") || "";
+            localStorage.setItem("boardPassword", window.boardPassword);
+            return saveNoteToServer(note, id); // Retry save with new password
+        }
+
         return data.data?.[0]; // returns the inserted/updated row
     }
 
     /* ---------------- DELETE NOTE FROM SERVER ---------------- */
     async function deleteNoteFromServer(id) {
-        await fetch("/api/delete_board", {
+        const res = await fetch("/api/delete_board", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -44,6 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 inputPassword: window.boardPassword
             })
         });
+
+        if (res.status === 403) {
+            alert("The password you entered is incorrect. Cannot delete note.");
+            localStorage.removeItem("boardPassword");
+            window.boardPassword = prompt("Enter board password (for editing):") || "";
+            localStorage.setItem("boardPassword", window.boardPassword);
+            return deleteNoteFromServer(id); // Retry delete with new password
+        }
     }
 
     /* ---------------- LOAD NOTES FROM SERVER ---------------- */
@@ -75,12 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             function upHandler(e) {
-                // Detach first
                 note.removeEventListener("pointermove", moveHandler);
                 note.removeEventListener("pointerup", upHandler);
                 note.releasePointerCapture(e.pointerId);
 
-                // Then snap & save
                 let x = Math.round((note.offsetLeft) / GRID_SIZE) * GRID_SIZE;
                 let y = Math.round((note.offsetTop) / GRID_SIZE) * GRID_SIZE;
 
@@ -90,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 note.style.left = Math.min(maxX, Math.max(0, x)) + "px";
                 note.style.top = Math.min(maxY, Math.max(0, y)) + "px";
 
-                // async save after detaching events
                 saveNoteToServer(note, note.dataset.id);
             }
 
@@ -103,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (note.querySelector("textarea")) return;
 
             const originalText = note.textContent;
-
             const textarea = document.createElement("textarea");
             textarea.value = originalText;
             textarea.style.width = "100%";
@@ -118,10 +138,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             note.innerHTML = "";
             note.appendChild(textarea);
-
             textarea.focus();
 
-            /* ---------- AUTO RESIZE ---------- */
             function autoResize() {
                 textarea.style.height = "auto";
                 textarea.style.height = textarea.scrollHeight + "px";
@@ -155,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
         board.appendChild(note);
         attachDragging(note);
 
-        // save new notes
         if (!id) {
             saveNoteToServer(note).then(saved => {
                 if (saved) note.dataset.id = saved.id;
@@ -180,7 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
     clearBtn.addEventListener("click", async () => {
         if (!confirm("Delete ALL notes?")) return;
 
-        // Delete one-by-one at server level
         const notes = document.querySelectorAll(".note");
         for (let note of notes) {
             await deleteNoteFromServer(note.dataset.id);
