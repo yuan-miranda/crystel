@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const GRID_SIZE = 32;
 
-    const supabase = supabase.createClient(
+    const supabaseClient = supabase.createClient(
         "https://mqgdwchkvbvurppqepnr.supabase.co",
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZ2R3Y2hrdmJ2dXJwcHFlcG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMDEwODUsImV4cCI6MjA4MDY3NzA4NX0.6VaZkb5mGTCSztqXxBVY8YwHm6kKAHZr_jGD3EyWztQ"
     )
@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ---------------- START ---------------- */
     // Listen for realtime updates on the 'board' table
-    supabase
+    supabaseClient
         .from('board')
         .on('INSERT', payload => {
             const note = payload.new;
