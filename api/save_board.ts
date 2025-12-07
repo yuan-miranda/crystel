@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(403).json({ error: '403 Forbidden' });
     }
 
-    if (!id || text === undefined || left === undefined || top === undefined) {
+    if (text === undefined || left === undefined || top === undefined) {
         return res.status(400).json({ error: 'Invalid request body' });
     }
 
