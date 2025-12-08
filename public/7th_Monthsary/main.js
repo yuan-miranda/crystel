@@ -196,7 +196,7 @@ function setupContextMenu() {
     contextMenu = document.getElementById("contextMenu");
     const deleteContext = document.getElementById("contextDelete");
 
-    const hoverEffect = (item) => {
+    const hoverEffect = e => {
         deleteContext.style.backgroundColor = e.type === "mouseover" ? "#6c63ff" : "transparent";
         deleteContext.style.color = e.type === "mouseover" ? "white" : "#333";
     };
