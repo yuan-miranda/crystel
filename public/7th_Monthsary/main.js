@@ -93,6 +93,11 @@ async function loadNotes() {
 }
 
 function createNote({ id = null, text, left, top }) {
+    if (id) {
+        const existing = document.querySelector(`.note[data-id='${id}']`);
+        if (existing) return existing;
+    }
+
     const note = document.createElement("div");
     note.className = "note";
     note.textContent = text;
@@ -110,6 +115,8 @@ function createNote({ id = null, text, left, top }) {
             if (saved) note.dataset.id = saved.id;
         });
     }
+
+    return note;
 }
 
 function attachDragging(note) {
@@ -226,7 +233,7 @@ function setupRealtime(supabaseClient) {
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "board" }, payload => {
             const n = payload.new;
             const existing = document.querySelector(`.note[data-id='${n.id}']`);
-            if (existing) {
+            if (existing && !existing.querySelector("textarea")) {
                 existing.textContent = n.text;
                 existing.style.left = n.left_pos + "px";
                 existing.style.top = n.top_pos + "px";
@@ -280,4 +287,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupRealtime(supabaseClient);
     loadNotes();
+});
+
+window.addEventListener("focus", async () => {
+    await loadNotes();
 });
