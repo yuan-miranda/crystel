@@ -1,5 +1,5 @@
 const GRID_SIZE = 32;
-let board, input, contextMenu, contextNote;
+let board, input, contextMenu, colorDropdown, contextNote;
 
 function loadPassword() {
     const password = localStorage.getItem("boardPassword") || prompt("Enter board password (for editing) else ignore this:") || "";
@@ -138,15 +138,11 @@ function makeNoteDraggable(note) {
             note.style.left = snappedX + "px";
             note.style.top = snappedY + "px";
 
+            isDragging = false;
+            note.dataset.isDragging = "false";
+
             if (snappedX !== startX || snappedY !== startY) {
-                saveNoteToServer(
-                    note,
-                    note.dataset.id,
-                    { left: startX, top: startY }
-                ).then(() => {
-                    isDragging = false;
-                    note.dataset.isDragging = "false";
-                });
+                saveNoteToServer(note, note.dataset.id, { left: startX, top: startY })
             }
         }
 
@@ -157,8 +153,8 @@ function makeNoteDraggable(note) {
 
 function makeNoteEditable(note) {
     note.addEventListener("dblclick", () => {
-        if (note.dataset.isDragging === "true") return;
-        if (note.querySelector("textarea")) return;
+        const leftover = note.querySelector("textarea");
+        if (leftover) leftover.remove();
 
         const noteWidth = note.offsetWidth;
         const textarea = document.createElement("textarea");
@@ -244,14 +240,25 @@ function makeNoteContextMenu(note) {
 
 function showContextMenu(x, y, note) {
     contextNote = note;
+
+    // force reset state
+    note.dataset.isDragging = "false";
+    const textarea = note.querySelector("textarea");
+    if (textarea) {
+        note.textContent = textarea.value;
+        textarea.remove();
+    }
+
     contextMenu.style.left = x + "px";
     contextMenu.style.top = y + "px";
     contextMenu.style.display = "block";
+    if (colorDropdown) colorDropdown.style.display = "none";
 }
 
 function hideContextMenu() {
     contextNote = null;
     if (contextMenu) contextMenu.style.display = "none";
+    if (colorDropdown) colorDropdown.style.display = "none";
 }
 
 function setupRealtime(client) {
@@ -280,63 +287,46 @@ function setupRealtime(client) {
 }
 
 function setupChangeColorDropdown() {
-    const changeColorBtn = document.getElementById("changeColor");
-    const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF",];
+    const changeColorBtn = document.getElementById("changeColor"); // inside context menu
+    const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF"];
 
-    const dropdown = document.createElement("div");
-    dropdown.className = "color-dropdown";
+    colorDropdown = document.createElement("div");
+    colorDropdown.className = "color-dropdown";
 
     colors.forEach(color => {
         const colorOption = document.createElement("div");
         colorOption.className = "color-option";
         colorOption.style.backgroundColor = color;
 
-        colorOption.addEventListener("click", async () => {
+        colorOption.addEventListener("click", async (e) => {
+            e.stopPropagation();
             if (!contextNote) return;
 
             contextNote.style.backgroundColor = color;
             contextNote.dataset.color = color;
 
-            const body = {
-                id: contextNote.dataset.id,
-                color: color,
-                inputPassword: window.boardPassword || "",
-            }
-
-            const response = await fetch("/api/save_board", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-
-            if (response.status === 403) {
-                contextNote.style.backgroundColor = contextNote.dataset.color;
-                return retryWithPassword(() => {
-                    contextNote.style.backgroundColor = color;
-                    contextNote.dataset.color = color;
-                    return fetch("/api/save_board", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body),
-                    });
-                });
-            }
-
+            await saveNoteToServer(contextNote, contextNote.dataset.id);
             hideContextMenu();
+            colorDropdown.style.display = "none";
         });
-        dropdown.appendChild(colorOption);
+
+        colorDropdown.appendChild(colorOption);
     });
-    changeColorBtn.appendChild(dropdown);
+
+    document.body.appendChild(colorDropdown);
 
     changeColorBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // prevent document click
         if (!contextNote) return;
-        dropdown.style.left = e.clientX + "px";
-        dropdown.style.top = e.clientY + "px";
-        dropdown.style.display = "block";
+
+        const rect = changeColorBtn.getBoundingClientRect();
+        colorDropdown.style.left = (rect.right + 2) + "px"; // show to the right of the button
+        colorDropdown.style.top = (rect.top - 2) + "px";    // align top
+        colorDropdown.style.display = "flex";
     });
 
     document.addEventListener("click", () => {
-        dropdown.style.display = "none";
+        colorDropdown.style.display = "none";
     });
 }
 
@@ -351,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadPassword();
     setupContextMenu();
-    // setupChangeColorDropdown();
+    setupChangeColorDropdown();
 
     document.getElementById("addNote").addEventListener("click", () => {
         const text = input.value;
