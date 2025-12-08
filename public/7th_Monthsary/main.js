@@ -149,10 +149,10 @@ function makeNoteDraggable(note) {
                     note.dataset.isDragging = "false";
                 });
             }
-
-            note.addEventListener("pointermove", moveHandler);
-            note.addEventListener("pointerup", upHandler);
         }
+        
+        note.addEventListener("pointermove", moveHandler);
+        note.addEventListener("pointerup", upHandler);
     });
 }
 
