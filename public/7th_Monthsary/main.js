@@ -57,7 +57,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
             });
     }
 
-    const json = await res.json();
+    const json = await response.json();
     return json.data?.[0];
 }
 
@@ -150,7 +150,7 @@ function makeNoteDraggable(note) {
                 });
             }
         }
-        
+
         note.addEventListener("pointermove", moveHandler);
         note.addEventListener("pointerup", upHandler);
     });
