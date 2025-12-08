@@ -60,7 +60,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
 
 async function deleteNoteFromServer(id) {
     const response = await fetch("/api/delete_board", {
-        method: "POST",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, inputPassword: window.boardPassword || "" }),
     });
@@ -211,7 +211,7 @@ function makeNoteContextMenu(note) {
 }
 
 function setupContextMenu() {
-    contextMenu = document.getElementById("context-menu");
+    contextMenu = document.getElementById("contextMenu");
     const deleteContext = document.getElementById("contextDelete");
 
     const hoverEffect = (item) => {

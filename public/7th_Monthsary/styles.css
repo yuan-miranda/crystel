@@ -111,7 +111,7 @@ body {
     cursor: grabbing;
 }
 
-.context-menu {
+#contextMenu {
     position: absolute;
     display: none;
     background: #ffffff;
@@ -124,13 +124,13 @@ body {
     color: #333;
 }
 
-.context-menu div {
+#contextMenu div {
     padding: 4px 8px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
 }
 
-.context-menu div:hover {
+#contextMenu div:hover {
     background-color: #6c63ff;
     color: white;
 }
