@@ -73,15 +73,14 @@ async function deleteNoteFromServer(id) {
 async function loadNotes() {
     const notes = await fetch("/api/load_board").then(res => res.json());
     notes.forEach(note => {
-        createNote(note.id, note.text, note.left, note.top, note.color);
+        createNote({ id: note.id, text: note.text, left: note.left, top: note.top, color: note.color });
     });
 }
 
-function createNote(id = null, text, left, top, color) {
-    if (id) {
-        const existingNote = document.querySelector(`#board [data-id='${id}']`);
-        if (existingNote) return existingNote;
-    }
+function createNote({ id = null, text, left, top, color }) {
+    const tempId = id || `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const existingNote = document.querySelector(`#board [data-id='${id || tempId}']`);
+    if (existingNote) return existingNote;
 
     const note = document.createElement("div");
     note.className = "note";
@@ -90,7 +89,7 @@ function createNote(id = null, text, left, top, color) {
     note.style.top = top + "px";
     note.style.backgroundColor = color || "#fff8a6";
 
-    note.dataset.id = id || "";
+    note.dataset.id = id || tempId;
     note.dataset.color = color || "#fff8a6";
 
     board.appendChild(note);
@@ -179,8 +178,9 @@ function makeNoteEditable(note) {
 
         textarea.addEventListener("blur", () => {
             note.textContent = textarea.value;
-            const saved = saveNoteToServer(note, note.dataset.id, null, textarea.value);
-            if (saved) note.dataset.id = saved.id;
+            saveNoteToServer(note, note.dataset.id, null, textarea.value).then(saved => {
+                if (saved) note.dataset.id = saved.id;
+            });
         });
 
         textarea.addEventListener("keydown", (e) => {
@@ -208,7 +208,7 @@ function setupContextMenu() {
         // what the fuck
         const noteToDelete = contextNote;
         if (!noteToDelete) return;
-        
+
         await deleteNoteFromServer(noteToDelete.dataset.id);
         noteToDelete.remove();
         hideContextMenu();
@@ -251,17 +251,20 @@ function hideContextMenu() {
 
 function setupRealtime(client) {
     const handleChange = (payload) => {
-        const note = payload.new || payload.old;
-        const existingNote = document.querySelector(`.note[data-id='${note.id}']`);
-
-        if (payload.eventType === "DELETE") existingNote?.remove();
-        else if (payload.eventType === "INSERT") createNote(note.id, note.text, note.left, note.top, note.color);
-        else if (payload.eventType === "UPDATE" && existingNote && !existingNote.querySelector("textarea")) {
-            existingNote.textContent = note.text;
-            existingNote.style.left = note.left + "px";
-            existingNote.style.top = note.top + "px";
-            existingNote.style.backgroundColor = note.color;
-            existingNote.dataset.color = note.color;
+        if (payload.eventType === "DELETE" && payload.old) {
+            const existingNote = document.querySelector(`.note[data-id='${payload.old.id}']`);
+            existingNote?.remove();
+        } else if (payload.eventType === "INSERT" && payload.new) {
+            createNote({ id: payload.new.id, text: payload.new.text, left: payload.new.left, top: payload.new.top, color: payload.new.color });
+        } else if (payload.eventType === "UPDATE" && payload.new) {
+            const existingNote = document.querySelector(`.note[data-id='${payload.new.id}']`);
+            if (existingNote && !existingNote.querySelector("textarea")) {
+                existingNote.textContent = payload.new.text;
+                existingNote.style.left = payload.new.left + "px";
+                existingNote.style.top = payload.new.top + "px";
+                existingNote.style.backgroundColor = payload.new.color;
+                existingNote.dataset.color = payload.new.color;
+            }
         }
     };
     client.channel("public:board")
@@ -349,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote(null, text, 50, 50);
+        createNote({ text, left: 50, top: 50 });
         input.value = "";
     });
 
