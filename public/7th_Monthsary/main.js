@@ -204,11 +204,14 @@ function setupContextMenu() {
     deleteContext.addEventListener("mouseout", hoverEffect);
 
     deleteContext.addEventListener("click", async () => {
-        if (contextNote) {
-            await deleteNoteFromServer(contextNote.dataset.id);
-            contextNote.remove();
-            hideContextMenu();
-        }
+        // for some reason this works better than passing contextNote directly
+        // what the fuck
+        const noteToDelete = contextNote;
+        if (!noteToDelete) return;
+        
+        await deleteNoteFromServer(noteToDelete.dataset.id);
+        noteToDelete.remove();
+        hideContextMenu();
     });
     document.addEventListener("click", hideContextMenu);
 }
