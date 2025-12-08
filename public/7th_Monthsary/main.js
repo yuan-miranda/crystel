@@ -46,16 +46,19 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
         }
         if (restoreContent !== null) note.textContent = restoreContent;
 
-        return retryWithPassword(() => saveNoteToServer(note, id, restorePos, restoreContent), () => {
-            if (restorePos) {
-                note.style.left = restorePos.left + "px";
-                note.style.top = restorePos.top + "px";
-            }
-            if (restoreContent !== null) note.textContent = restoreContent;
-        });
+        return retryWithPassword(
+            () => saveNoteToServer(note, id, restorePos, restoreContent),
+            () => {
+                if (restorePos) {
+                    note.style.left = restorePos.left + "px";
+                    note.style.top = restorePos.top + "px";
+                }
+                if (restoreContent !== null) note.textContent = restoreContent;
+            });
     }
 
-    return response;
+    const json = await res.json();
+    return json.data?.[0];
 }
 
 async function deleteNoteFromServer(id) {
@@ -96,7 +99,7 @@ function createNote(id = null, text, left, top, color) {
     makeNoteContextMenu(note);
 
     if (!id) saveNoteToServer(note, null).then(res => {
-        if (res && res.ok) note.dataset.id = res.id;
+        if (res) note.dataset.id = res.id;
     });
     return note;
 }
@@ -136,19 +139,20 @@ function makeNoteDraggable(note) {
             note.style.left = snappedX + "px";
             note.style.top = snappedY + "px";
 
-            if (isDragging) {
-                isDragging = false;
-                note.dataset.isDragging = "false";
+            if (snappedX !== startX || snappedY !== startY) {
                 saveNoteToServer(
                     note,
                     note.dataset.id,
                     { left: startX, top: startY }
-                );
+                ).then(() => {
+                    isDragging = false;
+                    note.dataset.isDragging = "false";
+                });
             }
-        }
 
-        note.addEventListener("pointermove", moveHandler);
-        note.addEventListener("pointerup", upHandler);
+            note.addEventListener("pointermove", moveHandler);
+            note.addEventListener("pointerup", upHandler);
+        }
     });
 }
 
@@ -159,6 +163,7 @@ function makeNoteEditable(note) {
 
         const noteWidth = note.offsetWidth;
         const textarea = document.createElement("textarea");
+        textarea.classList.add("note-input-textarea");
         textarea.style.width = noteWidth + "px";
         textarea.value = note.textContent;
         note.textContent = "";
@@ -169,17 +174,13 @@ function makeNoteEditable(note) {
             textarea.style.height = "auto";
             textarea.style.height = (textarea.scrollHeight) + "px";
         };
-        textarea.addEventListener("input", autoResize);
         autoResize();
+        textarea.addEventListener("input", autoResize);
 
         textarea.addEventListener("blur", () => {
             note.textContent = textarea.value;
-            saveNoteToServer(
-                note,
-                note.dataset.id,
-                null,
-                textarea.value
-            );
+            const saved = saveNoteToServer(note, note.dataset.id, null, textarea.value);
+            if (saved) note.dataset.id = saved.id;
         });
 
         textarea.addEventListener("keydown", (e) => {
@@ -191,49 +192,54 @@ function makeNoteEditable(note) {
     });
 }
 
-function makeNoteContextMenu(note) {
-    note.addEventListener("contextmenu", (e) => {
-        if (note.querySelector("textarea") || note.dataset.isDragging === "true") return;
-        e.preventDefault();
-        showContextMenu(e.clientX, e.clientY, note);
-    });
-
-    let pressTimer;
-    note.addEventListener("pointerdown", (e) => {
-        if (note.querySelector("textarea")) return;
-        pressTimer = setTimeout(() => {
-            showContextMenu(e.clientX, e.clientY, note);
-        }, 600);
-    });
-
-    note.addEventListener("pointerup", () => clearTimeout(pressTimer));
-    note.addEventListener("pointerleave", () => clearTimeout(pressTimer));
-}
-
 function setupContextMenu() {
     contextMenu = document.getElementById("contextMenu");
     const deleteContext = document.getElementById("contextDelete");
 
     const hoverEffect = (item) => {
-        item.addEventListener("pointerover", () => {
-            item.style.backgroundColor = "#e0e0e0";
-        });
-        item.addEventListener("pointerout", () => {
-            item.style.backgroundColor = "transparent";
-        });
+        deleteContext.style.backgroundColor = e.type === "mouseover" ? "#6c63ff" : "transparent";
+        deleteContext.style.color = e.type === "mouseover" ? "white" : "#333";
     };
-    hoverEffect(deleteContext);
+    deleteContext.addEventListener("mouseover", hoverEffect);
+    deleteContext.addEventListener("mouseout", hoverEffect);
 
     deleteContext.addEventListener("click", async () => {
-        if (contextNote) {
-            await deleteNoteFromServer(contextNote.dataset.id);
-            contextNote.remove();
-            hideContextMenu();
-        }
+        if (!contextNote) return;
+
+        await deleteNoteFromServer(contextNote.dataset.id);
+        contextNote.remove();
+        hideContextMenu();
     });
+
+    //     deleteItem.addEventListener("click", async () => {
+    //     if (contextNote) { await deleteNoteFromServer(contextNote.dataset.id); contextNote.remove(); hideContextMenu(); }
+    // });
+
+    // document.addEventListener("click", hideContextMenu);
 
     document.addEventListener("click", () => hideContextMenu());
 }
+
+function makeNoteContextMenu(note) {
+    note.addEventListener("contextmenu", (e) => {
+        if (note.querySelector("textarea") || note.dataset.isDragging === "true") return;
+        e.preventDefault();
+        showContextMenu(e.pageX, e.pageY, note);
+    });
+
+    let pressTimer;
+    note.addEventListener("touchstart", (e) => {
+        if (note.querySelector("textarea")) return;
+        pressTimer = setTimeout(() => {
+            const touch = e.touches[0];
+            showContextMenu(touch.pageX, touch.pageY, note);
+        }, 600);
+    });
+
+    note.addEventListener("touchend", () => clearTimeout(pressTimer));
+    note.addEventListener("touchmove", () => clearTimeout(pressTimer));
+}
+
 
 function showContextMenu(x, y, note) {
     contextNote = note;
@@ -243,17 +249,18 @@ function showContextMenu(x, y, note) {
 }
 
 function hideContextMenu() {
-    contextMenu.style.display = "none";
     contextNote = null;
+    if (contextMenu) contextMenu.style.display = "none";
 }
 
 function setupRealtime(client) {
-    const handleChange = (data) => {
-        const note = data.new || data.old;
+    const handleChange = (payload) => {
+        const note = payload.new || payload.old;
         const existingNote = document.querySelector(`.note[data-id='${note.id}']`);
-        if (data.eventType === "DELETE") existingNote?.remove();
-        else if (data.eventType === "INSERT") createNote(note.id, note.text, note.left, note.top, note.color);
-        else if (data.eventType === "UPDATE" && existingNote && !existingNote.querySelector("textarea")) {
+
+        if (payload.eventType === "DELETE") existingNote?.remove();
+        else if (payload.eventType === "INSERT") createNote(note.id, note.text, note.left, note.top, note.color);
+        else if (payload.eventType === "UPDATE" && existingNote && !existingNote.querySelector("textarea")) {
             existingNote.textContent = note.text;
             existingNote.style.left = note.left + "px";
             existingNote.style.top = note.top + "px";
@@ -340,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadPassword();
     setupContextMenu();
-    setupChangeColorDropdown();
+    // setupChangeColorDropdown();
 
     document.getElementById("addNote").addEventListener("click", () => {
         const text = input.value;
@@ -354,12 +361,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirm("Are you sure you want to delete all notes?")) return;
         for (const note of document.querySelectorAll(".note")) {
             await deleteNoteFromServer(note.dataset.id);
-            note.remove();
         }
+        board.innerHTML = "";
     });
 
-    loadNotes();
     setupRealtime(supabaseClient);
+    loadNotes();
 });
 
 window.addEventListener("focus", () => loadNotes());
