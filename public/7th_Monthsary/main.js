@@ -1,120 +1,119 @@
 const GRID_SIZE = 32;
 let board, input, contextMenu, contextNote;
 
-// Load or prompt for board password
 function loadPassword() {
-    let pw = localStorage.getItem("boardPassword") || prompt("Enter board password (for editing) else ignore this:") || "";
-    localStorage.setItem("boardPassword", pw);
-    window.boardPassword = pw;
-    return pw;
+    const password = localStorage.getItem("boardPassword") || prompt("Enter board password (for editing) else ignore this:") || "";
+    localStorage.setItem("boardPassword", password);
+    window.boardPassword = password;
+    return password;
 }
 
-// Retry an action if password was incorrect
 async function retryWithPassword(action, rollback) {
     localStorage.removeItem("boardPassword");
-    const pw = prompt("Incorrect password. Enter again:");
-    if (pw === null) {
-        if (rollback) rollback(); // Revert changes if user cancels
+    const password = prompt("Incorrect password. Enter again:");
+
+    if (password === null) {
+        if (rollback) rollback();
         alert("Edit canceled. You must have the correct password to make changes.");
         return null;
     }
-    window.boardPassword = pw;
-    localStorage.setItem("boardPassword", pw);
+
+    window.boardPassword = password;
+    localStorage.setItem("boardPassword", password);
     return action();
 }
 
-// Save a note to the server with password authentication
-async function saveNoteToServer(note, id, restorePos = null, restoreText = null) {
+async function saveNoteToServer(note, id, restorePos = null, restoreContent = null) {
     const body = {
-        id,
+        id: id,
         text: note.textContent,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
-        inputPassword: window.boardPassword
-    };
-
-    const res = await fetch("/api/save_board", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
-
-    if (res.status === 403) {
-        // Restore note if save failed
-        if (restorePos) {
-            note.style.left = restorePos.x + "px";
-            note.style.top = restorePos.y + "px";
-        }
-        if (restoreText !== null) note.textContent = restoreText;
-
-        // Retry save after prompting for correct password
-        return retryWithPassword(
-            () => saveNoteToServer(note, id, restorePos, restoreText),
-            () => {
-                if (restorePos) {
-                    note.style.left = restorePos.x + "px";
-                    note.style.top = restorePos.y + "px";
-                }
-                if (restoreText !== null) note.textContent = restoreText;
-            }
-        );
+        color: note.dataset.color || "#ffff88",
+        inputPassword: window.boardPassword || "",
     }
 
-    const json = await res.json();
-    return json.data?.[0];
-}
-
-// Delete note from server with password handling
-async function deleteNoteFromServer(id) {
-    const res = await fetch("/api/delete_board", {
-        method: "DELETE",
+    const response = await fetch("/api/save_board", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, inputPassword: window.boardPassword })
+        body: JSON.stringify(body),
     });
 
-    if (res.status === 403) return retryWithPassword(() => deleteNoteFromServer(id));
+    if (response.status === 403) {
+        if (restorePos) {
+            note.style.left = restorePos.left + "px";
+            note.style.top = restorePos.top + "px";
+        }
+        if (restoreContent !== null) note.textContent = restoreContent;
+
+        return retryWithPassword(() => saveNoteToServer(note, id, restorePos, restoreContent), () => {
+            if (restorePos) {
+                note.style.left = restorePos.left + "px";
+                note.style.top = restorePos.top + "px";
+            }
+            if (restoreContent !== null) note.textContent = restoreContent;
+        });
+    }
+
+    return response;
 }
 
-// Load notes from server
+async function deleteNoteFromServer(id) {
+    const response = await fetch("/api/delete_board", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, inputPassword: window.boardPassword || "" }),
+    });
+    if (response.status === 403) return retryWithPassword(() => deleteNoteFromServer(id));
+}
+
 async function loadNotes() {
-    const notes = await (await fetch("/api/load_board")).json();
-    notes.forEach(n => createNote({ id: n.id, text: n.text, left: n.left_pos, top: n.top_pos }));
+    const notes = await fetch("/api/load_board").then(res => res.json());
+    notes.forEach(note => {
+        createNote(note.id, note.text, note.left, note.top, note.color);
+    });
 }
 
-// Create a note element
-function createNote({ id = null, text, left, top }) {
+function createNote(id = null, text, left, top, color) {
     if (id) {
-        const existing = document.querySelector(`.note[data-id='${id}']`);
-        if (existing) return existing;
+        const existingNote = document.querySelector(`#board [data-id='${id}']`);
+        if (existingNote) return existingNote;
     }
 
     const note = document.createElement("div");
     note.className = "note";
-    note.textContent = text;
-    note.dataset.id = id || "";
+    note.textContent = text || "";
     note.style.left = left + "px";
     note.style.top = top + "px";
+    note.style.backgroundColor = color || "#fff8a6";
+
+    note.dataset.id = id || "";
+    note.dataset.color = color || "#fff8a6";
 
     board.appendChild(note);
-    attachDragging(note);
-    attachEditing(note);
-    attachContextMenu(note);
+    makeNoteDraggable(note);
+    makeNoteEditable(note);
+    makeNoteContextMenu(note);
 
-    if (!id) saveNoteToServer(note, null).then(saved => { if (saved) note.dataset.id = saved.id; });
+    if (!id) saveNoteToServer(note, null).then(res => {
+        if (res && res.ok) note.dataset.id = res.id;
+    });
     return note;
 }
 
-// Enable drag-and-drop with grid snapping
-function attachDragging(note) {
+function makeNoteDraggable(note) {
     let isDragging = false;
     note.dataset.isDragging = "false";
 
-    note.addEventListener("pointerdown", e => {
+    note.addEventListener("pointerdown", (e) => {
         if (note.querySelector("textarea")) return;
 
         note.setPointerCapture(e.pointerId);
-        const startX = note.offsetLeft, startY = note.offsetTop;
-        const offsetX = e.clientX - startX, offsetY = e.clientY - startY;
+
+        const startX = note.offsetLeft;
+        const startY = note.offsetTop;
+        const offsetX = e.clientX - startX;
+        const offsetY = e.clientY - startY;
 
         function moveHandler(e) {
             isDragging = true;
@@ -123,20 +122,29 @@ function attachDragging(note) {
             note.style.top = (e.clientY - offsetY) + "px";
         }
 
-        function upHandler() {
+        function upHandler(e) {
             note.removeEventListener("pointermove", moveHandler);
             note.removeEventListener("pointerup", upHandler);
             note.releasePointerCapture(e.pointerId);
 
-            // Snap note to grid
-            let snappedX = Math.min(board.offsetWidth - note.offsetWidth, Math.max(0, Math.round(note.offsetLeft / GRID_SIZE) * GRID_SIZE));
-            let snappedY = Math.min(board.offsetHeight - note.offsetHeight, Math.max(0, Math.round(note.offsetTop / GRID_SIZE) * GRID_SIZE));
+            const snap = (v, max) =>
+                Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
+
+            const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
+            const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
+
             note.style.left = snappedX + "px";
             note.style.top = snappedY + "px";
 
-            if (snappedX !== startX || snappedY !== startY) saveNoteToServer(note, note.dataset.id, { x: startX, y: startY });
-            isDragging = false;
-            note.dataset.isDragging = "false";
+            if (isDragging) {
+                isDragging = false;
+                note.dataset.isDragging = "false";
+                saveNoteToServer(
+                    note,
+                    note.dataset.id,
+                    { left: startX, top: startY }
+                );
+            }
         }
 
         note.addEventListener("pointermove", moveHandler);
@@ -144,106 +152,115 @@ function attachDragging(note) {
     });
 }
 
-// Enable editing on double click
-function attachEditing(note) {
+function makeNoteEditable(note) {
     note.addEventListener("dblclick", () => {
+        if (note.dataset.isDragging === "true") return;
         if (note.querySelector("textarea")) return;
-        const originalText = note.textContent;
 
         const noteWidth = note.offsetWidth;
         const textarea = document.createElement("textarea");
-        textarea.classList.add("note-input-textarea");
         textarea.style.width = noteWidth + "px";
-        textarea.value = originalText;
-        note.innerHTML = "";
+        textarea.value = note.textContent;
+        note.textContent = "";
         note.appendChild(textarea);
         textarea.focus();
 
-        // Auto resize textarea as user types
         const autoResize = () => {
             textarea.style.height = "auto";
-            textarea.style.height = textarea.scrollHeight + "px";
+            textarea.style.height = (textarea.scrollHeight) + "px";
         };
-        autoResize();
         textarea.addEventListener("input", autoResize);
+        autoResize();
 
-        textarea.addEventListener("blur", async () => {
-            note.textContent = textarea.value || " ";
-            const saved = await saveNoteToServer(note, note.dataset.id, null, originalText);
-            if (saved) note.dataset.id = saved.id;
+        textarea.addEventListener("blur", () => {
+            note.textContent = textarea.value;
+            saveNoteToServer(
+                note,
+                note.dataset.id,
+                null,
+                textarea.value
+            );
         });
 
-        textarea.addEventListener("keydown", e => { if (e.key === "Enter") e.stopPropagation(); });
+        textarea.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                textarea.blur();
+            }
+        });
     });
 }
 
-// Setup the right-click context menu
-function setupContextMenu() {
-    contextMenu = document.querySelector(".context-menu");
-    const deleteItem = document.getElementById("deleteNote");
-
-    const hoverEffect = e => {
-        deleteItem.style.backgroundColor = e.type === "mouseover" ? "#6c63ff" : "transparent";
-        deleteItem.style.color = e.type === "mouseover" ? "white" : "#333";
-    };
-    deleteItem.addEventListener("mouseover", hoverEffect);
-    deleteItem.addEventListener("mouseout", hoverEffect);
-
-    deleteItem.addEventListener("click", async () => {
-        if (contextNote) { await deleteNoteFromServer(contextNote.dataset.id); contextNote.remove(); hideContextMenu(); }
-    });
-
-    document.addEventListener("click", hideContextMenu);
-}
-
-// Attach context menu to a note
-function attachContextMenu(note) {
-    note.addEventListener("contextmenu", e => {
+function makeNoteContextMenu(note) {
+    note.addEventListener("contextmenu", (e) => {
         if (note.querySelector("textarea") || note.dataset.isDragging === "true") return;
         e.preventDefault();
-        showContextMenu(note, e.pageX, e.pageY);
+        showContextMenu(e.clientX, e.clientY, note);
     });
 
     let pressTimer;
-    note.addEventListener("touchstart", e => {
-        if (!note.querySelector("textarea"))
-            pressTimer = setTimeout(() => {
-                const touch = e.touches[0];
-                showContextMenu(note, touch.pageX, touch.pageY);
-            }, 600);
+    note.addEventListener("pointerdown", (e) => {
+        if (note.querySelector("textarea")) return;
+        pressTimer = setTimeout(() => {
+            showContextMenu(e.clientX, e.clientY, note);
+        }, 600);
     });
-    note.addEventListener("touchend", () => clearTimeout(pressTimer));
-    note.addEventListener("touchmove", () => clearTimeout(pressTimer));
+
+    note.addEventListener("pointerup", () => clearTimeout(pressTimer));
+    note.addEventListener("pointerleave", () => clearTimeout(pressTimer));
 }
 
-// Show the context menu at specific coordinates
-function showContextMenu(note, x, y) {
+function setupContextMenu() {
+    contextMenu = document.getElementById("context-menu");
+    const deleteContext = document.getElementById("contextDelete");
+
+    const hoverEffect = (item) => {
+        item.addEventListener("pointerover", () => {
+            item.style.backgroundColor = "#e0e0e0";
+        });
+        item.addEventListener("pointerout", () => {
+            item.style.backgroundColor = "transparent";
+        });
+    };
+    hoverEffect(deleteContext);
+
+    deleteContext.addEventListener("click", async () => {
+        if (contextNote) {
+            await deleteNoteFromServer(contextNote.dataset.id);
+            contextNote.remove();
+            hideContextMenu();
+        }
+    });
+
+    document.addEventListener("click", () => hideContextMenu());
+}
+
+function showContextMenu(x, y, note) {
     contextNote = note;
     contextMenu.style.left = x + "px";
     contextMenu.style.top = y + "px";
     contextMenu.style.display = "block";
 }
 
-// Hide the context menu
 function hideContextMenu() {
+    contextMenu.style.display = "none";
     contextNote = null;
-    if (contextMenu) contextMenu.style.display = "none";
 }
 
-// Setup real-time updates via Supabase
 function setupRealtime(client) {
-    const handleChange = (payload) => {
-        const n = payload.new || payload.old;
-        const existing = document.querySelector(`.note[data-id='${n.id}']`);
-        if (payload.eventType === "DELETE") existing?.remove();
-        else if (payload.eventType === "INSERT") createNote({ id: n.id, text: n.text, left: n.left_pos, top: n.top_pos });
-        else if (payload.eventType === "UPDATE" && existing && !existing.querySelector("textarea")) {
-            existing.textContent = n.text;
-            existing.style.left = n.left_pos + "px";
-            existing.style.top = n.top_pos + "px";
+    const handleChange = (data) => {
+        const note = data.new || data.old;
+        const existingNote = document.querySelector(`.note[data-id='${note.id}']`);
+        if (data.eventType === "DELETE") existingNote?.remove();
+        else if (data.eventType === "INSERT") createNote(note.id, note.text, note.left, note.top, note.color);
+        else if (data.eventType === "UPDATE" && existingNote && !existingNote.querySelector("textarea")) {
+            existingNote.textContent = note.text;
+            existingNote.style.left = note.left + "px";
+            existingNote.style.top = note.top + "px";
+            existingNote.style.backgroundColor = note.color;
+            existingNote.dataset.color = note.color;
         }
     };
-
     client.channel("public:board")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "board" }, handleChange)
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "board" }, handleChange)
@@ -251,7 +268,67 @@ function setupRealtime(client) {
         .subscribe();
 }
 
-// Initialize board after DOM loads
+function setupChangeColorDropdown() {
+    const changeColorBtn = document.getElementById("changeColor");
+    const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF",];
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "color-dropdown";
+
+    colors.forEach(color => {
+        const colorOption = document.createElement("div");
+        colorOption.className = "color-option";
+        colorOption.style.backgroundColor = color;
+
+        colorOption.addEventListener("click", async () => {
+            if (!contextNote) return;
+
+            contextNote.style.backgroundColor = color;
+            contextNote.dataset.color = color;
+
+            const body = {
+                id: contextNote.dataset.id,
+                color: color,
+                inputPassword: window.boardPassword || "",
+            }
+
+            const response = await fetch("/api/save_board", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+
+            if (response.status === 403) {
+                contextNote.style.backgroundColor = contextNote.dataset.color;
+                return retryWithPassword(() => {
+                    contextNote.style.backgroundColor = color;
+                    contextNote.dataset.color = color;
+                    return fetch("/api/save_board", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                    });
+                });
+            }
+
+            hideContextMenu();
+        });
+        dropdown.appendChild(colorOption);
+    });
+    changeColorBtn.appendChild(dropdown);
+
+    changeColorBtn.addEventListener("click", (e) => {
+        if (!contextNote) return;
+        dropdown.style.left = e.clientX + "px";
+        dropdown.style.top = e.clientY + "px";
+        dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", () => {
+        dropdown.style.display = "none";
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     board = document.getElementById("board");
     input = document.getElementById("noteInput");
@@ -263,22 +340,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadPassword();
     setupContextMenu();
+    setupChangeColorDropdown();
 
-    document.getElementById("addBtn").addEventListener("click", () => {
+    document.getElementById("addNote").addEventListener("click", () => {
         const text = input.value;
-        if (!text) return;
-        createNote({ text, left: Math.random() * (board.offsetWidth - 150), top: Math.random() * (board.offsetHeight - 150) });
+        if (!text.trim()) return;
+
+        createNote(null, text, 50, 50);
         input.value = "";
     });
 
-    document.getElementById("clearBtn").addEventListener("click", async () => {
-        if (!confirm("Delete ALL notes?")) return;
-        for (const note of document.querySelectorAll(".note")) await deleteNoteFromServer(note.dataset.id);
-        board.innerHTML = "";
+    document.getElementById("clearNotes").addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete all notes?")) return;
+        for (const note of document.querySelectorAll(".note")) {
+            await deleteNoteFromServer(note.dataset.id);
+            note.remove();
+        }
     });
 
-    setupRealtime(supabaseClient);
     loadNotes();
+    setupRealtime(supabaseClient);
 });
 
-window.addEventListener("focus", loadNotes);
+window.addEventListener("focus", () => loadNotes());

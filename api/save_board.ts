@@ -14,13 +14,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { id, text, left, top, inputPassword } = req.body;
+    const { id, text, left, top, color, inputPassword } = req.body;
 
     if (inputPassword !== PASSWORD) {
         return res.status(403).json({ error: '403 Forbidden' });
     }
 
-    if (text === undefined || left === undefined || top === undefined) {
+    if (text === undefined || left === undefined || top === undefined || color === undefined) {
         return res.status(400).json({ error: 'Invalid request body' });
     }
 
@@ -31,8 +31,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .from('board')
             .update({
                 text,
-                left_pos: left,
-                top_pos: top,
+                left,
+                top,
+                color,
                 updated_at: new Date().toISOString(),
             })
             .eq('id', id)
@@ -42,8 +43,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .from('board')
             .insert({
                 text,
-                left_pos: left,
-                top_pos: top,
+                left,
+                top,
+                color,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })

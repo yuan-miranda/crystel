@@ -134,3 +134,22 @@ body {
     background-color: #6c63ff;
     color: white;
 }
+
+.color-dropdown {
+    position: absolute;
+    display: none;
+    padding: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.color-dropdown .color-option {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+    display: inline-block;
+    cursor: pointer;
+}
