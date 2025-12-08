@@ -204,20 +204,12 @@ function setupContextMenu() {
     deleteContext.addEventListener("mouseout", hoverEffect);
 
     deleteContext.addEventListener("click", async () => {
-        const noteToDelete = contextNote; // store reference
-        if (!noteToDelete) return;        // safely exit if null
-        
-        await deleteNoteFromServer(noteToDelete.dataset.id);
-        noteToDelete.remove();
-        hideContextMenu();
+        if (contextNote) {
+            await deleteNoteFromServer(contextNote.dataset.id);
+            contextNote.remove();
+            hideContextMenu();
+        }
     });
-
-    //     deleteItem.addEventListener("click", async () => {
-    //     if (contextNote) { await deleteNoteFromServer(contextNote.dataset.id); contextNote.remove(); hideContextMenu(); }
-    // });
-
-    // document.addEventListener("click", hideContextMenu);
-
     document.addEventListener("click", () => hideContextMenu());
 }
 
