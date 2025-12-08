@@ -204,10 +204,11 @@ function setupContextMenu() {
     deleteContext.addEventListener("mouseout", hoverEffect);
 
     deleteContext.addEventListener("click", async () => {
-        if (!contextNote) return;
-
-        await deleteNoteFromServer(contextNote.dataset.id);
-        contextNote.remove();
+        const noteToDelete = contextNote; // store reference
+        if (!noteToDelete) return;        // safely exit if null
+        
+        await deleteNoteFromServer(noteToDelete.dataset.id);
+        noteToDelete.remove();
         hideContextMenu();
     });
 
