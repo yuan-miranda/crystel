@@ -204,6 +204,11 @@ function setupContextMenu() {
     deleteContext.addEventListener("mouseout", hoverEffect);
 
     deleteContext.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete this note?")) {
+            hideContextMenu();
+            return;
+        }
+
         // for some reason this works better than passing contextNote directly
         // what the fuck
         const noteToDelete = contextNote;
