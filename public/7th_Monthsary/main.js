@@ -210,7 +210,7 @@ function setupContextMenu() {
             hideContextMenu();
         }
     });
-    document.addEventListener("click", () => hideContextMenu());
+    document.addEventListener("click", hideContextMenu);
 }
 
 function makeNoteContextMenu(note) {
