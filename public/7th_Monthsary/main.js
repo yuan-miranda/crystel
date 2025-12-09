@@ -153,8 +153,7 @@ function makeNoteDraggable(note) {
 
 function makeNoteEditable(note) {
     note.addEventListener("dblclick", () => {
-        const leftover = note.querySelector("textarea");
-        if (leftover) leftover.remove();
+        if (note.querySelector("textarea")) return;
 
         const noteWidth = note.offsetWidth;
         const textarea = document.createElement("textarea");
