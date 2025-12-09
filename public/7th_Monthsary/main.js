@@ -77,7 +77,7 @@ async function loadNotes() {
     });
 }
 
-function createNote({ id = null, text, left, top, color }) {
+function createNote({ id = null, text, left, top, color, local = false }) {
     const tempId = id || `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const existingNote = document.querySelector(`#board [data-id='${id || tempId}']`);
     if (existingNote) return existingNote;
@@ -92,13 +92,18 @@ function createNote({ id = null, text, left, top, color }) {
     note.dataset.id = id || tempId;
     note.dataset.color = color || "#FFF8A6";
 
+    if (local) note.dataset.local = "true";
+
     board.appendChild(note);
     makeNoteDraggable(note);
     makeNoteEditable(note);
     makeNoteContextMenu(note);
 
     if (!id) saveNoteToServer(note, null).then(res => {
-        if (res) note.dataset.id = res.id;
+        if (res) {
+            note.dataset.id = res.id;
+            delete note.dataset.local;
+        }
     });
     return note;
 }
@@ -265,8 +270,19 @@ function setupRealtime(client) {
         if (payload.eventType === "DELETE" && payload.old) {
             const existingNote = document.querySelector(`.note[data-id='${payload.old.id}']`);
             existingNote?.remove();
+
         } else if (payload.eventType === "INSERT" && payload.new) {
-            createNote({ id: payload.new.id, text: payload.new.text, left: payload.new.left, top: payload.new.top, color: payload.new.color });
+            const localNote = document.querySelector(`.note[data-local='true']`);
+            if (localNote && localNote.dataset.id == payload.new.id) return;
+
+            createNote({
+                id: payload.new.id,
+                text: payload.new.text,
+                left: payload.new.left,
+                top: payload.new.top,
+                color: payload.new.color
+            })
+
         } else if (payload.eventType === "UPDATE" && payload.new) {
             const existingNote = document.querySelector(`.note[data-id='${payload.new.id}']`);
             if (existingNote && !existingNote.querySelector("textarea")) {
@@ -346,7 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote({ text, left: 50, top: 50 });
+        createNote({ text, left: 50, top: 50, color: "#FFF8A6", local: true });
         input.value = "";
     });
 
