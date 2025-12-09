@@ -40,10 +40,10 @@ body {
 
 .note-input-textarea {
     border: none;
+    outline: none;
     background: transparent;
     resize: none;
     font-family: inherit;
-    overflow: hidden;
 }
 
 #noteInput:focus {
@@ -94,8 +94,7 @@ body {
 .note {
     position: absolute;
     padding: 10px;
-    min-width: auto;
-    max-width: 1024px;
+    max-width: 512px;
     background: #fff8a6;
     border: 1px solid #e1d374;
     border-radius: 8px;
@@ -105,10 +104,15 @@ body {
     word-break: break-word;
     white-space: pre-wrap;
     touch-action: none;
+    transition: box-shadow 0.3s ease;
 }
 
 .note:active {
     cursor: grabbing;
+}
+
+.note:hover {
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #contextMenu {
