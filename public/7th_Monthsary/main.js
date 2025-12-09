@@ -29,7 +29,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
         text: note.textContent,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
-        color: note.dataset.color || "#ffff88",
+        color: note.dataset.color || "#FFF8A6",
         inputPassword: window.boardPassword || "",
     }
 
@@ -87,10 +87,10 @@ function createNote({ id = null, text, left, top, color }) {
     note.textContent = text || "";
     note.style.left = left + "px";
     note.style.top = top + "px";
-    note.style.backgroundColor = color || "#fff8a6";
+    note.style.backgroundColor = color || "#FFF8A6";
 
     note.dataset.id = id || tempId;
-    note.dataset.color = color || "#fff8a6";
+    note.dataset.color = color || "#FFF8A6";
 
     board.appendChild(note);
     makeNoteDraggable(note);

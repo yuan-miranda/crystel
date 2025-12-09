@@ -10,7 +10,7 @@ html {
     height: 100vh;
     overflow: hidden;
     font-size: 14px;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
 }
 
@@ -95,8 +95,7 @@ body {
     position: absolute;
     padding: 10px;
     max-width: 512px;
-    background: #fff8a6;
-    border: 1px solid #e1d374;
+    border: 1px solid black;
     border-radius: 8px;
     box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
     cursor: grab;
