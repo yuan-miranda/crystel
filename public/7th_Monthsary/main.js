@@ -26,7 +26,7 @@ async function retryWithPassword(action, rollback) {
 async function saveNoteToServer(note, id, restorePos = null, restoreContent = null) {
     const body = {
         id: id,
-        ref_id: note.dataset.refId,
+        refId: note.dataset.refId,
         text: note.textContent,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
