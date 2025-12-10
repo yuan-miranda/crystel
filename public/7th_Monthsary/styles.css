@@ -81,7 +81,7 @@ body {
 
     /* Dot grid */
     background-image:
-        radial-gradient(circle, #cfcfcf 1.5px, transparent 1.5px);
+        radial-gradient(circle, #999 1.5px, transparent 1.5px);
     background-size: 32px 32px;
     background-position: 0 0;
     background-repeat: repeat;

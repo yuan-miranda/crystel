@@ -312,7 +312,7 @@ function setupRealtime(client) {
 }
 
 function setupChangeColorDropdown() {
-    const changeColorBtn = document.getElementById("changeColor"); // inside context menu
+    const changeColorBtn = document.getElementById("changeColor");
     const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF"];
 
     colorDropdown = document.createElement("div");
@@ -341,12 +341,12 @@ function setupChangeColorDropdown() {
     document.body.appendChild(colorDropdown);
 
     changeColorBtn.addEventListener("click", (e) => {
-        e.stopPropagation(); // prevent document click
+        e.stopPropagation();
         if (!contextNote) return;
 
         const rect = changeColorBtn.getBoundingClientRect();
-        colorDropdown.style.left = (rect.right + 2) + "px"; // show to the right of the button
-        colorDropdown.style.top = (rect.top - 2) + "px";    // align top
+        colorDropdown.style.left = (rect.right + 2) + "px";
+        colorDropdown.style.top = (rect.top - 2) + "px";
         colorDropdown.style.display = "flex";
     });
 
@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote({ text, left: 50, top: 50, color: "#FFF8A6" });
+        createNote({ text, left: 32, top: 32, color: "#FFF8A6" });
         input.value = "";
     });
 
