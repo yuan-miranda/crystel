@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { id, text, left, top, color, inputPassword } = req.body;
+    const { id, refId, text, left, top, color, inputPassword } = req.body;
 
     if (inputPassword !== PASSWORD) {
         return res.status(403).json({ error: '403 Forbidden' });
@@ -46,6 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 left,
                 top,
                 color,
+                ref_id: refId,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })

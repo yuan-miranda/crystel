@@ -26,6 +26,7 @@ async function retryWithPassword(action, rollback) {
 async function saveNoteToServer(note, id, restorePos = null, restoreContent = null) {
     const body = {
         id: id,
+        ref_id: note.dataset.refId,
         text: note.textContent,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
@@ -73,39 +74,34 @@ async function deleteNoteFromServer(id) {
 async function loadNotes() {
     const notes = await fetch("/api/load_board").then(res => res.json());
     notes.forEach(note => {
-        createNote({ id: note.id, text: note.text, left: note.left, top: note.top, color: note.color });
+        createNote({ id: note.id, refId: note.ref_id, text: note.text, left: note.left, top: note.top, color: note.color });
     });
 }
 
-function createNote({ id = null, text, left, top, color, local = false }) {
-    const tempId = id || `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const existingNote = document.querySelector(`#board [data-id='${id || tempId}']`);
-    if (existingNote) return existingNote;
+function createNote({ id = null, refId = null, text, left, top, color }) {
+    const newNote = document.createElement("div");
+    newNote.className = "note";
+    newNote.textContent = text || "";
+    newNote.style.left = left + "px";
+    newNote.style.top = top + "px";
+    newNote.style.backgroundColor = color || "#FFF8A6";
 
-    const note = document.createElement("div");
-    note.className = "note";
-    note.textContent = text || "";
-    note.style.left = left + "px";
-    note.style.top = top + "px";
-    note.style.backgroundColor = color || "#FFF8A6";
+    newNote.dataset.refId = refId || crypto.randomUUID();
+    newNote.dataset.id = id;
+    newNote.dataset.color = color || "#FFF8A6";
 
-    note.dataset.id = id || tempId;
-    note.dataset.color = color || "#FFF8A6";
+    board.appendChild(newNote);
+    makeNoteDraggable(newNote);
+    makeNoteEditable(newNote);
+    makeNoteContextMenu(newNote);
 
-    if (local) note.dataset.local = "true";
-
-    board.appendChild(note);
-    makeNoteDraggable(note);
-    makeNoteEditable(note);
-    makeNoteContextMenu(note);
-
-    if (!id) saveNoteToServer(note, null).then(res => {
+    if (!id) saveNoteToServer(newNote, null).then(res => {
         if (res) {
-            note.dataset.id = res.id;
-            delete note.dataset.local;
+            newNote.dataset.id = res.id;
+            newNote.dataset.refId = res.ref_id;
         }
     });
-    return note;
+    return newNote;
 }
 
 function makeNoteDraggable(note) {
@@ -272,11 +268,18 @@ function setupRealtime(client) {
             existingNote?.remove();
 
         } else if (payload.eventType === "INSERT" && payload.new) {
-            const localNote = document.querySelector(`.note[data-local='true']`);
-            if (localNote && localNote.dataset.id == payload.new.id) return;
+            let existingNote = document.querySelector(`.note[data-id='${payload.new.id}']`);
+            if (existingNote) return;
+
+            existingNote = document.querySelector(`.note[data-ref-id='${payload.new.ref_id}']`);
+            if (existingNote) {
+                existingNote.dataset.id = payload.new.id;
+                return;
+            }
 
             createNote({
                 id: payload.new.id,
+                refId: payload.new.ref_id,
                 text: payload.new.text,
                 left: payload.new.left,
                 top: payload.new.top,
@@ -284,14 +287,18 @@ function setupRealtime(client) {
             })
 
         } else if (payload.eventType === "UPDATE" && payload.new) {
-            const existingNote = document.querySelector(`.note[data-id='${payload.new.id}']`);
-            if (existingNote && !existingNote.querySelector("textarea")) {
-                existingNote.textContent = payload.new.text;
-                existingNote.style.left = payload.new.left + "px";
-                existingNote.style.top = payload.new.top + "px";
-                existingNote.style.backgroundColor = payload.new.color;
-                existingNote.dataset.color = payload.new.color;
-            }
+            const existingNote =
+                document.querySelector(`.note[data-id='${payload.new.id}']`)
+                || document.querySelector(`.note[data-ref-id='${payload.new.ref_id}']`);
+            if (!existingNote) return;
+
+            if (existingNote.querySelector("textarea")) return;
+
+            existingNote.textContent = payload.new.text;
+            existingNote.style.left = payload.new.left + "px";
+            existingNote.style.top = payload.new.top + "px";
+            existingNote.style.backgroundColor = payload.new.color;
+            existingNote.dataset.color = payload.new.color;
         }
     };
     client.channel("public:board")
@@ -362,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote({ text, left: 50, top: 50, color: "#FFF8A6", local: true });
+        createNote({ text, left: 50, top: 50, color: "#FFF8A6" });
         input.value = "";
     });
 
