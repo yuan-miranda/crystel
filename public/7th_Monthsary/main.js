@@ -74,6 +74,9 @@ async function deleteNoteFromServer(id) {
 async function loadNotes() {
     const notes = await fetch("/api/load_board").then(res => res.json());
     notes.forEach(note => {
+        let existingNote = document.querySelector(`.note[data-id='${note.id}']`);
+        if (existingNote) return;
+
         createNote({ id: note.id, refId: note.ref_id, text: note.text, left: note.left, top: note.top, color: note.color });
     });
 }
