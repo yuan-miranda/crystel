@@ -159,30 +159,50 @@ function makeNoteEditable(note) {
     note.addEventListener("dblclick", () => {
         if (note.querySelector("textarea")) return;
 
-        const noteWidth = note.offsetWidth;
+        const initialWidth = note.offsetWidth;
+
         const textarea = document.createElement("textarea");
         textarea.classList.add("note-input-textarea");
-        textarea.style.width = noteWidth + "px";
         textarea.value = note.textContent;
         note.textContent = "";
+        textarea.spellcheck = false;
+
+        note.style.width = "auto";
+        textarea.style.width = (initialWidth - 21) + "px";
+
         note.appendChild(textarea);
         textarea.focus();
 
-        const autoResize = () => {
-            textarea.style.height = "auto";
+        const resizeHeight = () => {
             textarea.style.height = (textarea.scrollHeight) + "px";
         };
-        autoResize();
-        textarea.addEventListener("input", autoResize);
+        resizeHeight();
+
+        textarea.addEventListener("input", () => resizeHeight());
+
+        let savedWidth = initialWidth;
+        const observer = new ResizeObserver(() => {
+            savedWidth = textarea.offsetWidth;
+
+            if (textarea.scrollHeight > textarea.offsetHeight) {
+                textarea.style.height = textarea.scrollHeight + "px";
+            }
+        });
+        observer.observe(textarea);
 
         textarea.addEventListener("blur", () => {
             note.textContent = textarea.value;
+            note.style.width = (savedWidth + 21) + "px";
+
+            observer.unobserve(textarea);
+            textarea.remove();
             saveNoteToServer(note, note.dataset.id, null, textarea.value).then(saved => {
                 if (saved) note.dataset.id = saved.id;
             });
         });
 
         textarea.addEventListener("keydown", (e) => {
+
             if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 textarea.blur();
