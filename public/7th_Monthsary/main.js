@@ -119,50 +119,58 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
 
 function makeNoteDraggable(note) {
     let isDragging = false;
-    note.dataset.isDragging = "false";
+    let startX, startY, offsetX, offsetY;
 
-    note.addEventListener("pointerdown", (e) => {
+    const startDrag = (x, y) => {
+        startX = note.offsetLeft;
+        startY = note.offsetTop;
+        offsetX = x - startX;
+        offsetY = y - startY;
+        isDragging = true;
+        note.dataset.isDragging = "true";
+    };
+
+    const moveDrag = (x, y) => {
+        if (!isDragging) return;
+        note.style.left = (x - offsetX) + "px";
+        note.style.top = (y - offsetY) + "px";
+    };
+
+    const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        note.dataset.isDragging = "false";
+
+        const snap = (v, max) => Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
+        const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
+        const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
+        note.style.left = snappedX + "px";
+        note.style.top = snappedY + "px";
+
+        saveNoteToServer(note, note.dataset.id, { left: startX, top: startY });
+    };
+
+    // Mouse / pointer events
+    note.addEventListener("pointerdown", e => {
         if (note.querySelector("textarea")) return;
-
         note.setPointerCapture(e.pointerId);
-
-        const startX = note.offsetLeft;
-        const startY = note.offsetTop;
-        const offsetX = e.clientX - startX;
-        const offsetY = e.clientY - startY;
-
-        function moveHandler(e) {
-            isDragging = true;
-            note.dataset.isDragging = "true";
-            note.style.left = (e.clientX - offsetX) + "px";
-            note.style.top = (e.clientY - offsetY) + "px";
-        }
-
-        function upHandler(e) {
-            note.removeEventListener("pointermove", moveHandler);
-            note.removeEventListener("pointerup", upHandler);
-            note.releasePointerCapture(e.pointerId);
-
-            const snap = (v, max) =>
-                Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
-
-            const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
-            const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
-
-            note.style.left = snappedX + "px";
-            note.style.top = snappedY + "px";
-
-            isDragging = false;
-            note.dataset.isDragging = "false";
-
-            if (snappedX !== startX || snappedY !== startY) {
-                saveNoteToServer(note, note.dataset.id, { left: startX, top: startY })
-            }
-        }
-
-        note.addEventListener("pointermove", moveHandler);
-        note.addEventListener("pointerup", upHandler);
+        startDrag(e.clientX, e.clientY);
     });
+    note.addEventListener("pointermove", e => moveDrag(e.clientX, e.clientY));
+    note.addEventListener("pointerup", endDrag);
+
+    // Touch fallback for mobile
+    note.addEventListener("touchstart", e => {
+        if (note.querySelector("textarea")) return;
+        const touch = e.touches[0];
+        startDrag(touch.pageX, touch.pageY);
+    });
+    note.addEventListener("touchmove", e => {
+        const touch = e.touches[0];
+        moveDrag(touch.pageX, touch.pageY);
+        e.preventDefault(); // Prevent scrolling while dragging
+    }, { passive: false });
+    note.addEventListener("touchend", endDrag);
 }
 
 function makeNoteEditable(note) {
