@@ -415,6 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setupRealtime(supabaseClient);
+    loadNotes();
 });
 
 window.addEventListener("focus", () => loadNotes());
