@@ -1,6 +1,14 @@
 const GRID_SIZE = 32;
 let board, input, contextMenu, colorDropdown, contextNote;
 
+const ceilElementWidth = (element) => {
+    requestAnimationFrame(() => {
+        const rect = element.getBoundingClientRect();
+        const width = Math.ceil(rect.width);
+        element.style.width = width + "px";
+    });
+}
+
 function loadPassword() {
     const password = localStorage.getItem("boardPassword") || prompt("Enter board password (for editing) else ignore this:") || "";
     localStorage.setItem("boardPassword", password);
@@ -94,6 +102,8 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
     newNote.dataset.color = color || "#FFF8A6";
 
     board.appendChild(newNote);
+    ceilElementWidth(newNote);
+
     makeNoteDraggable(newNote);
     makeNoteEditable(newNote);
     makeNoteContextMenu(newNote);
@@ -168,7 +178,7 @@ function makeNoteEditable(note) {
         textarea.spellcheck = false;
 
         note.style.width = "auto";
-        textarea.style.width = (initialWidth - 21) + "px";
+        textarea.style.width = (initialWidth - 22) + "px";
 
         note.appendChild(textarea);
         textarea.focus();
@@ -182,7 +192,7 @@ function makeNoteEditable(note) {
 
         let savedWidth = initialWidth;
         const observer = new ResizeObserver(() => {
-            savedWidth = textarea.offsetWidth;
+            savedWidth = Math.ceil(textarea.getBoundingClientRect().width);
 
             if (textarea.scrollHeight > textarea.offsetHeight) {
                 textarea.style.height = textarea.scrollHeight + "px";
@@ -192,7 +202,7 @@ function makeNoteEditable(note) {
 
         textarea.addEventListener("blur", () => {
             note.textContent = textarea.value;
-            note.style.width = (savedWidth + 21) + "px";
+            note.style.width = (savedWidth + 22) + "px";
 
             observer.unobserve(textarea);
             textarea.remove();
@@ -405,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setupRealtime(supabaseClient);
-    loadNotes();
 });
 
 window.addEventListener("focus", () => loadNotes());
+window.addEventListener("resize", () => location.reload());
