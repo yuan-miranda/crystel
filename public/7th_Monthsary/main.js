@@ -1,12 +1,12 @@
 const GRID_SIZE = 32;
 let board, input, contextMenu, colorDropdown, contextNote;
 
-const ceilElementWidth = (element) => {
-    requestAnimationFrame(() => {
-        const rect = element.getBoundingClientRect();
-        const width = Math.ceil(rect.width);
-        element.style.width = width + "px";
-    });
+let idleTimeout = null;
+const IDLE_TIME = 1 * 60 * 1000;
+
+function resetIdleTimer() {
+    if (idleTimeout) clearTimeout(idleTimeout);
+    idleTimeout = setTimeout(() => alert(`Ayo bro you still there? You have been idle for ${IDLE_TIME / 1000 / 60} minutes.`), IDLE_TIME);
 }
 
 function loadPassword() {
@@ -102,7 +102,6 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
     newNote.dataset.color = color || "#FFF8A6";
 
     board.appendChild(newNote);
-    ceilElementWidth(newNote);
 
     makeNoteDraggable(newNote);
     makeNoteEditable(newNote);
@@ -427,4 +426,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("focus", () => loadNotes());
-window.addEventListener("resize", () => location.reload());
+
+resetIdleTimer();
+['mousemove', 'mousedown', 'keydown', 'touchstart', 'touchmove'].forEach(e => {
+    window.addEventListener(e, resetIdleTimer, { passive: true });
+});
