@@ -88,16 +88,29 @@ async function loadNotes() {
         let existingNote = document.querySelector(`.note[data-id='${note.id}']`);
         if (existingNote) return;
 
-        createNote({ id: note.id, refId: note.ref_id, text: note.text, left: note.left, top: note.top, color: note.color });
+        createNote({
+            id: note.id,
+            refId: note.ref_id,
+            text: note.text,
+            left: note.left,
+            top: note.top,
+            width: note.width,
+            height: note.height,
+            color: note.color
+        });
     });
 }
 
-function createNote({ id = null, refId = null, text, left, top, color }) {
+function createNote({ id = null, refId = null, text, left, top, width, height, color }) {
     const newNote = document.createElement("div");
     newNote.className = "note";
     newNote.dataset.text = text || "";
     newNote.style.left = left + "px";
     newNote.style.top = top + "px";
+    // newNote.style.width = width + "px";
+    // newNote.style.height = height + "px";
+    newNote.dataset.width = width;
+    newNote.dataset.height = height;
     newNote.style.backgroundColor = color || "#FFF8A6";
 
     newNote.dataset.refId = refId || crypto.randomUUID();
@@ -146,8 +159,9 @@ const disableEditing = (note) => {
 function makeNoteEditable(note) {
     const textarea = document.createElement("textarea");
     textarea.value = note.dataset.text;
+    textarea.style.width = (note.dataset.width || 256) + "px";
+    textarea.style.height = (note.dataset.height || 64) + "px";
     textarea.spellcheck = false;
-    textarea.rows = 1;
 
     note.appendChild(textarea);
     disableEditing(note);
@@ -171,6 +185,10 @@ function makeNoteEditable(note) {
         if (note.dataset.text === textarea.value) return disableEditing(note);
 
         note.dataset.text = textarea.value;
+        // note.style.width = textarea.offsetWidth + "px";
+        // note.style.height = textarea.offsetHeight + "px";
+        note.dataset.width = textarea.offsetWidth;
+        note.dataset.height = textarea.offsetHeight;
         disableEditing(note);
 
         saveNoteToServer(note, note.dataset.id, null, textarea.value)
@@ -402,6 +420,8 @@ function setupRealtime(client) {
                 text: payload.new.text,
                 left: payload.new.left,
                 top: payload.new.top,
+                width: payload.new.width,
+                height: payload.new.height,
                 color: payload.new.color
             })
 
@@ -418,6 +438,10 @@ function setupRealtime(client) {
 
             existingNote.style.left = payload.new.left + "px";
             existingNote.style.top = payload.new.top + "px";
+            // existingNote.style.width = payload.new.width + "px";
+            // existingNote.style.height = payload.new.height + "px";
+            existingNote.dataset.width = payload.new.width;
+            existingNote.dataset.height = payload.new.height;
             existingNote.style.backgroundColor = payload.new.color;
             existingNote.dataset.color = payload.new.color;
         }
@@ -445,7 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote({ text, left: 32, top: 32, color: "#FFF8A6" });
+        createNote({ text, left: 32, top: 32, width: 256, height: 64, color: "#FFF8A6" });
         input.value = "";
     });
 
