@@ -170,6 +170,9 @@ function makeNoteEditable(note) {
     const resizeHeight = () => {
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
+
+        note.dataset.width = textarea.offsetWidth;
+        note.dataset.height = textarea.offsetHeight;
     };
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
@@ -178,6 +181,8 @@ function makeNoteEditable(note) {
         if (textarea.scrollHeight > textarea.offsetHeight) {
             textarea.style.height = textarea.scrollHeight + "px";
         }
+        note.dataset.width = textarea.offsetWidth;
+        note.dataset.height = textarea.offsetHeight;
     });
     observer.observe(textarea);
 
