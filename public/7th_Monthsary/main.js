@@ -190,7 +190,6 @@ function makeNoteDraggable(note) {
     let originLeft, originTop;
     let offsetX, offsetY;
     let activePointerId = null;
-
     const DRAG_THRESHOLD = 8;
 
     overlay.addEventListener("pointerdown", e => {
@@ -220,9 +219,7 @@ function makeNoteDraggable(note) {
         const dy = e.clientY - startY;
 
         if (!isDragging) {
-            if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
-                return;
-            }
+            if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
             isDragging = true;
             note.dataset.isDragging = "true";
         }
@@ -233,11 +230,7 @@ function makeNoteDraggable(note) {
 
     const endDrag = e => {
         if (activePointerId !== e.pointerId) return;
-
-        if (overlay.hasPointerCapture(activePointerId)) {
-            overlay.releasePointerCapture(activePointerId);
-        }
-
+        if (overlay.hasPointerCapture(activePointerId)) overlay.releasePointerCapture(activePointerId);
         activePointerId = null;
 
         if (!isDragging) {
@@ -261,12 +254,7 @@ function makeNoteDraggable(note) {
         note.style.left = snappedX + "px";
         note.style.top = snappedY + "px";
 
-        if (moved) {
-            saveNoteToServer(note, note.dataset.id, {
-                left: originLeft,
-                top: originTop
-            });
-        }
+        if (moved) saveNoteToServer(note, note.dataset.id, { left: originLeft, top: originTop });
     };
 
     overlay.addEventListener("pointerup", endDrag);
