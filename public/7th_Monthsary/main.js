@@ -162,6 +162,7 @@ function makeNoteEditable(note) {
     textarea.style.width = (note.dataset.width || 256) + "px";
     textarea.style.height = (note.dataset.height || 64) + "px";
     textarea.spellcheck = false;
+    textarea.rows = 1;
 
     note.appendChild(textarea);
     disableEditing(note);
