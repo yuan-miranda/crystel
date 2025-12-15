@@ -233,17 +233,17 @@ function makeNoteDraggable(note) {
     overlay.addEventListener("pointerup", endDrag);
 
     // touch fallback for mobile
-    overlay.addEventListener("touchstart", e => {
-        if (isEditing) return;
-        const touch = e.touches[0];
-        startDrag(touch.pageX, touch.pageY);
-    });
-    overlay.addEventListener("touchmove", e => {
-        const touch = e.touches[0];
-        moveDrag(touch.pageX, touch.pageY);
-        e.preventDefault();
-    }, { passive: false });
-    overlay.addEventListener("touchend", endDrag);
+    // overlay.addEventListener("touchstart", e => {
+    //     if (isEditing) return;
+    //     const touch = e.touches[0];
+    //     startDrag(touch.pageX, touch.pageY);
+    // });
+    // overlay.addEventListener("touchmove", e => {
+    //     const touch = e.touches[0];
+    //     moveDrag(touch.pageX, touch.pageY);
+    //     e.preventDefault();
+    // }, { passive: false });
+    // overlay.addEventListener("touchend", endDrag);
 }
 
 function setupContextMenu() {
