@@ -1,10 +1,20 @@
+// GRID_SIZE is responsible for snapping notes to grid when dragging (refer to "#board" CSS)
 const GRID_SIZE = 32;
-const PADDING = 20;
+
+// SNAP_SIZE is just a value that I liked because it is divisible by GRID_SIZE
+const SNAP_SIZE = 8;
+
+// PADDING came from the padding: 8px; in ".note" CSS (8px * 2)
+// its used here because the textarea inside the note is smaller than the note itself
+// and ex: 256x64 .note will have a 240x48 textarea inside rather than 256x64 > 272x80 .note
+const PADDING = 16;
+
+// Some global variables I didnt bother putting inside a class or something
 let board, input, contextMenu, colorDropdown, contextNote;
 let isEditing = false;
-let idleTimeout = null;
-const IDLE_TIME = 1 * 60 * 1000;
 
+const IDLE_TIME = 1 * 60 * 1000;
+let idleTimeout = null;
 function resetIdleTimer() {
     if (idleTimeout) clearTimeout(idleTimeout);
     idleTimeout = setTimeout(() => alert(`Ayo bro you still there? You have been idle for ${IDLE_TIME / 1000 / 60} minutes.`), IDLE_TIME);
@@ -118,9 +128,16 @@ function createNote({ id = null, refId = null, text, left, top, width, height, c
     newNote.dataset.id = id;
     newNote.dataset.color = color || "#FFF8A6";
 
+    const textarea = document.createElement("textarea");
+    textarea.value = newNote.dataset.text;
+    textarea.style.width = (newNote.dataset.width || 256 - PADDING) + "px";
+    textarea.style.height = (newNote.dataset.height || 64 - PADDING) + "px";
+    textarea.spellcheck = false;
+
     const overlay = document.createElement("div");
     overlay.className = "overlay";
 
+    newNote.appendChild(textarea);
     newNote.appendChild(overlay);
     board.appendChild(newNote);
     makeNoteDraggable(newNote);
@@ -158,23 +175,24 @@ const disableEditing = (note) => {
 }
 
 function makeNoteEditable(note) {
-    const textarea = document.createElement("textarea");
-    textarea.value = note.dataset.text;
-    textarea.style.width = (note.dataset.width || 256 - PADDING) + "px";
-    textarea.style.height = (note.dataset.height || 64 - PADDING) + "px";
-    textarea.spellcheck = false;
-
-    note.appendChild(textarea);
+    const textarea = note.querySelector("textarea");
     disableEditing(note);
 
     const resizeHeight = () => {
-        // textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
 
     const observer = new ResizeObserver(() => {
+        const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
+
+        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, GRID_SIZE);
+        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, GRID_SIZE);
+
+        textarea.style.width = (newWidth - PADDING) + "px";
+        textarea.style.height = (newHeight - PADDING) + "px";
+
         if (textarea.scrollHeight > textarea.offsetHeight) {
             textarea.style.height = textarea.scrollHeight + "px";
         }
@@ -212,7 +230,7 @@ function makeNoteDraggable(note) {
     let originLeft, originTop;
     let offsetX, offsetY;
     let activePointerId = null;
-    const DRAG_THRESHOLD = 8;
+    const DRAG_THRESHOLD = SNAP_SIZE;
 
     overlay.addEventListener("pointerdown", e => {
         if (isEditing) return;
@@ -263,12 +281,11 @@ function makeNoteDraggable(note) {
         isDragging = false;
         note.dataset.isDragging = "false";
 
-        const snap = (v, max) =>
+        const gridSnap = (v, max) =>
             Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
 
-        const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
-        const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
-
+        const snappedX = gridSnap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
+        const snappedY = gridSnap(note.offsetTop, board.offsetHeight - note.offsetHeight);
         const moved =
             snappedX !== originLeft ||
             snappedY !== originTop;
