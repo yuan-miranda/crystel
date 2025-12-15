@@ -41,6 +41,8 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
         text: note.dataset.text,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
+        width: parseInt(note.dataset.width) || 256,
+        height: parseInt(note.dataset.height) || 64,
         color: note.dataset.color || "#FFF8A6",
         inputPassword: window.boardPassword || "",
     }
