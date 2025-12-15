@@ -1,4 +1,5 @@
 const GRID_SIZE = 32;
+const PADDING = 20;
 let board, input, contextMenu, colorDropdown, contextNote;
 let isEditing = false;
 let idleTimeout = null;
@@ -41,8 +42,8 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
         text: note.dataset.text,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
-        width: parseInt(note.dataset.width) || 256,
-        height: parseInt(note.dataset.height) || 64,
+        width: parseInt(note.dataset.width) || 256 - PADDING,
+        height: parseInt(note.dataset.height) || 64 - PADDING,
         color: note.dataset.color || "#FFF8A6",
         inputPassword: window.boardPassword || "",
     }
@@ -159,20 +160,16 @@ const disableEditing = (note) => {
 function makeNoteEditable(note) {
     const textarea = document.createElement("textarea");
     textarea.value = note.dataset.text;
-    textarea.style.width = (note.dataset.width || 256) + "px";
-    textarea.style.height = (note.dataset.height || 64) + "px";
+    textarea.style.width = (note.dataset.width || 256 - PADDING) + "px";
+    textarea.style.height = (note.dataset.height || 64 - PADDING) + "px";
     textarea.spellcheck = false;
-    textarea.rows = 1;
 
     note.appendChild(textarea);
     disableEditing(note);
 
     const resizeHeight = () => {
-        textarea.style.height = "auto";
+        // textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
-
-        note.dataset.width = textarea.offsetWidth;
-        note.dataset.height = textarea.offsetHeight;
     };
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
@@ -181,8 +178,6 @@ function makeNoteEditable(note) {
         if (textarea.scrollHeight > textarea.offsetHeight) {
             textarea.style.height = textarea.scrollHeight + "px";
         }
-        note.dataset.width = textarea.offsetWidth;
-        note.dataset.height = textarea.offsetHeight;
     });
     observer.observe(textarea);
 
@@ -441,18 +436,18 @@ function setupRealtime(client) {
             if (!existingNote) return;
 
             const textarea = existingNote.querySelector("textarea");
+            if (textarea) textarea.value = payload.new.text;
 
             existingNote.dataset.text = payload.new.text;
-            if (textarea) textarea.value = payload.new.text;
 
             existingNote.style.left = payload.new.left + "px";
             existingNote.style.top = payload.new.top + "px";
 
-            textarea.style.width = (payload.new.width || 256) + "px";
-            textarea.style.height = (payload.new.height || 64) + "px";
+            textarea.style.width = (payload.new.width || 256 - PADDING) + "px";
+            textarea.style.height = (payload.new.height || 64 - PADDING) + "px";
             existingNote.dataset.width = payload.new.width;
             existingNote.dataset.height = payload.new.height;
-            
+
             existingNote.style.backgroundColor = payload.new.color;
             existingNote.dataset.color = payload.new.color;
         }
@@ -480,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = input.value;
         if (!text.trim()) return;
 
-        createNote({ text, left: 32, top: 32, width: 256, height: 64, color: "#FFF8A6" });
+        createNote({ text, left: 32, top: 32, width: 256 - PADDING, height: 64 - PADDING, color: "#FFF8A6" });
         input.value = "";
     });
 
