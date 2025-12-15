@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Textarea Overlay Demo</title>
 
     <style>
         * {
@@ -15,45 +14,53 @@
 
         html,
         body {
-            height: 100%;
             width: 100%;
+            height: 100%;
         }
 
         #container {
-            height: 100%;
             width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         #textareaDiv {
+            position: absolute;
             border: 2px solid black;
             padding: 10px;
-            display: inline-block;
             background-color: #FFF8A6;
             border-radius: 8px;
+            display: inline-block;
         }
 
         #textareaDiv textarea {
+            position: absolute;
+            z-index: 1;
             resize: both;
             overflow: auto;
-            /* min-width: 200px;
-            min-height: 120px; */
             max-width: 512px;
             outline: none;
             border: none;
             background-color: #FFF8A6;
             display: block;
         }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            background: transparent;
+            pointer-events: auto;
+        }
     </style>
 </head>
 
 <body>
-    <!-- HOLY FUCVK -->
-
     <div id="container">
         <div id="textareaDiv">
+            <div id="overlay" class="overlay"></div>
             <textarea id="editor" disabled></textarea>
         </div>
     </div>
@@ -61,8 +68,9 @@
     <script>
         const textarea = document.getElementById("editor");
         const wrapper = document.getElementById("textareaDiv");
-        const STORAGE_KEY = "textareaSize";
+        const overlay = document.getElementById("overlay");
 
+        const STORAGE_KEY = "textareaSize";
         const PADDING = 24;
 
         function syncWrapper() {
@@ -70,14 +78,23 @@
             wrapper.style.height = textarea.offsetHeight + PADDING + "px";
         }
 
-        // Load saved size
+        overlay.addEventListener("click", () => {
+            overlay.style.pointerEvents = "none";
+            textarea.disabled = false;
+            textarea.focus();
+        });
+
+        textarea.addEventListener("blur", () => {
+            textarea.disabled = true;
+            overlay.style.pointerEvents = "auto";
+        });
+
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
         if (saved) {
             textarea.style.width = saved.width + "px";
             textarea.style.height = saved.height + "px";
         }
 
-        // Observe resize in real-time (works while dragging)
         const resizeObserver = new ResizeObserver(() => {
             syncWrapper();
             localStorage.setItem(
@@ -90,10 +107,7 @@
         });
 
         resizeObserver.observe(textarea);
-
-        // Initial sync
         syncWrapper();
     </script>
 </body>
-
 </html>

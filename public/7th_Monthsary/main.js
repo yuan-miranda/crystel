@@ -104,6 +104,10 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
     newNote.dataset.id = id;
     newNote.dataset.color = color || "#FFF8A6";
 
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+
+    newNote.appendChild(overlay);
     board.appendChild(newNote);
     makeNoteDraggable(newNote);
     makeNoteEditable(newNote);
@@ -118,17 +122,25 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
     return newNote;
 }
 
-const enableEditing = (textarea) => {
+const enableEditing = (note) => {
+    const textarea = note.querySelector("textarea");
+    const overlay = note.querySelector(".overlay");
+
     isEditing = true;
     textarea.disabled = false;
     textarea.style.resize = "both";
+    overlay.style.pointerEvents = "none";
     textarea.focus();
 }
 
-const disableEditing = (textarea) => {
+const disableEditing = (note) => {
+    const textarea = note.querySelector("textarea");
+    const overlay = note.querySelector(".overlay");
+
     isEditing = false;
     textarea.disabled = true;
     textarea.style.resize = "none";
+    overlay.style.pointerEvents = "auto";
 }
 
 function makeNoteEditable(note) {
@@ -137,8 +149,8 @@ function makeNoteEditable(note) {
     textarea.spellcheck = false;
     textarea.rows = 1;
 
-    disableEditing(textarea);
     note.appendChild(textarea);
+    disableEditing(note);
 
     const resizeHeight = () => {
         textarea.style.height = "auto";
@@ -156,10 +168,10 @@ function makeNoteEditable(note) {
 
     textarea.addEventListener("blur", () => {
         if (!isEditing) return;
-        if (note.dataset.text === textarea.value) return disableEditing(textarea);
+        if (note.dataset.text === textarea.value) return disableEditing(note);
 
         note.dataset.text = textarea.value;
-        disableEditing(textarea);
+        disableEditing(note);
 
         saveNoteToServer(note, note.dataset.id, null, textarea.value)
             .then(saved => { if (saved) note.dataset.id = saved.id; });
@@ -171,6 +183,7 @@ function makeNoteEditable(note) {
 }
 
 function makeNoteDraggable(note) {
+    const overlay = note.querySelector(".overlay");
     let isDragging = false;
     let startX, startY, offsetX, offsetY;
 
@@ -210,27 +223,27 @@ function makeNoteDraggable(note) {
         saveNoteToServer(note, note.dataset.id, { left: startX, top: startY });
     };
 
-    // Mouse / pointer events
-    note.addEventListener("pointerdown", e => {
+    // mouse events / pointer events
+    overlay.addEventListener("pointerdown", e => {
         if (isEditing) return;
-        note.setPointerCapture(e.pointerId);
+        overlay.setPointerCapture(e.pointerId);
         startDrag(e.clientX, e.clientY);
     });
-    note.addEventListener("pointermove", e => moveDrag(e.clientX, e.clientY));
-    note.addEventListener("pointerup", endDrag);
+    overlay.addEventListener("pointermove", e => moveDrag(e.clientX, e.clientY));
+    overlay.addEventListener("pointerup", endDrag);
 
-    // Touch fallback for mobile
-    note.addEventListener("touchstart", e => {
+    // touch fallback for mobile
+    overlay.addEventListener("touchstart", e => {
         if (isEditing) return;
         const touch = e.touches[0];
         startDrag(touch.pageX, touch.pageY);
     });
-    note.addEventListener("touchmove", e => {
+    overlay.addEventListener("touchmove", e => {
         const touch = e.touches[0];
         moveDrag(touch.pageX, touch.pageY);
         e.preventDefault();
     }, { passive: false });
-    note.addEventListener("touchend", endDrag);
+    overlay.addEventListener("touchend", endDrag);
 }
 
 function setupContextMenu() {
@@ -239,32 +252,6 @@ function setupContextMenu() {
     const changeColor = document.getElementById("changeColor");
     const deleteContext = document.getElementById("contextDelete");
 
-    deleteContext.addEventListener("click", async () => {
-        if (!confirm("Are you sure you want to delete this note?")) return;
-
-        // for some reason this works better than passing contextNote directly
-        // what the fuck
-        const noteToDelete = contextNote;
-        if (!noteToDelete) return;
-
-        await deleteNoteFromServer(noteToDelete.dataset.id);
-        noteToDelete.remove();
-    });
-
-    changeColor.addEventListener("click", (e) => {
-        e.stopPropagation();
-        changeColorDropdown(changeColor);
-    });
-
-    editNote.addEventListener("click", () => {
-        const textarea = contextNote.querySelector("textarea");
-        if (textarea) enableEditing(textarea);
-    });
-
-    document.addEventListener("click", hideContextMenu);
-}
-
-function changeColorDropdown(button) {
     const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF"];
     colorDropdown = document.createElement("div");
     colorDropdown.className = "color-dropdown";
@@ -287,6 +274,33 @@ function changeColorDropdown(button) {
     });
     document.body.appendChild(colorDropdown);
 
+    deleteContext.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete this note?")) return;
+
+        // for some reason this works better than passing contextNote directly
+        // what the fuck
+        const noteToDelete = contextNote;
+        if (!noteToDelete) return;
+
+        await deleteNoteFromServer(noteToDelete.dataset.id);
+        noteToDelete.remove();
+    });
+
+    changeColor.addEventListener("click", (e) => {
+        e.stopPropagation();
+        changeColorDropdown(changeColor);
+    });
+
+    editNote.addEventListener("click", () => {
+        if (contextNote) enableEditing(contextNote);
+    });
+
+    document.addEventListener("click", hideContextMenu);
+}
+
+function changeColorDropdown(button) {
+    const colorDropdown = document.querySelector(".color-dropdown");
+
     // align dropdown to the right of the button
     const rect = button.getBoundingClientRect();
     colorDropdown.style.left = (rect.right + 2) + "px";
@@ -295,14 +309,16 @@ function changeColorDropdown(button) {
 }
 
 function makeNoteContextMenu(note) {
-    note.addEventListener("contextmenu", (e) => {
+    const overlay = note.querySelector(".overlay");
+
+    overlay.addEventListener("contextmenu", (e) => {
         if (isEditing || note.dataset.isDragging === "true") return;
         e.preventDefault();
         showContextMenu(e.pageX, e.pageY, note);
     });
 
     let pressTimer;
-    note.addEventListener("touchstart", (e) => {
+    overlay.addEventListener("touchstart", (e) => {
         if (isEditing || note.dataset.isDragging === "true") return;
         pressTimer = setTimeout(() => {
             const touch = e.touches[0];
@@ -310,8 +326,8 @@ function makeNoteContextMenu(note) {
         }, 600);
     });
 
-    note.addEventListener("touchend", () => clearTimeout(pressTimer));
-    note.addEventListener("touchmove", () => clearTimeout(pressTimer));
+    overlay.addEventListener("touchend", () => clearTimeout(pressTimer));
+    overlay.addEventListener("touchmove", () => clearTimeout(pressTimer));
 }
 
 function showContextMenu(x, y, note) {
