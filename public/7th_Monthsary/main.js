@@ -184,66 +184,93 @@ function makeNoteEditable(note) {
 
 function makeNoteDraggable(note) {
     const overlay = note.querySelector(".overlay");
+
     let isDragging = false;
-    let startX, startY, offsetX, offsetY;
+    let startX, startY;
+    let originLeft, originTop;
+    let offsetX, offsetY;
+    let activePointerId = null;
 
-    const startDrag = (x, y) => {
-        startX = note.offsetLeft;
-        startY = note.offsetTop;
-        offsetX = x - startX;
-        offsetY = y - startY;
-        isDragging = true;
-        note.dataset.isDragging = "true";
-    };
+    const DRAG_THRESHOLD = 8;
 
-    const moveDrag = (x, y) => {
-        if (!isDragging) return;
-        note.style.left = (x - offsetX) + "px";
-        note.style.top = (y - offsetY) + "px";
-    };
+    overlay.addEventListener("pointerdown", e => {
+        if (isEditing) return;
 
-    const endDrag = () => {
-        if (!isDragging) return;
+        activePointerId = e.pointerId;
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        originLeft = note.offsetLeft;
+        originTop = note.offsetTop;
+
+        offsetX = e.clientX - originLeft;
+        offsetY = e.clientY - originTop;
+
         isDragging = false;
         note.dataset.isDragging = "false";
 
-        const snap = (v, max) => Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
+        overlay.setPointerCapture(activePointerId);
+    });
+
+    overlay.addEventListener("pointermove", e => {
+        if (activePointerId !== e.pointerId) return;
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (!isDragging) {
+            if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+                return;
+            }
+            isDragging = true;
+            note.dataset.isDragging = "true";
+        }
+
+        note.style.left = (e.clientX - offsetX) + "px";
+        note.style.top = (e.clientY - offsetY) + "px";
+    });
+
+    const endDrag = e => {
+        if (activePointerId !== e.pointerId) return;
+
+        if (overlay.hasPointerCapture(activePointerId)) {
+            overlay.releasePointerCapture(activePointerId);
+        }
+
+        activePointerId = null;
+
+        if (!isDragging) {
+            note.dataset.isDragging = "false";
+            return;
+        }
+
+        isDragging = false;
+        note.dataset.isDragging = "false";
+
+        const snap = (v, max) =>
+            Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
+
         const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
         const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
 
-        // prevent saving if not moved (ts is nasty)
         const moved =
-            snappedX !== startX
-            || snappedY !== startY;
+            snappedX !== originLeft ||
+            snappedY !== originTop;
 
         note.style.left = snappedX + "px";
         note.style.top = snappedY + "px";
 
-        if (!moved) return;
-        saveNoteToServer(note, note.dataset.id, { left: startX, top: startY });
+        if (moved) {
+            saveNoteToServer(note, note.dataset.id, {
+                left: originLeft,
+                top: originTop
+            });
+        }
     };
 
-    // mouse events / pointer events
-    overlay.addEventListener("pointerdown", e => {
-        if (isEditing) return;
-        overlay.setPointerCapture(e.pointerId);
-        startDrag(e.clientX, e.clientY);
-    });
-    overlay.addEventListener("pointermove", e => moveDrag(e.clientX, e.clientY));
     overlay.addEventListener("pointerup", endDrag);
-
-    // touch fallback for mobile
-    // overlay.addEventListener("touchstart", e => {
-    //     if (isEditing) return;
-    //     const touch = e.touches[0];
-    //     startDrag(touch.pageX, touch.pageY);
-    // });
-    // overlay.addEventListener("touchmove", e => {
-    //     const touch = e.touches[0];
-    //     moveDrag(touch.pageX, touch.pageY);
-    //     e.preventDefault();
-    // }, { passive: false });
-    // overlay.addEventListener("touchend", endDrag);
+    overlay.addEventListener("pointercancel", endDrag);
 }
 
 function setupContextMenu() {
@@ -311,54 +338,36 @@ function changeColorDropdown(button) {
 function makeNoteContextMenu(note) {
     const overlay = note.querySelector(".overlay");
 
-    let pressTimer = null;
-    let startX = 0;
-    let startY = 0;
-    const PRESS_DELAY = 600;
-    const MOVE_TOLERANCE = 8;
+    let pressTimer;
+    const LONG_PRESS = 600;
 
     overlay.addEventListener("pointerdown", e => {
         if (isEditing) return;
 
-        startX = e.clientX;
-        startY = e.clientY;
-
         pressTimer = setTimeout(() => {
             if (note.dataset.isDragging === "true") return;
             showContextMenu(e.pageX, e.pageY, note);
-        }, PRESS_DELAY);
+        }, LONG_PRESS);
     });
 
-    overlay.addEventListener("pointermove", e => {
-        if (!pressTimer) return;
-
-        const dx = Math.abs(e.clientX - startX);
-        const dy = Math.abs(e.clientY - startY);
-
-        if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
+    overlay.addEventListener("pointermove", () => {
+        clearTimeout(pressTimer);
     });
 
     overlay.addEventListener("pointerup", () => {
         clearTimeout(pressTimer);
-        pressTimer = null;
     });
 
     overlay.addEventListener("pointercancel", () => {
         clearTimeout(pressTimer);
-        pressTimer = null;
     });
 
-    // desktop right-click
+    // desktop right click
     overlay.addEventListener("contextmenu", e => {
-        if (isEditing || note.dataset.isDragging === "true") return;
         e.preventDefault();
         showContextMenu(e.pageX, e.pageY, note);
     });
 }
-
 
 function showContextMenu(x, y, note) {
     contextNote = note;
