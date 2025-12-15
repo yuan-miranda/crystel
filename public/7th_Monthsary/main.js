@@ -441,8 +441,12 @@ function setupRealtime(client) {
 
             existingNote.style.left = payload.new.left + "px";
             existingNote.style.top = payload.new.top + "px";
+
+            textarea.style.width = (payload.new.width || 256) + "px";
+            textarea.style.height = (payload.new.height || 64) + "px";
             existingNote.dataset.width = payload.new.width;
             existingNote.dataset.height = payload.new.height;
+            
             existingNote.style.backgroundColor = payload.new.color;
             existingNote.dataset.color = payload.new.color;
         }
