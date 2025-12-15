@@ -311,24 +311,54 @@ function changeColorDropdown(button) {
 function makeNoteContextMenu(note) {
     const overlay = note.querySelector(".overlay");
 
-    overlay.addEventListener("contextmenu", (e) => {
+    let pressTimer = null;
+    let startX = 0;
+    let startY = 0;
+    const PRESS_DELAY = 600;
+    const MOVE_TOLERANCE = 8;
+
+    overlay.addEventListener("pointerdown", e => {
+        if (isEditing) return;
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        pressTimer = setTimeout(() => {
+            if (note.dataset.isDragging === "true") return;
+            showContextMenu(e.pageX, e.pageY, note);
+        }, PRESS_DELAY);
+    });
+
+    overlay.addEventListener("pointermove", e => {
+        if (!pressTimer) return;
+
+        const dx = Math.abs(e.clientX - startX);
+        const dy = Math.abs(e.clientY - startY);
+
+        if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    });
+
+    overlay.addEventListener("pointerup", () => {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    });
+
+    overlay.addEventListener("pointercancel", () => {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    });
+
+    // desktop right-click
+    overlay.addEventListener("contextmenu", e => {
         if (isEditing || note.dataset.isDragging === "true") return;
         e.preventDefault();
         showContextMenu(e.pageX, e.pageY, note);
     });
-
-    let pressTimer;
-    overlay.addEventListener("touchstart", (e) => {
-        if (isEditing || note.dataset.isDragging === "true") return;
-        pressTimer = setTimeout(() => {
-            const touch = e.touches[0];
-            showContextMenu(touch.pageX, touch.pageY, note);
-        }, 600);
-    });
-
-    overlay.addEventListener("touchend", () => clearTimeout(pressTimer));
-    overlay.addEventListener("touchmove", () => clearTimeout(pressTimer));
 }
+
 
 function showContextMenu(x, y, note) {
     contextNote = note;
