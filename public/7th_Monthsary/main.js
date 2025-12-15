@@ -109,8 +109,6 @@ function createNote({ id = null, refId = null, text, left, top, width, height, c
     newNote.dataset.text = text || "";
     newNote.style.left = left + "px";
     newNote.style.top = top + "px";
-    // newNote.style.width = width + "px";
-    // newNote.style.height = height + "px";
     newNote.dataset.width = width;
     newNote.dataset.height = height;
     newNote.style.backgroundColor = color || "#FFF8A6";
@@ -184,11 +182,14 @@ function makeNoteEditable(note) {
 
     textarea.addEventListener("blur", () => {
         if (!isEditing) return;
-        if (note.dataset.text === textarea.value) return disableEditing(note);
+
+        // no changes in text, but also check if size changed
+        if (note.dataset.text === textarea.value
+            && parseInt(note.dataset.width) === textarea.offsetWidth
+            && parseInt(note.dataset.height) === textarea.offsetHeight)
+            return disableEditing(note);
 
         note.dataset.text = textarea.value;
-        // note.style.width = textarea.offsetWidth + "px";
-        // note.style.height = textarea.offsetHeight + "px";
         note.dataset.width = textarea.offsetWidth;
         note.dataset.height = textarea.offsetHeight;
         disableEditing(note);
@@ -440,8 +441,6 @@ function setupRealtime(client) {
 
             existingNote.style.left = payload.new.left + "px";
             existingNote.style.top = payload.new.top + "px";
-            // existingNote.style.width = payload.new.width + "px";
-            // existingNote.style.height = payload.new.height + "px";
             existingNote.dataset.width = payload.new.width;
             existingNote.dataset.height = payload.new.height;
             existingNote.style.backgroundColor = payload.new.color;
