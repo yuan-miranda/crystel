@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+        }
+
+        #container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #textareaDiv {
+            border: 2px solid black;
+            padding: 10px;
+            display: inline-block;
+            background-color: #FFF8A6;
+            border-radius: 8px;
+        }
+
+        #textareaDiv textarea {
+            resize: both;
+            overflow: auto;
+            /* min-width: 200px;
+            min-height: 120px; */
+            max-width: 512px;
+            outline: none;
+            border: none;
+            background-color: #FFF8A6;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HOLY FUCVK -->
+
+    <div id="container">
+        <div id="textareaDiv">
+            <textarea id="editor" disabled></textarea>
+        </div>
+    </div>
+
+    <script>
+        const textarea = document.getElementById("editor");
+        const wrapper = document.getElementById("textareaDiv");
+        const STORAGE_KEY = "textareaSize";
+
+        const PADDING = 24;
+
+        function syncWrapper() {
+            wrapper.style.width = textarea.offsetWidth + PADDING + "px";
+            wrapper.style.height = textarea.offsetHeight + PADDING + "px";
+        }
+
+        // Load saved size
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved) {
+            textarea.style.width = saved.width + "px";
+            textarea.style.height = saved.height + "px";
+        }
+
+        // Observe resize in real-time (works while dragging)
+        const resizeObserver = new ResizeObserver(() => {
+            syncWrapper();
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    width: textarea.offsetWidth,
+                    height: textarea.offsetHeight
+                })
+            );
+        });
+
+        resizeObserver.observe(textarea);
+
+        // Initial sync
+        syncWrapper();
+    </script>
+</body>
+
+</html>

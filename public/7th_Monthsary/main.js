@@ -1,6 +1,6 @@
 const GRID_SIZE = 32;
 let board, input, contextMenu, colorDropdown, contextNote;
-
+let isEditing = false;
 let idleTimeout = null;
 const IDLE_TIME = 1 * 60 * 1000;
 
@@ -10,7 +10,10 @@ function resetIdleTimer() {
 }
 
 function loadPassword() {
-    const password = localStorage.getItem("boardPassword") || prompt("Enter board password (for editing) else ignore this:") || "";
+    const password =
+        localStorage.getItem("boardPassword")
+        || prompt("Enter board password (for editing) else ignore this:")
+        || "";
     localStorage.setItem("boardPassword", password);
     window.boardPassword = password;
     return password;
@@ -35,7 +38,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
     const body = {
         id: id,
         refId: note.dataset.refId,
-        text: note.textContent,
+        text: note.dataset.text,
         left: parseInt(note.style.left),
         top: parseInt(note.style.top),
         color: note.dataset.color || "#FFF8A6",
@@ -53,7 +56,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
             note.style.left = restorePos.left + "px";
             note.style.top = restorePos.top + "px";
         }
-        if (restoreContent !== null) note.textContent = restoreContent;
+        if (restoreContent !== null) note.dataset.text = restoreContent;
 
         return retryWithPassword(
             () => saveNoteToServer(note, id, restorePos, restoreContent),
@@ -62,7 +65,7 @@ async function saveNoteToServer(note, id, restorePos = null, restoreContent = nu
                     note.style.left = restorePos.left + "px";
                     note.style.top = restorePos.top + "px";
                 }
-                if (restoreContent !== null) note.textContent = restoreContent;
+                if (restoreContent !== null) note.dataset.text = restoreContent;
             });
     }
 
@@ -92,7 +95,7 @@ async function loadNotes() {
 function createNote({ id = null, refId = null, text, left, top, color }) {
     const newNote = document.createElement("div");
     newNote.className = "note";
-    newNote.textContent = text || "";
+    newNote.dataset.text = text || "";
     newNote.style.left = left + "px";
     newNote.style.top = top + "px";
     newNote.style.backgroundColor = color || "#FFF8A6";
@@ -102,7 +105,6 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
     newNote.dataset.color = color || "#FFF8A6";
 
     board.appendChild(newNote);
-
     makeNoteDraggable(newNote);
     makeNoteEditable(newNote);
     makeNoteContextMenu(newNote);
@@ -114,6 +116,58 @@ function createNote({ id = null, refId = null, text, left, top, color }) {
         }
     });
     return newNote;
+}
+
+const enableEditing = (textarea) => {
+    isEditing = true;
+    textarea.disabled = false;
+    textarea.style.resize = "both";
+    textarea.focus();
+}
+
+const disableEditing = (textarea) => {
+    isEditing = false;
+    textarea.disabled = true;
+    textarea.style.resize = "none";
+}
+
+function makeNoteEditable(note) {
+    const textarea = document.createElement("textarea");
+    textarea.value = note.dataset.text;
+    textarea.spellcheck = false;
+    textarea.rows = 1;
+
+    disableEditing(textarea);
+    note.appendChild(textarea);
+
+    const resizeHeight = () => {
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+    };
+    requestAnimationFrame(resizeHeight);
+    textarea.addEventListener("input", resizeHeight);
+
+    const observer = new ResizeObserver(() => {
+        if (textarea.scrollHeight > textarea.offsetHeight) {
+            textarea.style.height = textarea.scrollHeight + "px";
+        }
+    });
+    observer.observe(textarea);
+
+    textarea.addEventListener("blur", () => {
+        if (!isEditing) return;
+        if (note.dataset.text === textarea.value) return disableEditing(textarea);
+
+        note.dataset.text = textarea.value;
+        disableEditing(textarea);
+
+        saveNoteToServer(note, note.dataset.id, null, textarea.value)
+            .then(saved => { if (saved) note.dataset.id = saved.id; });
+    });
+
+    textarea.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) textarea.blur();
+    });
 }
 
 function makeNoteDraggable(note) {
@@ -143,15 +197,22 @@ function makeNoteDraggable(note) {
         const snap = (v, max) => Math.min(max, Math.max(0, Math.round(v / GRID_SIZE) * GRID_SIZE));
         const snappedX = snap(note.offsetLeft, board.offsetWidth - note.offsetWidth);
         const snappedY = snap(note.offsetTop, board.offsetHeight - note.offsetHeight);
+
+        // prevent saving if not moved (ts is nasty)
+        const moved =
+            snappedX !== startX
+            || snappedY !== startY;
+
         note.style.left = snappedX + "px";
         note.style.top = snappedY + "px";
 
+        if (!moved) return;
         saveNoteToServer(note, note.dataset.id, { left: startX, top: startY });
     };
 
     // Mouse / pointer events
     note.addEventListener("pointerdown", e => {
-        if (note.querySelector("textarea")) return;
+        if (isEditing) return;
         note.setPointerCapture(e.pointerId);
         startDrag(e.clientX, e.clientY);
     });
@@ -160,90 +221,26 @@ function makeNoteDraggable(note) {
 
     // Touch fallback for mobile
     note.addEventListener("touchstart", e => {
-        if (note.querySelector("textarea")) return;
+        if (isEditing) return;
         const touch = e.touches[0];
         startDrag(touch.pageX, touch.pageY);
     });
     note.addEventListener("touchmove", e => {
         const touch = e.touches[0];
         moveDrag(touch.pageX, touch.pageY);
-        e.preventDefault(); // Prevent scrolling while dragging
+        e.preventDefault();
     }, { passive: false });
     note.addEventListener("touchend", endDrag);
 }
 
-function makeNoteEditable(note) {
-    note.addEventListener("dblclick", () => {
-        if (note.querySelector("textarea")) return;
-
-        const initialWidth = note.offsetWidth;
-
-        const textarea = document.createElement("textarea");
-        textarea.classList.add("note-input-textarea");
-        textarea.value = note.textContent;
-        note.textContent = "";
-        textarea.spellcheck = false;
-
-        note.style.width = "auto";
-        textarea.style.width = (initialWidth - 22) + "px";
-
-        note.appendChild(textarea);
-        textarea.focus();
-
-        const resizeHeight = () => {
-            textarea.style.height = (textarea.scrollHeight) + "px";
-        };
-        resizeHeight();
-
-        textarea.addEventListener("input", () => resizeHeight());
-
-        let savedWidth = initialWidth;
-        const observer = new ResizeObserver(() => {
-            savedWidth = Math.ceil(textarea.getBoundingClientRect().width);
-
-            if (textarea.scrollHeight > textarea.offsetHeight) {
-                textarea.style.height = textarea.scrollHeight + "px";
-            }
-        });
-        observer.observe(textarea);
-
-        textarea.addEventListener("blur", () => {
-            note.textContent = textarea.value;
-            note.style.width = (savedWidth + 22) + "px";
-
-            observer.unobserve(textarea);
-            textarea.remove();
-            saveNoteToServer(note, note.dataset.id, null, textarea.value).then(saved => {
-                if (saved) note.dataset.id = saved.id;
-            });
-        });
-
-        textarea.addEventListener("keydown", (e) => {
-
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                textarea.blur();
-            }
-        });
-    });
-}
-
 function setupContextMenu() {
     contextMenu = document.getElementById("contextMenu");
+    const editNote = document.getElementById("editNote");
+    const changeColor = document.getElementById("changeColor");
     const deleteContext = document.getElementById("contextDelete");
 
-    const hoverEffect = e => {
-        deleteContext.style.backgroundColor = e.type === "mouseover" ? "#6c63ff" : "transparent";
-        deleteContext.style.color = e.type === "mouseover" ? "white" : "#333";
-    };
-    deleteContext.addEventListener("mouseover", hoverEffect);
-    deleteContext.addEventListener("mouseout", hoverEffect);
-
     deleteContext.addEventListener("click", async () => {
-        if (!confirm("Are you sure you want to delete this note?")) {
-            hideContextMenu();
-            return;
-        }
+        if (!confirm("Are you sure you want to delete this note?")) return;
 
         // for some reason this works better than passing contextNote directly
         // what the fuck
@@ -252,21 +249,61 @@ function setupContextMenu() {
 
         await deleteNoteFromServer(noteToDelete.dataset.id);
         noteToDelete.remove();
-        hideContextMenu();
     });
+
+    changeColor.addEventListener("click", (e) => {
+        e.stopPropagation();
+        changeColorDropdown(changeColor);
+    });
+
+    editNote.addEventListener("click", () => {
+        const textarea = contextNote.querySelector("textarea");
+        if (textarea) enableEditing(textarea);
+    });
+
     document.addEventListener("click", hideContextMenu);
+}
+
+function changeColorDropdown(button) {
+    const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF"];
+    colorDropdown = document.createElement("div");
+    colorDropdown.className = "color-dropdown";
+
+    colors.forEach(color => {
+        const colorOption = document.createElement("div");
+        colorOption.className = "color-option";
+        colorOption.style.backgroundColor = color;
+
+        colorOption.addEventListener("click", async () => {
+            if (!contextNote) return;
+
+            contextNote.style.backgroundColor = color;
+            contextNote.dataset.color = color;
+
+            await saveNoteToServer(contextNote, contextNote.dataset.id);
+            colorDropdown.style.display = "none";
+        });
+        colorDropdown.appendChild(colorOption);
+    });
+    document.body.appendChild(colorDropdown);
+
+    // align dropdown to the right of the button
+    const rect = button.getBoundingClientRect();
+    colorDropdown.style.left = (rect.right + 2) + "px";
+    colorDropdown.style.top = (rect.top - 2) + "px";
+    colorDropdown.style.display = "flex";
 }
 
 function makeNoteContextMenu(note) {
     note.addEventListener("contextmenu", (e) => {
-        if (note.querySelector("textarea") || note.dataset.isDragging === "true") return;
+        if (isEditing || note.dataset.isDragging === "true") return;
         e.preventDefault();
         showContextMenu(e.pageX, e.pageY, note);
     });
 
     let pressTimer;
     note.addEventListener("touchstart", (e) => {
-        if (note.querySelector("textarea")) return;
+        if (isEditing || note.dataset.isDragging === "true") return;
         pressTimer = setTimeout(() => {
             const touch = e.touches[0];
             showContextMenu(touch.pageX, touch.pageY, note);
@@ -277,7 +314,6 @@ function makeNoteContextMenu(note) {
     note.addEventListener("touchmove", () => clearTimeout(pressTimer));
 }
 
-
 function showContextMenu(x, y, note) {
     contextNote = note;
 
@@ -285,8 +321,7 @@ function showContextMenu(x, y, note) {
     note.dataset.isDragging = "false";
     const textarea = note.querySelector("textarea");
     if (textarea) {
-        note.textContent = textarea.value;
-        textarea.remove();
+        textarea.blur();
     }
 
     contextMenu.style.left = x + "px";
@@ -296,6 +331,7 @@ function showContextMenu(x, y, note) {
 }
 
 function hideContextMenu() {
+    if (!contextNote) return;
     contextNote = null;
     if (contextMenu) contextMenu.style.display = "none";
     if (colorDropdown) colorDropdown.style.display = "none";
@@ -332,9 +368,11 @@ function setupRealtime(client) {
                 || document.querySelector(`.note[data-ref-id='${payload.new.ref_id}']`);
             if (!existingNote) return;
 
-            if (existingNote.querySelector("textarea")) return;
+            const textarea = existingNote.querySelector("textarea");
 
-            existingNote.textContent = payload.new.text;
+            existingNote.dataset.text = payload.new.text;
+            if (textarea) textarea.value = payload.new.text;
+
             existingNote.style.left = payload.new.left + "px";
             existingNote.style.top = payload.new.top + "px";
             existingNote.style.backgroundColor = payload.new.color;
@@ -348,53 +386,9 @@ function setupRealtime(client) {
         .subscribe();
 }
 
-function setupChangeColorDropdown() {
-    const changeColorBtn = document.getElementById("changeColor");
-    const colors = ["#FFFFFF", "#FFF8A6", "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8B00FF"];
-
-    colorDropdown = document.createElement("div");
-    colorDropdown.className = "color-dropdown";
-
-    colors.forEach(color => {
-        const colorOption = document.createElement("div");
-        colorOption.className = "color-option";
-        colorOption.style.backgroundColor = color;
-
-        colorOption.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (!contextNote) return;
-
-            contextNote.style.backgroundColor = color;
-            contextNote.dataset.color = color;
-
-            await saveNoteToServer(contextNote, contextNote.dataset.id);
-            hideContextMenu();
-            colorDropdown.style.display = "none";
-        });
-
-        colorDropdown.appendChild(colorOption);
-    });
-
-    document.body.appendChild(colorDropdown);
-
-    changeColorBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!contextNote) return;
-
-        const rect = changeColorBtn.getBoundingClientRect();
-        colorDropdown.style.left = (rect.right + 2) + "px";
-        colorDropdown.style.top = (rect.top - 2) + "px";
-        colorDropdown.style.display = "flex";
-    });
-
-    document.addEventListener("click", () => {
-        colorDropdown.style.display = "none";
-    });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     board = document.getElementById("board");
-    input = document.getElementById("noteInput");
+    input = document.getElementById("noteInputField");
 
     const supabaseClient = supabase.createClient(
         "https://mqgdwchkvbvurppqepnr.supabase.co",
@@ -403,7 +397,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadPassword();
     setupContextMenu();
-    setupChangeColorDropdown();
 
     document.getElementById("addNote").addEventListener("click", () => {
         const text = input.value;
