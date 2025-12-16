@@ -353,13 +353,27 @@ function setupContextMenu() {
 }
 
 function changeColorDropdown(button) {
-    const colorDropdown = document.querySelector(".color-dropdown");
-
-    // align dropdown to the right of the button
     const rect = button.getBoundingClientRect();
-    colorDropdown.style.left = (rect.right + 2) + "px";
-    colorDropdown.style.top = (rect.top - 2) + "px";
     colorDropdown.style.display = "flex";
+    colorDropdown.style.left = "0px";
+    colorDropdown.style.top = "0px";
+
+    const ddRect = colorDropdown.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let left = rect.right + 4;
+    let top = rect.top;
+
+    if (left + ddRect.width > vw) {
+        left = rect.left - ddRect.width - 4;
+    }
+    if (top + ddRect.height > vh) {
+        top = vh - ddRect.height - 4;
+    }
+
+    colorDropdown.style.left = Math.max(4, left) + "px";
+    colorDropdown.style.top = Math.max(4, top) + "px";
 }
 
 function makeNoteContextMenu(note) {
@@ -399,16 +413,30 @@ function makeNoteContextMenu(note) {
 function showContextMenu(x, y, note) {
     contextNote = note;
 
-    // force reset state
     note.dataset.isDragging = "false";
-    const textarea = note.querySelector("textarea");
-    if (textarea) {
-        textarea.blur();
+    note.querySelector("textarea")?.blur();
+
+    contextMenu.style.display = "block";
+    contextMenu.style.left = "0px";
+    contextMenu.style.top = "0px";
+
+    const menuRect = contextMenu.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let left = x;
+    let top = y;
+
+    if (left + menuRect.width > vw) {
+        left = vw - menuRect.width - 4;
+    }
+    if (top + menuRect.height > vh) {
+        top = vh - menuRect.height - 4;
     }
 
-    contextMenu.style.left = x + "px";
-    contextMenu.style.top = y + "px";
-    contextMenu.style.display = "block";
+    contextMenu.style.left = Math.max(4, left) + "px";
+    contextMenu.style.top = Math.max(4, top) + "px";
+
     if (colorDropdown) colorDropdown.style.display = "none";
 }
 
@@ -509,6 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("focus", () => loadNotes());
+window.addEventListener("resize", hideContextMenu);
 
 resetIdleTimer();
 ['mousemove', 'mousedown', 'keydown', 'touchstart', 'touchmove'].forEach(e => {
