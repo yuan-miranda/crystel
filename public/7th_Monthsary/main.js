@@ -184,8 +184,8 @@ function makeNoteEditable(note) {
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
 
+    const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
     const observer = new ResizeObserver(() => {
-        const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
 
         const newWidth = sizeSnap(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
         const newHeight = sizeSnap(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
@@ -208,9 +208,16 @@ function makeNoteEditable(note) {
             && parseInt(note.dataset.height) === textarea.offsetHeight)
             return disableEditing(note);
 
-        note.dataset.text = textarea.value;
+        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
+        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
+
+        textarea.style.width = (newWidth - PADDING) + "px";
+        textarea.style.height = (newHeight - PADDING) + "px";
+
         note.dataset.width = textarea.offsetWidth;
         note.dataset.height = textarea.offsetHeight;
+        note.dataset.text = textarea.value;
+
         disableEditing(note);
 
         saveNoteToServer(note, note.dataset.id, null, textarea.value)
