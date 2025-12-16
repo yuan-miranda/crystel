@@ -184,11 +184,15 @@ function makeNoteEditable(note) {
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
 
-    const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
-    const observer = new ResizeObserver(() => {
+    // if the size is below 32x32, snap it into that size, else snap to nearest SNAP_SIZE*2
+    const snapToNearestSize = (v, grid, min = 32) => {
+        if (v < min) return min;
+        return Math.round(v / grid) * grid;
+    };
 
-        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
-        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
+    const observer = new ResizeObserver(() => {
+        const newWidth = snapToNearestSize(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
+        const newHeight = snapToNearestSize(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
 
         textarea.style.width = (newWidth - PADDING) + "px";
         textarea.style.height = (newHeight - PADDING) + "px";
@@ -208,8 +212,8 @@ function makeNoteEditable(note) {
             && parseInt(note.dataset.height) === textarea.offsetHeight)
             return disableEditing(note);
 
-        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
-        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
+        const newWidth = snapToNearestSize(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
+        const newHeight = snapToNearestSize(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
 
         textarea.style.width = (newWidth - PADDING) + "px";
         textarea.style.height = (newHeight - PADDING) + "px";
