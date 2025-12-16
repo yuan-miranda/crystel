@@ -187,8 +187,8 @@ function makeNoteEditable(note) {
     const observer = new ResizeObserver(() => {
         const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
 
-        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, GRID_SIZE);
-        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, GRID_SIZE);
+        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, SNAP_SIZE * 2);
+        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, SNAP_SIZE * 2);
 
         textarea.style.width = (newWidth - PADDING) + "px";
         textarea.style.height = (newHeight - PADDING) + "px";
