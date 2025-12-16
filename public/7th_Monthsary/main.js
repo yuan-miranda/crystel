@@ -184,26 +184,18 @@ function makeNoteEditable(note) {
     requestAnimationFrame(resizeHeight);
     textarea.addEventListener("input", resizeHeight);
 
-    let isSnapping = false;
-
-    const sizeSnap = (v, grid) => Math.ceil(v / grid) * grid;
     const observer = new ResizeObserver(() => {
-        if (isSnapping) return;
+        const sizeSnap = (v, grid) => Math.round(v / grid) * grid;
 
-        isSnapping = true;
-        const snappedWidth = sizeSnap(textarea.getBoundingClientRect().width + PADDING, GRID_SIZE);
-        const snappedHeight = sizeSnap(textarea.getBoundingClientRect().height + PADDING, GRID_SIZE);
+        const newWidth = sizeSnap(textarea.offsetWidth + PADDING, GRID_SIZE);
+        const newHeight = sizeSnap(textarea.offsetHeight + PADDING, GRID_SIZE);
 
-        textarea.style.width = (snappedWidth - PADDING) + "px";
-        textarea.style.height = (snappedHeight - PADDING) + "px";
+        textarea.style.width = (newWidth - PADDING) + "px";
+        textarea.style.height = (newHeight - PADDING) + "px";
 
-        // if content overflows, increase height to fit
-        if (textarea.scrollHeight > textarea.clientHeight) {
-            const needed = snap(textarea.scrollHeight + PADDING, GRID_SIZE);
-            textarea.style.height = (needed - PADDING) + "px";
+        if (textarea.scrollHeight > textarea.offsetHeight) {
+            textarea.style.height = textarea.scrollHeight + "px";
         }
-
-        isSnapping = false;
     });
     observer.observe(textarea);
 
