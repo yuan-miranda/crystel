@@ -14,8 +14,7 @@
 <body>
     <div class="add-note-wrapper">
         <button class="add-note btn btn-dark d-flex align-items-center justify-content-center"
-            data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomAddNote"
-            aria-controls="offcanvasBottomAddNote">
+            data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomAddNote" aria-controls="offcanvasBottomAddNote">
             <i data-lucide="plus" style="margin-right: 8px;"></i>
             Add Note
         </button>
@@ -37,11 +36,10 @@
             <div class="w-100" style="max-width: 50rem;">
                 <form>
                     <div class="mb-3">
-                        <label for="noteContent" class="form-label">
-                            Note Content (Required)
+                        <label for="noteText" class="form-label">
+                            Note Text (Required)
                         </label>
-                        <input type="text" class="form-control" id="noteContent"
-                            placeholder="Type your note here...">
+                        <input type="text" class="form-control" id="noteText" placeholder="Type your note here...">
                     </div>
 
                     <div class="mb-3">
@@ -50,13 +48,13 @@
                         </label>
 
                         <div class="d-flex align-items-center gap-2">
-                            <input type="number" class="form-control flex-grow-1" placeholder="Width" value="256" min="32"
-                                id="noteWidth" />
+                            <input type="number" class="form-control flex-grow-1" placeholder="Width" value="256"
+                                min="32" max="512" step="16" id="noteWidth" />
 
                             <i data-lucide="x"></i>
 
-                            <input type="number" class="form-control flex-grow-1" placeholder="Height" value="64" min="32"
-                                id="noteHeight" />
+                            <input type="number" class="form-control flex-grow-1" placeholder="Height" value="64"
+                                min="32" max="512" step="16" id="noteHeight" />
                         </div>
 
                         <div>
@@ -85,7 +83,7 @@
 
 
                     <div class="d-grid" style="padding-bottom: 20px;">
-                        <button type="submit" class="btn btn-dark" id="addNoteBtn">Add Note</button>
+                        <button type="button" class="btn btn-dark" id="addNoteBtn">Add Note</button>
                     </div>
                 </form>
             </div>
@@ -97,11 +95,6 @@
         <div id="changeColor">Change Color</div>
         <div id="contextDelete">Delete Note</div>
     </div>
-
-    <!-- <div id="controls">
-        <input type="text" id="noteInputField" placeholder="Type a message..." />
-        <button id="addNote">Add Note</button>
-    </div> -->
 
     <div id="boardViewport">
         <div id="board"></div>

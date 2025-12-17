@@ -5,6 +5,7 @@ const GRID_SIZE = 32;
 
 // SNAP_SIZE is just a value that I liked because it is divisible by GRID_SIZE
 const SNAP_SIZE = 8;
+const DRAG_THRESHOLD = 8;
 
 // PADDING came from the padding: 8px; in ".note" CSS (8px * 2)
 // its used here because the textarea inside the note is smaller than the note itself
@@ -243,7 +244,6 @@ function makeNoteDraggable(note) {
     let originLeft, originTop;
     let offsetX, offsetY;
     let activePointerId = null;
-    const DRAG_THRESHOLD = SNAP_SIZE;
 
     overlay.addEventListener("pointerdown", e => {
         if (isEditing) return;
@@ -518,8 +518,18 @@ function setupRealtime(client) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const INPUT_MIN = 32;
+    const INPUT_MAX = 512;
+    const INPUT_SNAP = 16;
+
+    function snapClamp(value) {
+        if (isNaN(value)) return null;
+        value = Math.max(INPUT_MIN, Math.min(INPUT_MAX, value));
+        return Math.round(value / INPUT_SNAP) * INPUT_SNAP;
+    }
+
     board = document.getElementById("board");
-    input = document.getElementById("noteInputField");
+    const bsOffcanvas = new bootstrap.Offcanvas(document.getElementById("offcanvasBottomAddNote"));
 
     const supabaseClient = supabase.createClient(
         "https://mqgdwchkvbvurppqepnr.supabase.co",
@@ -529,13 +539,55 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPassword();
     setupContextMenu();
 
-    // document.getElementById("addNote").addEventListener("click", () => {
-    //     const text = input.value;
-    //     if (!text.trim()) return;
+    const noteText = document.getElementById("noteText");
+    const widthInput = document.getElementById("noteWidth");
+    const heightInput = document.getElementById("noteHeight");
+    const colorInput = document.getElementById("noteColor");
 
-    //     createNote({ text, left: 32, top: 32, width: 256 - PADDING, height: 64 - PADDING, color: "#FFF8A6" });
-    //     input.value = "";
-    // });
+    // default values
+    noteText.value = "";
+    widthInput.value = 256;
+    heightInput.value = 64;
+    colorInput.value = "#FFF8A6";
+
+    [widthInput, heightInput].forEach(input => {
+        const sanitize = () => {
+            const snapped = snapClamp(parseInt(input.value, 10));
+            if (snapped !== null) input.value = snapped;
+        };
+
+        input.addEventListener("blur", sanitize);
+        input.addEventListener("change", sanitize);
+    });
+
+    document.getElementById("addNoteBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const text = noteText.value.trim();
+        if (!text) return alert("Note text cannot be empty.");
+
+        const width = snapClamp(parseInt(widthInput.value, 10)) ?? 256;
+        const height = snapClamp(parseInt(heightInput.value, 10)) ?? 64;
+
+        widthInput.value = width;
+        heightInput.value = height;
+        const color = colorInput.value || "#FFF8A6";
+
+        createNote({
+            text,
+            left: 32,
+            top: 32,
+            width: width - PADDING,
+            height: height - PADDING,
+            color
+        });
+
+        noteText.value = "";
+        widthInput.value = 256;
+        heightInput.value = 64;
+        colorInput.value = "#FFF8A6";
+        bsOffcanvas.hide();
+    });
 
     setupRealtime(supabaseClient);
     loadNotes();
