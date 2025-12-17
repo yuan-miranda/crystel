@@ -142,6 +142,7 @@ body {
 }
 
 .add-note-wrapper {
+    display: flex;
     position: fixed;
     bottom: 10px;
     left: 50%;
@@ -151,7 +152,11 @@ body {
     z-index: 1;
 }
 
-.add-note {
+.add-note-wrapper .go-back-btn {
+    margin-right: 8px;
+}
+
+.add-note-wrapper .add-note {
     width: 100%;
     padding: 1rem;
 }
