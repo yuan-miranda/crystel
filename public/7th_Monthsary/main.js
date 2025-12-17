@@ -1,3 +1,5 @@
+lucide.createIcons();
+
 // GRID_SIZE is responsible for snapping notes to grid when dragging (refer to "#board" CSS)
 const GRID_SIZE = 32;
 
@@ -527,21 +529,13 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPassword();
     setupContextMenu();
 
-    document.getElementById("addNote").addEventListener("click", () => {
-        const text = input.value;
-        if (!text.trim()) return;
+    // document.getElementById("addNote").addEventListener("click", () => {
+    //     const text = input.value;
+    //     if (!text.trim()) return;
 
-        createNote({ text, left: 32, top: 32, width: 256 - PADDING, height: 64 - PADDING, color: "#FFF8A6" });
-        input.value = "";
-    });
-
-    document.getElementById("clearNotes").addEventListener("click", async () => {
-        if (!confirm("Are you sure you want to delete all notes?")) return;
-        for (const note of document.querySelectorAll(".note")) {
-            await deleteNoteFromServer(note.dataset.id);
-        }
-        board.innerHTML = "";
-    });
+    //     createNote({ text, left: 32, top: 32, width: 256 - PADDING, height: 64 - PADDING, color: "#FFF8A6" });
+    //     input.value = "";
+    // });
 
     setupRealtime(supabaseClient);
     loadNotes();

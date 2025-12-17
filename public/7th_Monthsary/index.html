@@ -5,21 +5,97 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Interactive Bulletin Board</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+    <div class="add-note-wrapper">
+        <button class="add-note btn btn-dark d-flex align-items-center justify-content-center"
+            data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomAddNote"
+            aria-controls="offcanvasBottomAddNote">
+            <i data-lucide="plus" style="margin-right: 8px;"></i>
+            Add Note
+        </button>
+    </div>
+
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomAddNote"
+        aria-labelledby="offcanvasBottomAddNoteLabel">
+
+        <div class="offcanvas-header justify-content-center">
+            <div class="offcanvas-inner-header w-100">
+                <div class="d-flex justify-content-between align-items-center" style="max-width: 50rem; margin: auto;">
+                    <h5 class="offcanvas-title" id="offcanvasBottomAddNoteLabel">Edit Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="offcanvas-body small d-flex justify-content-center">
+            <div class="w-100" style="max-width: 50rem;">
+                <form>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">
+                            Note Content (Required)
+                        </label>
+                        <input type="text" class="form-control" id="noteContent"
+                            placeholder="Type your note here...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="noteWidth" class="form-label">
+                            Note Size (default: 256x64, min: 32x32, value snaps to divisible by 16)
+                        </label>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="number" class="form-control flex-grow-1" placeholder="Width" value="256"
+                                id="noteWidth" />
+
+                            <i data-lucide="x"></i>
+
+                            <input type="number" class="form-control flex-grow-1" placeholder="Height" value="64"
+                                id="noteHeight" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="noteColor" class="form-label">
+                            Note Color
+                        </label>
+                        <select name="noteColor" id="noteColor" class="form-select">
+                            <option value="#FFF8A6" selected>Notes (Default)</option>
+                            <option value="#FFFFFF">White</option>
+                            <option value="#FF0000">Red</option>
+                            <option value="#FF7F00">Orange</option>
+                            <option value="#FFFF00">Yellow</option>
+                            <option value="#00FF00">Green</option>
+                            <option value="#0000FF">Blue</option>
+                            <option value="#4B0082">Indigo</option>
+                            <option value="#8B00FF">Violet</option>
+                        </select>
+                    </div>
+
+
+                    <div class="d-grid" style="padding-bottom: 20px;">
+                        <button type="submit" class="btn btn-dark" id="addNoteBtn">Add Note</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="contextMenu">
         <div id="editNote">Edit Note</div>
         <div id="changeColor">Change Color</div>
         <div id="contextDelete">Delete Note</div>
     </div>
 
-    <div id="controls">
+    <!-- <div id="controls">
         <input type="text" id="noteInputField" placeholder="Type a message..." />
         <button id="addNote">Add Note</button>
-        <button id="clearNotes">Clear</button>
-    </div>
+    </div> -->
 
     <div id="boardViewport">
         <div id="board"></div>
