@@ -46,17 +46,23 @@
 
                     <div class="mb-3">
                         <label for="noteWidth" class="form-label">
-                            Note Size (default: 256x64, min: 32x32, value snaps to divisible by 16)
+                            Note Size (px)
                         </label>
 
                         <div class="d-flex align-items-center gap-2">
-                            <input type="number" class="form-control flex-grow-1" placeholder="Width" value="256"
+                            <input type="number" class="form-control flex-grow-1" placeholder="Width" value="256" min="32"
                                 id="noteWidth" />
 
                             <i data-lucide="x"></i>
 
-                            <input type="number" class="form-control flex-grow-1" placeholder="Height" value="64"
+                            <input type="number" class="form-control flex-grow-1" placeholder="Height" value="64" min="32"
                                 id="noteHeight" />
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                * Widith and height. Default is 256x64. Minimum size is 32x32. Size values snap by 16.
+                            </small>
                         </div>
                     </div>
 
