@@ -15,6 +15,7 @@ const PADDING = 16;
 // Some global variables I didnt bother putting inside a class or something
 let board, input, contextMenu, colorDropdown, contextNote;
 let isEditing = false;
+let isLoadingNotes = false;
 
 const IDLE_TIME = 1 * 60 * 1000;
 let idleTimeout = null;
@@ -99,22 +100,37 @@ async function deleteNoteFromServer(id) {
 }
 
 async function loadNotes() {
-    const notes = await fetch("/api/load_board").then(res => res.json());
-    notes.forEach(note => {
-        let existingNote = document.querySelector(`.note[data-id='${note.id}']`);
-        if (existingNote) return;
+    if (isLoadingNotes) return;
+    isLoadingNotes = true;
 
-        createNote({
-            id: note.id,
-            refId: note.ref_id,
-            text: note.text,
-            left: note.left,
-            top: note.top,
-            width: note.width,
-            height: note.height,
-            color: note.color
+    document.querySelectorAll(".note").forEach(n => n.remove());
+
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    loadingOverlay.style.display = "flex";
+
+    try {
+        const response = await fetch("/api/load_board");
+        const notes = await response.json();
+
+        notes.forEach(note => {
+            let existingNote = document.querySelector(`.note[data-id='${note.id}']`);
+            if (existingNote) return;
+
+            createNote({
+                id: note.id,
+                refId: note.ref_id,
+                text: note.text,
+                left: note.left,
+                top: note.top,
+                width: note.width,
+                height: note.height,
+                color: note.color
+            });
         });
-    });
+    } finally {
+        loadingOverlay.style.display = "none";
+        isLoadingNotes = false;
+    }
 }
 
 function createNote({ id = null, refId = null, text, left, top, width, height, color }) {
