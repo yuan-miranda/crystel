@@ -1,6 +1,7 @@
 // target: December 21, 2025, 1:00 AM Manila Time (UTC+8)
 const targetTimeUTC = Date.UTC(2025, 11, 20, 17, 0, 0);
 const countdownEl = document.getElementById("countdown");
+const overlayEl = document.getElementById("overlay");
 
 const pad = v => String(v).padStart(2, "0");
 
@@ -8,6 +9,7 @@ function updateCountdown() {
     let diff = targetTimeUTC - Date.now();
 
     if (diff <= 0) {
+        overlayEl.style.display = "none";
         return;
     }
 
@@ -25,5 +27,7 @@ function updateCountdown() {
     countdownEl.textContent = `${pad(days)}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
 }
 
-updateCountdown();
-setInterval(updateCountdown, 1000);
+document.addEventListener("DOMContentLoaded", () => {
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+});
