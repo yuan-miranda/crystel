@@ -1,12 +1,13 @@
-const CHARACTER_WIDTH = window.innerWidth < 768 ? 24 : 64;
+const CHARACTER_WIDTH = window.innerWidth < 768 ? 32 : 64;
 const EDGE_PADDING = window.innerWidth < 768 ? 32 : 128;
 
 const characters = [
-    { element: yuan },
-    { element: crystel }
+    { element: yuan, image: 'media/yuan.webp' },
+    { element: crystel, image: 'media/crystel.webp' }
 ];
 
 characters.forEach(character => {
+        character.element.style.backgroundImage = `url(${character.image})`;
     const x = EDGE_PADDING + Math.random() * (innerWidth - CHARACTER_WIDTH - EDGE_PADDING * 2);
     Object.assign(character, {
         x,
@@ -20,7 +21,9 @@ characters.forEach(character => {
         walkThinkX: null,
         rotation: 0,
         walkSpeed: window.innerWidth < 768 ? 0.06 : 0.08,
-        walkDistanceFactor: 1
+        walkDistanceFactor: 1,
+        jumpCount: 0,       // track number of jumps
+        jumpCooldown: 0     // cooldown timer in ms
     });
 });
 
@@ -30,12 +33,13 @@ function randomRange(min, max) {
 
 function chooseState(character) {
     const roll = Math.random();
+    const canJump = character.jumpCooldown <= 0 && character.jumpCount < 2;
 
-    if (roll < 0.25) {           
+    if (roll < 0.25) {
         character.state = "idle";
         character.vx = 0;
         character.timer = randomRange(300, 1000);
-    } else if (roll < 0.60) {    
+    } else if (roll < 0.60) {
         character.state = "walk";
         const walkDistance = randomRange(
             window.innerWidth < 768 ? 50 : 100,
@@ -48,16 +52,18 @@ function chooseState(character) {
             Math.max(EDGE_PADDING, character.x + direction * walkDistance)
         );
 
-        character.vx = (character.walkTargetX > character.x ? character.walkSpeed : -character.walkSpeed);
+        character.vx = character.walkTargetX > character.x ? character.walkSpeed : -character.walkSpeed;
         character.facing = Math.sign(character.vx);
 
         character.walkThinkX = Math.random() < 0.3
             ? character.x + (character.walkTargetX - character.x) * randomRange(0.2, 0.8)
             : null;
-    } else if (roll < 0.825) {   
+    } else if (roll < 0.825 && canJump) {
         character.state = "jump";
         character.vy = -0.7;
-    } else {                     
+        character.jumpCount += 1;
+        if (character.jumpCount >= 2) character.jumpCooldown = 2000; // 2s cooldown
+    } else {
         character.state = "celebrate";
         character.timer = randomRange(400, 700);
     }
@@ -72,6 +78,15 @@ function animate(now) {
     characters.forEach(character => {
         character.timer -= delta;
 
+        // reduce jump cooldown
+        if (character.jumpCooldown > 0) {
+            character.jumpCooldown -= delta;
+            if (character.jumpCooldown <= 0) {
+                character.jumpCooldown = 0;
+                character.jumpCount = 0; // reset jumps after cooldown
+            }
+        }
+
         switch (character.state) {
             case "idle":
                 character.y = 0;
@@ -83,18 +98,10 @@ function animate(now) {
                 character.y = Math.sin(now / 150);
                 character.rotation = character.y * 5;
 
-                // jump cooldown during walk
-                if (!character.jumpCooldown && Math.random() < 0.0002 * delta) {
-                    character.state = "jump";
-                    character.vy = -0.7;
-                    character.jumpCooldown = 1000;
-                }
-                if (character.jumpCooldown) character.jumpCooldown -= delta;
-
                 if (
                     character.walkThinkX !== null &&
                     ((character.vx > 0 && character.x >= character.walkThinkX) ||
-                     (character.vx < 0 && character.x <= character.walkThinkX))
+                        (character.vx < 0 && character.x <= character.walkThinkX))
                 ) {
                     character.walkThinkX = null;
                     if (Math.random() < 0.5) {
@@ -126,23 +133,47 @@ function animate(now) {
                 break;
 
             case "celebrate":
-                // trigger confetti/firework once per celebration
                 if (!character.celebrateStarted) {
                     character.celebrateStarted = true;
 
-                    setTimeout(() => {
-                        const xPos = character.x + CHARACTER_WIDTH / 2;
-                        const yPos = 0.6;
+                    const xPos = character.x + CHARACTER_WIDTH / 2;
+                    // 0.00 = top, 1.00 = bottom
+                    const rocketTargetHeight = 0.60;
+                    const duration = 700;
+                    const targetY = window.innerHeight * rocketTargetHeight;
 
-                        confetti({
-                            particleCount: 72,
-                            spread: 72,
-                            origin: { x: xPos / window.innerWidth, y: yPos }
-                        });
-                    }, 300);
+                    const rocket = document.createElement("img");
+                    rocket.src = "media/Firework_Rocket_JE2_BE2.webp";
+                    rocket.style.position = "absolute";
+                    rocket.style.width = window.innerWidth < 768 ? "32px" : "48px";
+                    rocket.style.height = window.innerWidth < 768 ? "32px" : "48px";
+                    rocket.style.left = `${xPos - (window.innerWidth < 768 ? 16 : 24)}px`;
+                    rocket.style.top = `${window.innerHeight - 50}px`;
+                    document.body.appendChild(rocket);
+
+                    const startY = window.innerHeight - 50;
+                    const startTime = performance.now();
+
+                    function animateRocket(time) {
+                        const elapsed = time - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        rocket.style.top = `${startY - progress * (startY - targetY)}px`;
+
+                        if (progress < 1) requestAnimationFrame(animateRocket);
+                        else {
+                            rocket.remove();
+                            confetti({
+                                particleCount: window.innerWidth < 768 ? 36 : 80,
+                                spread: window.innerWidth < 768 ? 50 : 80,
+                                startVelocity: window.innerWidth < 768 ? 30 : 50,
+                                origin: { x: xPos / window.innerWidth, y: rocketTargetHeight }
+                            });
+                        }
+                    }
+
+                    requestAnimationFrame(animateRocket);
                 }
 
-                // wiggle animation
                 character.y = 0;
                 character.rotation = Math.sin(now / 60) * 15;
                 character.x += Math.sin(now / 60) * 0.4;
