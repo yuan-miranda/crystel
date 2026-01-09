@@ -1,5 +1,5 @@
-const PET_WIDTH = 32;
-const EDGE_PADDING = 100;
+const PET_WIDTH = window.innerWidth < 768 ? 24 : 64;
+const EDGE_PADDING = window.innerWidth < 768 ? 32 : 128;
 
 const pets = [
     { element: yuan },
@@ -19,8 +19,8 @@ pets.forEach(pet => {
         walkTargetX: x,
         walkThinkX: null,
         rotation: 0,
-        walkSpeed: 0.06, // base walk speed
-        walkDistanceFactor: 1 // can scale distance based on speed
+        walkSpeed: window.innerWidth < 768 ? 0.06 : 0.08, // slightly faster on larger screens
+        walkDistanceFactor: 1
     });
 });
 
@@ -37,7 +37,7 @@ function chooseState(pet) {
         pet.timer = randomRange(300, 1000);
     } else if (roll < 0.75) {
         pet.state = "walk";
-        const walkDistance = randomRange(50, 550) * pet.walkDistanceFactor;
+        const walkDistance = randomRange(100, 550) * pet.walkDistanceFactor;
         const direction = Math.random() < 0.5 ? -1 : 1;
         pet.walkTargetX = Math.min(
             innerWidth - PET_WIDTH - EDGE_PADDING,
@@ -88,7 +88,7 @@ function animate(now) {
                 if (
                     pet.walkThinkX !== null &&
                     ((pet.vx > 0 && pet.x >= pet.walkThinkX) ||
-                     (pet.vx < 0 && pet.x <= pet.walkThinkX))
+                        (pet.vx < 0 && pet.x <= pet.walkThinkX))
                 ) {
                     pet.walkThinkX = null;
                     if (Math.random() < 0.5) {

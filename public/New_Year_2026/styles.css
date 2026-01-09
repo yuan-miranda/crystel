@@ -14,7 +14,15 @@ body {
 .people * {
     position: fixed;
     bottom: 0;
-    width: 32px;
-    height: 32px;
+    width: 64px;
+    height: 64px;
     background: black;
+}
+
+/* const PET_WIDTH = window.innerWidth < 768 ? 24 : 64; */
+@media (max-width: 767px) {
+    .people * {
+        width: 24px;
+        height: 24px;
+    }
 }
