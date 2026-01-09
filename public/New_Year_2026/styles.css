@@ -1,0 +1,20 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+body {
+    height: 100vh;
+}
+
+
+.people * {
+    position: fixed;
+    bottom: 0;
+    width: 32px;
+    height: 32px;
+    background: black;
+}
