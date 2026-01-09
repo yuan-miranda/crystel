@@ -12,13 +12,11 @@ body {
     user-select: none;
 }
 
-.characters * {
+.character {
     position: fixed;
     bottom: 0;
     width: 64px;
     height: 64px;
-    background-size: cover;
-    border-radius: 8px;
 
     transition: transform 0.1s linear;
     will-change: transform;
@@ -29,23 +27,29 @@ body {
     justify-content: flex-end;
 }
 
-.characters .name {
-    position: fixed;
-    bottom: 30px;
+.character .sprite {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    border-radius: 50%;
+    outline: 2px solid black;
+}
+
+.character .name {
+    position: absolute;
+    bottom: 72px;
 
     color: black;
-    background: transparent;
-    display: block;
     text-align: center;
 }
 
 @media (max-width: 767px) {
-    .characters * {
-        width: 32px;
-        height: 32px;
+    .character {
+        width: 40px;
+        height: 40px;
     }
 
-    .characters .name {
+    .character .name {
         font-size: 12px;
     }
 }

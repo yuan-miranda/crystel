@@ -1,13 +1,20 @@
-const CHARACTER_WIDTH = window.innerWidth < 768 ? 32 : 64;
-const EDGE_PADDING = window.innerWidth < 768 ? 32 : 128;
+const CHARACTER_WIDTH = onMobileResize(40, 64);
+const EDGE_PADDING = onMobileResize(40, 128);
 
 const characters = [
-    { element: yuan, image: 'media/yuan.webp' },
-    { element: crystel, image: 'media/crystel.webp' }
+    { element: yuan, name: "Yuan", image: 'media/yuan.webp' },
+    { element: crystel, name: "Crystel", image: 'media/crystel.webp' }
 ];
 
 characters.forEach(character => {
-        character.element.style.backgroundImage = `url(${character.image})`;
+    const spriteEl = character.element.querySelector('.sprite');
+    const nameEl = character.element.querySelector('.name');
+
+    spriteEl.style.backgroundImage = `url(${character.image})`;
+    nameEl.textContent = character.name;
+    nameEl.style.bottom = onMobileResize('48px', '72px');
+    character.spriteEl = spriteEl;
+
     const x = EDGE_PADDING + Math.random() * (innerWidth - CHARACTER_WIDTH - EDGE_PADDING * 2);
     Object.assign(character, {
         x,
@@ -20,15 +27,55 @@ characters.forEach(character => {
         walkTargetX: x,
         walkThinkX: null,
         rotation: 0,
-        walkSpeed: window.innerWidth < 768 ? 0.06 : 0.08,
+        walkSpeed: onMobileResize(0.06, 0.08),
         walkDistanceFactor: 1,
-        jumpCount: 0,       // track number of jumps
-        jumpCooldown: 0     // cooldown timer in ms
+        jumpCount: 0,
+        jumpCooldown: 0
     });
 });
 
+function spawnRocketParticle(x, y) {
+    const p = document.createElement("div");
+    p.style.position = "absolute";
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
+    p.style.width = "4px";
+    p.style.height = "4px";
+    p.style.borderRadius = "50%";
+    p.style.background = "red";
+    p.style.pointerEvents = "none";
+    p.style.transform = "translate(-50%, -50%)";
+    document.body.appendChild(p);
+
+    const vx = randomRange(-0.15, 0.15);
+    const vy = randomRange(0.3, 0.6);
+    const life = 300;
+    const start = performance.now();
+
+    function animate(t) {
+        const dt = t - start;
+        if (dt > life) {
+            p.remove();
+            return;
+        }
+
+        p.style.opacity = `${1 - dt / life}`;
+        p.style.transform =
+            `translate(${vx * dt}px, ${vy * dt}px) scale(${1 - dt / life})`;
+
+        requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+}
+
+
 function randomRange(min, max) {
     return min + Math.random() * (max - min);
+}
+
+function onMobileResize(mobileValue, desktopValue) {
+    return window.innerWidth < 768 ? mobileValue : desktopValue;
 }
 
 function chooseState(character) {
@@ -42,8 +89,8 @@ function chooseState(character) {
     } else if (roll < 0.60) {
         character.state = "walk";
         const walkDistance = randomRange(
-            window.innerWidth < 768 ? 50 : 100,
-            window.innerWidth < 768 ? 250 : 550
+            onMobileResize(50, 100),
+            onMobileResize(250, 550)
         ) * character.walkDistanceFactor;
 
         const direction = Math.random() < 0.5 ? -1 : 1;
@@ -62,7 +109,7 @@ function chooseState(character) {
         character.state = "jump";
         character.vy = -0.7;
         character.jumpCount += 1;
-        if (character.jumpCount >= 2) character.jumpCooldown = 2000; // 2s cooldown
+        if (character.jumpCount >= 2) character.jumpCooldown = 2000;
     } else {
         character.state = "celebrate";
         character.timer = randomRange(400, 700);
@@ -83,7 +130,7 @@ function animate(now) {
             character.jumpCooldown -= delta;
             if (character.jumpCooldown <= 0) {
                 character.jumpCooldown = 0;
-                character.jumpCount = 0; // reset jumps after cooldown
+                character.jumpCount = 0;
             }
         }
 
@@ -145,9 +192,9 @@ function animate(now) {
                     const rocket = document.createElement("img");
                     rocket.src = "media/Firework_Rocket_JE2_BE2.webp";
                     rocket.style.position = "absolute";
-                    rocket.style.width = window.innerWidth < 768 ? "32px" : "48px";
-                    rocket.style.height = window.innerWidth < 768 ? "32px" : "48px";
-                    rocket.style.left = `${xPos - (window.innerWidth < 768 ? 16 : 24)}px`;
+                    rocket.style.width = onMobileResize("32px", "48px");
+                    rocket.style.height = onMobileResize("32px", "48px");
+                    rocket.style.left = `${xPos - (onMobileResize(16, 24))}px`;
                     rocket.style.top = `${window.innerHeight - 50}px`;
                     document.body.appendChild(rocket);
 
@@ -157,15 +204,29 @@ function animate(now) {
                     function animateRocket(time) {
                         const elapsed = time - startTime;
                         const progress = Math.min(elapsed / duration, 1);
-                        rocket.style.top = `${startY - progress * (startY - targetY)}px`;
 
-                        if (progress < 1) requestAnimationFrame(animateRocket);
-                        else {
+                        const currentY = startY - progress * (startY - targetY);
+                        rocket.style.top = `${currentY}px`;
+
+                        // spawn exhaust particles (Minecraft-style trail)
+                        const rocketX =
+                            xPos;
+                        const rocketY =
+                            currentY + (onMobileResize(32, 48));
+
+                        spawnRocketParticle(
+                            rocketX + randomRange(-4, 4),
+                            rocketY
+                        );
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animateRocket);
+                        } else {
                             rocket.remove();
                             confetti({
-                                particleCount: window.innerWidth < 768 ? 36 : 80,
-                                spread: window.innerWidth < 768 ? 50 : 80,
-                                startVelocity: window.innerWidth < 768 ? 30 : 50,
+                                particleCount: onMobileResize(36, 80),
+                                spread: onMobileResize(50, 80),
+                                startVelocity: onMobileResize(30, 50),
                                 origin: { x: xPos / window.innerWidth, y: rocketTargetHeight }
                             });
                         }
@@ -185,7 +246,14 @@ function animate(now) {
                 break;
         }
 
-        character.element.style.transform = `translate(${character.x}px, ${character.y}px) rotate(${character.rotation}deg) scaleX(${character.facing})`;
+        // move character
+        character.element.style.transform =
+            `translate(${character.x}px, ${character.y}px)`;
+
+        // animate sprite only
+        character.spriteEl.style.transform =
+            `rotate(${character.rotation}deg) scaleX(${character.facing})`;
+
     });
 
     requestAnimationFrame(animate);
