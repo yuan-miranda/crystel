@@ -8,7 +8,7 @@
 
 body {
     height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Minecraft', sans-serif;
     user-select: none;
 }
 
@@ -39,7 +39,9 @@ body {
     position: absolute;
     bottom: 72px;
 
-    color: black;
+    color: white;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1px 4px;
     text-align: center;
 }
 
