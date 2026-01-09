@@ -31,13 +31,17 @@ function randomRange(min, max) {
 function chooseState(character) {
     const roll = Math.random();
 
-    if (roll < 0.25) {           // 25% idle
+    if (roll < 0.25) {           
         character.state = "idle";
         character.vx = 0;
         character.timer = randomRange(300, 1000);
-    } else if (roll < 0.75) {    // 50% walk
+    } else if (roll < 0.60) {    
         character.state = "walk";
-        const walkDistance = randomRange(100, 550) * character.walkDistanceFactor;
+        const walkDistance = randomRange(
+            window.innerWidth < 768 ? 50 : 100,
+            window.innerWidth < 768 ? 250 : 550
+        ) * character.walkDistanceFactor;
+
         const direction = Math.random() < 0.5 ? -1 : 1;
         character.walkTargetX = Math.min(
             innerWidth - CHARACTER_WIDTH - EDGE_PADDING,
@@ -50,10 +54,10 @@ function chooseState(character) {
         character.walkThinkX = Math.random() < 0.3
             ? character.x + (character.walkTargetX - character.x) * randomRange(0.2, 0.8)
             : null;
-    } else if (roll < 0.875) {   // 12.5% jump
+    } else if (roll < 0.825) {   
         character.state = "jump";
         character.vy = -0.7;
-    } else {                     // 12.5% celebrate
+    } else {                     
         character.state = "celebrate";
         character.timer = randomRange(400, 700);
     }
@@ -79,6 +83,7 @@ function animate(now) {
                 character.y = Math.sin(now / 150);
                 character.rotation = character.y * 5;
 
+                // jump cooldown during walk
                 if (!character.jumpCooldown && Math.random() < 0.0002 * delta) {
                     character.state = "jump";
                     character.vy = -0.7;
@@ -89,7 +94,7 @@ function animate(now) {
                 if (
                     character.walkThinkX !== null &&
                     ((character.vx > 0 && character.x >= character.walkThinkX) ||
-                        (character.vx < 0 && character.x <= character.walkThinkX))
+                     (character.vx < 0 && character.x <= character.walkThinkX))
                 ) {
                     character.walkThinkX = null;
                     if (Math.random() < 0.5) {
@@ -121,10 +126,31 @@ function animate(now) {
                 break;
 
             case "celebrate":
+                // trigger confetti/firework once per celebration
+                if (!character.celebrateStarted) {
+                    character.celebrateStarted = true;
+
+                    setTimeout(() => {
+                        const xPos = character.x + CHARACTER_WIDTH / 2;
+                        const yPos = 0.6;
+
+                        confetti({
+                            particleCount: 72,
+                            spread: 72,
+                            origin: { x: xPos / window.innerWidth, y: yPos }
+                        });
+                    }, 300);
+                }
+
+                // wiggle animation
                 character.y = 0;
                 character.rotation = Math.sin(now / 60) * 15;
                 character.x += Math.sin(now / 60) * 0.4;
-                if (character.timer <= 0) chooseState(character);
+
+                if (character.timer <= 0) {
+                    chooseState(character);
+                    character.celebrateStarted = false;
+                }
                 break;
         }
 
