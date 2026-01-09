@@ -1,14 +1,14 @@
-const PET_WIDTH = window.innerWidth < 768 ? 24 : 64;
+const CHARACTER_WIDTH = window.innerWidth < 768 ? 24 : 64;
 const EDGE_PADDING = window.innerWidth < 768 ? 32 : 128;
 
-const pets = [
+const characters = [
     { element: yuan },
     { element: crystel }
 ];
 
-pets.forEach(pet => {
-    const x = EDGE_PADDING + Math.random() * (innerWidth - PET_WIDTH - EDGE_PADDING * 2);
-    Object.assign(pet, {
+characters.forEach(character => {
+    const x = EDGE_PADDING + Math.random() * (innerWidth - CHARACTER_WIDTH - EDGE_PADDING * 2);
+    Object.assign(character, {
         x,
         y: 0,
         vx: 0,
@@ -19,7 +19,7 @@ pets.forEach(pet => {
         walkTargetX: x,
         walkThinkX: null,
         rotation: 0,
-        walkSpeed: window.innerWidth < 768 ? 0.06 : 0.08, // slightly faster on larger screens
+        walkSpeed: window.innerWidth < 768 ? 0.06 : 0.08,
         walkDistanceFactor: 1
     });
 });
@@ -28,34 +28,34 @@ function randomRange(min, max) {
     return min + Math.random() * (max - min);
 }
 
-function chooseState(pet) {
+function chooseState(character) {
     const roll = Math.random();
 
-    if (roll < 0.35) {
-        pet.state = "idle";
-        pet.vx = 0;
-        pet.timer = randomRange(300, 1000);
-    } else if (roll < 0.75) {
-        pet.state = "walk";
-        const walkDistance = randomRange(100, 550) * pet.walkDistanceFactor;
+    if (roll < 0.25) {           // 25% idle
+        character.state = "idle";
+        character.vx = 0;
+        character.timer = randomRange(300, 1000);
+    } else if (roll < 0.75) {    // 50% walk
+        character.state = "walk";
+        const walkDistance = randomRange(100, 550) * character.walkDistanceFactor;
         const direction = Math.random() < 0.5 ? -1 : 1;
-        pet.walkTargetX = Math.min(
-            innerWidth - PET_WIDTH - EDGE_PADDING,
-            Math.max(EDGE_PADDING, pet.x + direction * walkDistance)
+        character.walkTargetX = Math.min(
+            innerWidth - CHARACTER_WIDTH - EDGE_PADDING,
+            Math.max(EDGE_PADDING, character.x + direction * walkDistance)
         );
 
-        pet.vx = (pet.walkTargetX > pet.x ? pet.walkSpeed : -pet.walkSpeed);
-        pet.facing = Math.sign(pet.vx);
+        character.vx = (character.walkTargetX > character.x ? character.walkSpeed : -character.walkSpeed);
+        character.facing = Math.sign(character.vx);
 
-        pet.walkThinkX = Math.random() < 0.3
-            ? pet.x + (pet.walkTargetX - pet.x) * randomRange(0.2, 0.8)
+        character.walkThinkX = Math.random() < 0.3
+            ? character.x + (character.walkTargetX - character.x) * randomRange(0.2, 0.8)
             : null;
-    } else if (roll < 0.9) {
-        pet.state = "jump";
-        pet.vy = -0.7;
-    } else {
-        pet.state = "celebrate";
-        pet.timer = randomRange(400, 700);
+    } else if (roll < 0.875) {   // 12.5% jump
+        character.state = "jump";
+        character.vy = -0.7;
+    } else {                     // 12.5% celebrate
+        character.state = "celebrate";
+        character.timer = randomRange(400, 700);
     }
 }
 
@@ -65,69 +65,70 @@ function animate(now) {
     const delta = now - lastTime;
     lastTime = now;
 
-    pets.forEach(pet => {
-        pet.timer -= delta;
+    characters.forEach(character => {
+        character.timer -= delta;
 
-        switch (pet.state) {
+        switch (character.state) {
             case "idle":
-                pet.y = 0;
-                pet.rotation = 0;
-                if (pet.timer <= 0) chooseState(pet);
+                character.y = 0;
+                character.rotation = 0;
+                if (character.timer <= 0) chooseState(character);
                 break;
 
             case "walk":
-                pet.y = Math.sin(now / 150);
-                pet.rotation = pet.y * 5;
+                character.y = Math.sin(now / 150);
+                character.rotation = character.y * 5;
 
-                if (Math.random() < 0.0005 * delta) {
-                    pet.state = "jump";
-                    pet.vy = -0.7;
-                    break;
+                if (!character.jumpCooldown && Math.random() < 0.0002 * delta) {
+                    character.state = "jump";
+                    character.vy = -0.7;
+                    character.jumpCooldown = 1000;
                 }
+                if (character.jumpCooldown) character.jumpCooldown -= delta;
 
                 if (
-                    pet.walkThinkX !== null &&
-                    ((pet.vx > 0 && pet.x >= pet.walkThinkX) ||
-                        (pet.vx < 0 && pet.x <= pet.walkThinkX))
+                    character.walkThinkX !== null &&
+                    ((character.vx > 0 && character.x >= character.walkThinkX) ||
+                        (character.vx < 0 && character.x <= character.walkThinkX))
                 ) {
-                    pet.walkThinkX = null;
+                    character.walkThinkX = null;
                     if (Math.random() < 0.5) {
-                        pet.state = "idle";
-                        pet.vx = 0;
-                        pet.timer = randomRange(300, 800);
+                        character.state = "idle";
+                        character.vx = 0;
+                        character.timer = randomRange(300, 800);
                     } else {
-                        pet.state = "jump";
-                        pet.vy = -0.7;
+                        character.state = "jump";
+                        character.vy = -0.7;
                     }
                     break;
                 }
 
-                pet.x += pet.vx * delta;
-                if (pet.vx > 0) pet.x = Math.min(pet.x, pet.walkTargetX);
-                else pet.x = Math.max(pet.x, pet.walkTargetX);
+                character.x += character.vx * delta;
+                if (character.vx > 0) character.x = Math.min(character.x, character.walkTargetX);
+                else character.x = Math.max(character.x, character.walkTargetX);
 
-                if (pet.x === pet.walkTargetX) chooseState(pet);
+                if (character.x === character.walkTargetX) chooseState(character);
                 break;
 
             case "jump":
-                pet.vy += 0.002 * delta;
-                pet.y += pet.vy * delta;
-                pet.rotation = Math.sin(now / 100) * 10;
-                if (pet.y >= 0) {
-                    pet.y = 0;
-                    chooseState(pet);
+                character.vy += 0.002 * delta;
+                character.y += character.vy * delta;
+                character.rotation = Math.sin(now / 100) * 10;
+                if (character.y >= 0) {
+                    character.y = 0;
+                    chooseState(character);
                 }
                 break;
 
             case "celebrate":
-                pet.y = 0;
-                pet.rotation = Math.sin(now / 60) * 15;
-                pet.x += Math.sin(now / 60) * 0.4;
-                if (pet.timer <= 0) chooseState(pet);
+                character.y = 0;
+                character.rotation = Math.sin(now / 60) * 15;
+                character.x += Math.sin(now / 60) * 0.4;
+                if (character.timer <= 0) chooseState(character);
                 break;
         }
 
-        pet.element.style.transform = `translate(${pet.x}px, ${pet.y}px) rotate(${pet.rotation}deg) scaleX(${pet.facing})`;
+        character.element.style.transform = `translate(${character.x}px, ${character.y}px) rotate(${character.rotation}deg) scaleX(${character.facing})`;
     });
 
     requestAnimationFrame(animate);
