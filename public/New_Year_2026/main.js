@@ -9,6 +9,33 @@ const characters = [
     { name: "Crystel", image: "media/crystel.webp" }
 ];
 
+const newYearMessages = [
+    "Happy New Year!",
+    "Cheers sa 2026!",
+    "New year, new adventures!",
+    "Let's celebrate na!",
+    "Wishing you joy this year!",
+    "Fireworks time na!",
+    "Good vibes lang!",
+    "Fresh start ulit!",
+    "Sino ready sa snacks?",
+    "Grabe yung confetti!",
+    "May party ba dito?",
+
+    "Kaya kong tumalon mas mataas sayo, {other}!",
+    "Uy {other}, iwasan mo yung confetti!",
+    "2026 na—atin 'to, {other}!",
+    "{other}, wag mong i-hoard yung fireworks!",
+    "Ako na una sa sayaw, {other}!",
+    "{other}, ang shiny mo today ah!",
+    "Hoy {other}, wag kang mahulog dyan!",
+    "New year, same kalokohan, {other}!",
+    "Uy {other}, wish ka na!",
+    "{other}, ready ka na ba sa chaos?",
+    "Grabe, parang masaya tong year na 'to ah, {other}!",
+    "Tumalon talon ka naman, {other}!",
+];
+
 const container = document.querySelector(".characters");
 
 characters.forEach(character => {
@@ -49,6 +76,49 @@ characters.forEach(character => {
         jumpCooldown: 0
     });
 });
+
+characters.forEach(c => {
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble";
+    bubble.style.position = "absolute";
+    bubble.style.padding = "4px 8px";
+    bubble.style.background = "rgba(255, 255, 255, 0.9)";
+    bubble.style.border = "1px solid #ccc";
+    bubble.style.borderRadius = "12px";
+    bubble.style.fontSize = "12px";
+    bubble.style.whiteSpace = "nowrap";
+    bubble.style.pointerEvents = "none";
+    bubble.style.opacity = 0;
+    c.element.appendChild(bubble);
+    c.bubbleEl = bubble;
+    c.bubbleTimer = 0;
+});
+
+function getRandomMessage(currentCharacter) {
+    let msg = newYearMessages[Math.floor(Math.random() * newYearMessages.length)];
+    if (msg.includes("{other}")) {
+        const others = characters.filter(c => c !== currentCharacter);
+        const otherCharacter = others[Math.floor(Math.random() * others.length)];
+        msg = msg.replace("{other}", otherCharacter.name);
+    }
+    return msg;
+}
+
+function updateBubbles(delta) {
+    characters.forEach(c => {
+        if (c.bubbleTimer > 0) {
+            c.bubbleTimer -= delta;
+            if (c.bubbleTimer <= 0) c.bubbleEl.style.opacity = 0;
+        } else if (Math.random() < 0.003) { // lower chance for natural timing
+            c.bubbleEl.textContent = getRandomMessage(c);
+            c.bubbleEl.style.opacity = 1;
+            c.bubbleTimer = 3500; // slightly longer display
+        }
+
+        c.bubbleEl.style.left = `${CHARACTER_WIDTH / 2}px`;
+        c.bubbleEl.style.bottom = onMobileResize("72px", "100px");
+    });
+}
 
 function spawnRocketParticle(x, y) {
     const p = document.createElement("div");
@@ -125,8 +195,13 @@ function animate(now) {
     const delta = now - lastTime;
     lastTime = now;
 
+        updateBubbles(delta);
+
     characters.forEach(c => {
         c.timer -= delta;
+
+        
+
 
         if (c.jumpCooldown > 0) {
             c.jumpCooldown -= delta;
