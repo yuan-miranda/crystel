@@ -81,3 +81,17 @@ h1 {
     z-index: 1;
     margin: 1rem;
 }
+
+@media (max-width: 50rem) {
+    .title {
+        font-size: 1rem;
+    }
+
+    .description {
+        font-size: 0.9rem;
+    }
+
+    .selection-item #date {
+        font-size: 0.8rem;
+    }
+}
