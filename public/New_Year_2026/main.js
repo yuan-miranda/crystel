@@ -51,8 +51,14 @@ characters.forEach(character => {
     nameTag.textContent = character.name;
     nameTag.style.bottom = onMobileResize("48px", "72px");
 
-    characterElement.append(sprite, nameTag);
+    const bubbleEl = document.createElement("div");
+    bubbleEl.className = "bubble";
+
+    characterElement.append(sprite, nameTag, bubbleEl);
     container.appendChild(characterElement);
+
+    character.bubbleEl = bubbleEl;
+    character.bubbleTimer = 0;
 
     const x = EDGE_PADDING + Math.random() * (innerWidth - CHARACTER_WIDTH - EDGE_PADDING * 2);
 
@@ -97,15 +103,6 @@ function closeOpening() {
         }, 200);
     }, 100);
 }
-
-characters.forEach(c => {
-    const bubbleEl = document.createElement("div");
-    bubbleEl.className = "bubble";
-
-    c.element.appendChild(bubbleEl);
-    c.bubbleEl = bubbleEl;
-    c.bubbleTimer = 0;
-});
 
 function getRandomMessage(currentCharacter) {
     let msg = newYearMessages[Math.floor(Math.random() * newYearMessages.length)];
