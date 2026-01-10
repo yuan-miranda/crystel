@@ -12,6 +12,18 @@ body {
     user-select: none;
 }
 
+.bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    pointer-events: none;
+    filter: brightness(0.7) blur(2px);
+}
+
 .character {
     position: fixed;
     bottom: 0;
@@ -32,7 +44,7 @@ body {
     height: 100%;
     background-size: cover;
     border-radius: 50%;
-    outline: 2px solid black;
+    outline: 2px solid white;
 }
 
 .character .name {
@@ -40,9 +52,22 @@ body {
     bottom: 72px;
 
     color: white;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     padding: 1px 4px;
     text-align: center;
+}
+
+.character .bubble {
+    position: absolute;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid black;
+    border-radius: 12px;
+    white-space: nowrap;
+    text-align: center;
+    transition: opacity 0.5s ease;
+
+    opacity: 0;
 }
 
 @media (max-width: 767px) {

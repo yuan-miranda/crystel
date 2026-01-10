@@ -77,20 +77,33 @@ characters.forEach(character => {
     });
 });
 
+function createOpeningScreen() {
+    const openingScreen = document.getElementById('openingScreen');
+    openingScreen.innerHTML = `
+        <div class="opening-content">
+            <h1 class="opening-title" id="openingTitle">Happy New Year Crystel!</h1>
+            <p class="click-instruction">Click anywhere</p>
+        </div>
+    `;
+}
+
+function closeOpening() {
+    const screen = document.getElementById('openingScreen');
+    setTimeout(() => {
+        screen.classList.add('fade-out');
+        setTimeout(() => {
+            screen.remove();
+            document.querySelector('footer').style.display = 'flex';
+        }, 200);
+    }, 100);
+}
+
 characters.forEach(c => {
-    const bubble = document.createElement("div");
-    bubble.className = "chat-bubble";
-    bubble.style.position = "absolute";
-    bubble.style.padding = "4px 8px";
-    bubble.style.background = "rgba(255, 255, 255, 0.9)";
-    bubble.style.border = "1px solid #ccc";
-    bubble.style.borderRadius = "12px";
-    bubble.style.fontSize = "12px";
-    bubble.style.whiteSpace = "nowrap";
-    bubble.style.pointerEvents = "none";
-    bubble.style.opacity = 0;
-    c.element.appendChild(bubble);
-    c.bubbleEl = bubble;
+    const bubbleEl = document.createElement("div");
+    bubbleEl.className = "bubble";
+
+    c.element.appendChild(bubbleEl);
+    c.bubbleEl = bubbleEl;
     c.bubbleTimer = 0;
 });
 
@@ -195,13 +208,10 @@ function animate(now) {
     const delta = now - lastTime;
     lastTime = now;
 
-        updateBubbles(delta);
+    updateBubbles(delta);
 
     characters.forEach(c => {
         c.timer -= delta;
-
-        
-
 
         if (c.jumpCooldown > 0) {
             c.jumpCooldown -= delta;
@@ -267,6 +277,9 @@ function animate(now) {
                     });
                     document.body.appendChild(rocket);
 
+                    // Play overlapping firework sound
+                    new Audio("media/fireworks-13-419033.mp3").play();
+
                     const startTime = performance.now();
                     requestAnimationFrame(function animateRocket(time) {
                         const progress = Math.min((time - startTime) / duration, 1);
@@ -274,7 +287,15 @@ function animate(now) {
                         rocket.style.top = `${currentY}px`;
                         spawnRocketParticle(xPos + randomRange(-4, 4), currentY + onMobileResize(32, 48));
                         if (progress < 1) requestAnimationFrame(animateRocket);
-                        else { rocket.remove(); confetti({ particleCount: onMobileResize(36, 80), spread: onMobileResize(50, 80), startVelocity: onMobileResize(30, 50), origin: { x: xPos / window.innerWidth, y: rocketTargetHeight } }); }
+                        else {
+                            rocket.remove();
+                            confetti({
+                                particleCount: onMobileResize(36, 80),
+                                spread: onMobileResize(50, 80),
+                                startVelocity: onMobileResize(30, 50),
+                                origin: { x: xPos / window.innerWidth, y: rocketTargetHeight }
+                            });
+                        }
                     });
                 }
                 c.y = 0;
@@ -291,5 +312,15 @@ function animate(now) {
     requestAnimationFrame(animate);
 }
 
-requestAnimationFrame(animate);
+
+document.addEventListener('DOMContentLoaded', () => {
+
+
+    createOpeningScreen();
+    const openingScreen = document.getElementById('openingScreen');
+    openingScreen.addEventListener('click', () => {
+        closeOpening();
+        requestAnimationFrame(animate);
+    });
+});
 window.addEventListener('resize', () => window.location.reload());

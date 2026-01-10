@@ -1,0 +1,38 @@
+.opening-screen {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+    background: white;
+    width: 100vw;
+    height: 100vh;
+}
+
+.opening-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.opening-content {
+    z-index: 1;
+    max-width: 80%;
+    text-align: center;
+}
+
+.opening-title {
+    margin-bottom: 1rem;
+    color: #666;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.click-instruction {
+    opacity: 0.8;
+    color: #999;
+}
