@@ -56,8 +56,8 @@ body {
 
 .zone {
     position: absolute;
-    width: 150px;
-    height: 150px;
+    /* width: 150px;
+    height: 150px; */
     top: 40px;
     border: 2px dashed #666;
     display: flex;
