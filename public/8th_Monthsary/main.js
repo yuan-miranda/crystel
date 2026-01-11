@@ -6,11 +6,10 @@ const zones = [
 
 const blocks = [];
 const speed = 4;
-const spawnInterval = 1200; // ms between spawns
+const spawnInterval = 1200;
 const MAX_BLOCKS = 4;
 const BLOCK_GAP = 16;
 
-/* ================== BLOCK SPAWN ================== */
 function spawnBlock() {
     if (blocks.length >= MAX_BLOCKS) return;
 
@@ -40,7 +39,6 @@ function positionBlockAtConveyor(block) {
         rect.top + (rect.height - block.el.offsetHeight) / 2 + "px";
 }
 
-/* ================== DRAG ================== */
 function enableDrag(block) {
     const el = block.el;
 
@@ -59,16 +57,14 @@ function onDragStart(e, block) {
     block.offsetY = e.clientY - rect.top;
 
     block.el.setPointerCapture(e.pointerId);
-    block.el.style.cursor = "grabbing";
+    block.el.classList.add("dragging");
 
-    // Create placeholder
     const ph = document.createElement("div");
     ph.className = "block placeholder";
     ph.style.width = block.el.offsetWidth + "px";
     ph.style.height = block.el.offsetHeight + "px";
-    // ph.style.borderRadius = block.el.style.borderRadius;
-    ph.style.position = "absolute";
-    ph.x = block.x; // track x for smooth movement
+    ph.x = block.x;
+
     document.body.appendChild(ph);
     block.placeholder = ph;
 }
@@ -90,22 +86,16 @@ function onDragMove(e, block) {
 function onDragEnd(block) {
     if (!block.dragging) return;
     block.dragging = false;
-    block.el.style.cursor = "grab";
+    block.el.classList.remove("dragging");
 
-    // Remove placeholder
     if (block.placeholder) {
-        // Fade out first
-        block.placeholder.style.opacity = 0;
+        block.placeholder.classList.add("fade-out");
         setTimeout(() => {
-            if (block.placeholder) {
-                block.placeholder.remove();
-                block.placeholder = null;
-            }
-        }, 600); // match CSS transition duration
+            block.placeholder?.remove();
+            block.placeholder = null;
+        }, 600);
     }
 
-
-    // Remove from blocks array so conveyor loop won't move it
     const index = blocks.indexOf(block);
     if (index !== -1) blocks.splice(index, 1);
 
@@ -116,7 +106,6 @@ function onDragEnd(block) {
     }
 }
 
-/* ================== ZONES ================== */
 function isOverZone(el) {
     const rect = el.getBoundingClientRect();
     return zones.some(zone => {
@@ -128,13 +117,11 @@ function isOverZone(el) {
     });
 }
 
-/* ================== POP ================== */
 function popBlock(block) {
     block.el.classList.add("pop");
     setTimeout(() => block.el.remove(), 1000);
 }
 
-/* ================== LOOP ================== */
 function loop() {
     const rect = conveyor.getBoundingClientRect();
     const centerY = rect.top + (rect.height - getBlockHeight()) / 2;
@@ -144,7 +131,6 @@ function loop() {
         const targetX = window.innerWidth / 2 - w / 2 - index * (w + BLOCK_GAP);
 
         if (!block.dragging) {
-            // Move block normally along conveyor
             if (block.x < targetX) {
                 block.x += speed;
                 if (block.x > targetX) block.x = targetX;
@@ -153,7 +139,6 @@ function loop() {
             block.el.style.top = centerY + "px";
         }
 
-        // Smooth placeholder movement
         if (block.dragging && block.placeholder) {
             if (block.placeholder.x < targetX) {
                 block.placeholder.x += speed;
@@ -167,7 +152,6 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-/* ================== UTILS ================== */
 function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
 }
@@ -176,6 +160,5 @@ function getBlockHeight() {
     return blocks[0]?.el.offsetHeight || 0;
 }
 
-/* ================== INIT ================== */
 loop();
 setInterval(spawnBlock, spawnInterval);

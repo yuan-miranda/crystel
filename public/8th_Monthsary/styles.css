@@ -16,7 +16,6 @@ body {
     height: 100vh;
 }
 
-/* Conveyor */
 #conveyor-wrapper {
     position: absolute;
     top: 50%;
@@ -35,7 +34,6 @@ body {
     position: relative;
 }
 
-/* Blocks */
 .block {
     position: absolute;
     width: 100px;
@@ -43,16 +41,19 @@ body {
     border-radius: 8px;
     cursor: grab;
     z-index: 10;
-    transition: transform 1s ease, opacity 1s ease;
     touch-action: none;
+    transition: transform 1s ease, opacity 1s ease;
 }
 
-.pop {
+.block.dragging {
+    cursor: grabbing;
+}
+
+.block.pop {
     transform: scale(0);
     opacity: 0;
 }
 
-/* Zones */
 .zone {
     position: absolute;
     width: 150px;
@@ -78,12 +79,14 @@ body {
 .block.placeholder {
     background: rgba(0, 0, 0, 0.4);
     border: 2px dashed #333;
-    position: absolute;
     pointer-events: none;
     transition: opacity 0.6s ease, left 0.2s ease, top 0.2s ease;
 }
 
-/* Mobile scaling */
+.block.placeholder.fade-out {
+    opacity: 0;
+}
+
 @media (max-width: 50rem) {
     #conveyor-wrapper {
         height: 15vh;
