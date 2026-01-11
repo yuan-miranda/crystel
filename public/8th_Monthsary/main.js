@@ -1,121 +1,181 @@
 const conveyor = document.getElementById("conveyor");
-const zones = [document.getElementById("zone-left"), document.getElementById("zone-right")];
+const zones = [
+    document.getElementById("zone-left"),
+    document.getElementById("zone-right")
+];
 
-let block = null;
-let x = -120;
+const blocks = [];
 const speed = 4;
+const spawnInterval = 1200; // ms between spawns
+const MAX_BLOCKS = 4;
+const BLOCK_GAP = 16;
 
-let dragging = false;
-let offsetX = 0;
-let offsetY = 0;
-
-/* ================== BLOCK ================== */
-
+/* ================== BLOCK SPAWN ================== */
 function spawnBlock() {
-  block = document.createElement("div");
-  block.className = "block";
-  block.style.background = `hsl(${Math.random() * 360},70%,55%)`;
+    if (blocks.length >= MAX_BLOCKS) return;
 
-  x = -120;
-  document.body.appendChild(block);
+    const el = document.createElement("div");
+    el.className = "block";
+    el.style.background = `hsl(${Math.random() * 360},70%,55%)`;
+    document.body.appendChild(el);
 
-  positionBlockAtConveyor(block);
-  enableDrag(block);
+    const block = {
+        el,
+        x: -el.offsetWidth,
+        dragging: false,
+        offsetX: 0,
+        offsetY: 0,
+        placeholder: null
+    };
+
+    positionBlockAtConveyor(block);
+    enableDrag(block);
+    blocks.push(block);
 }
 
-function positionBlockAtConveyor(el) {
-  const rect = conveyor.getBoundingClientRect();
-  el.style.left = x + "px";
-  el.style.top = rect.top + (rect.height - el.offsetHeight) / 2 + "px";
+function positionBlockAtConveyor(block) {
+    const rect = conveyor.getBoundingClientRect();
+    block.el.style.left = block.x + "px";
+    block.el.style.top =
+        rect.top + (rect.height - block.el.offsetHeight) / 2 + "px";
 }
 
 /* ================== DRAG ================== */
+function enableDrag(block) {
+    const el = block.el;
 
-function enableDrag(el) {
-  el.addEventListener("pointerdown", onDragStart, { passive: false });
-  el.addEventListener("pointermove", onDragMove, { passive: false });
-  el.addEventListener("pointerup", onDragEnd);
-  el.addEventListener("pointercancel", onDragEnd);
+    el.addEventListener("pointerdown", e => onDragStart(e, block), { passive: false });
+    el.addEventListener("pointermove", e => onDragMove(e, block), { passive: false });
+    el.addEventListener("pointerup", () => onDragEnd(block));
+    el.addEventListener("pointercancel", () => onDragEnd(block));
 }
 
-function onDragStart(e) {
-  e.preventDefault();
+function onDragStart(e, block) {
+    e.preventDefault();
+    block.dragging = true;
 
-  dragging = true;
-  const rect = block.getBoundingClientRect();
+    const rect = block.el.getBoundingClientRect();
+    block.offsetX = e.clientX - rect.left;
+    block.offsetY = e.clientY - rect.top;
 
-  offsetX = e.clientX - rect.left;
-  offsetY = e.clientY - rect.top;
+    block.el.setPointerCapture(e.pointerId);
+    block.el.style.cursor = "grabbing";
 
-  block.setPointerCapture(e.pointerId);
-  block.style.cursor = "grabbing";
+    // Create placeholder
+    const ph = document.createElement("div");
+    ph.className = "block placeholder";
+    ph.style.width = block.el.offsetWidth + "px";
+    ph.style.height = block.el.offsetHeight + "px";
+    // ph.style.borderRadius = block.el.style.borderRadius;
+    ph.style.position = "absolute";
+    ph.x = block.x; // track x for smooth movement
+    document.body.appendChild(ph);
+    block.placeholder = ph;
 }
 
-function onDragMove(e) {
-  if (!dragging) return;
-  e.preventDefault();
+function onDragMove(e, block) {
+    if (!block.dragging) return;
+    e.preventDefault();
 
-  let left = e.clientX - offsetX;
-  let top = e.clientY - offsetY;
+    let left = e.clientX - block.offsetX;
+    let top = e.clientY - block.offsetY;
 
-  // Clamp inside viewport
-  left = Math.max(0, Math.min(window.innerWidth - block.offsetWidth, left));
-  top = Math.max(0, Math.min(window.innerHeight - block.offsetHeight, top));
+    left = clamp(left, 0, window.innerWidth - block.el.offsetWidth);
+    top = clamp(top, 0, window.innerHeight - block.el.offsetHeight);
 
-  block.style.left = left + "px";
-  block.style.top = top + "px";
+    block.el.style.left = left + "px";
+    block.el.style.top = top + "px";
 }
 
-function onDragEnd() {
-  if (!dragging) return;
-  dragging = false;
+function onDragEnd(block) {
+    if (!block.dragging) return;
+    block.dragging = false;
+    block.el.style.cursor = "grab";
 
-  block.style.cursor = "grab";
+    // Remove placeholder
+    if (block.placeholder) {
+        // Fade out first
+        block.placeholder.style.opacity = 0;
+        setTimeout(() => {
+            if (block.placeholder) {
+                block.placeholder.remove();
+                block.placeholder = null;
+            }
+        }, 600); // match CSS transition duration
+    }
 
-  if (isOverZone(block)) {
-    block.remove();
-  } else {
-    popBlock(block);
-  }
 
-  spawnBlock();
+    // Remove from blocks array so conveyor loop won't move it
+    const index = blocks.indexOf(block);
+    if (index !== -1) blocks.splice(index, 1);
+
+    if (isOverZone(block.el)) {
+        block.el.remove();
+    } else {
+        popBlock(block);
+    }
 }
 
 /* ================== ZONES ================== */
-
 function isOverZone(el) {
-  const rect = el.getBoundingClientRect();
-  return zones.some(zone => {
-    const z = zone.getBoundingClientRect();
-    return !(rect.right < z.left || rect.left > z.right || rect.bottom < z.top || rect.top > z.bottom);
-  });
+    const rect = el.getBoundingClientRect();
+    return zones.some(zone => {
+        const z = zone.getBoundingClientRect();
+        return !(rect.right < z.left ||
+            rect.left > z.right ||
+            rect.bottom < z.top ||
+            rect.top > z.bottom);
+    });
 }
 
-function popBlock(el) {
-  el.classList.add("pop");
-  setTimeout(() => el.remove(), 1000);
+/* ================== POP ================== */
+function popBlock(block) {
+    block.el.classList.add("pop");
+    setTimeout(() => block.el.remove(), 1000);
 }
 
 /* ================== LOOP ================== */
-
 function loop() {
-  if (block && !dragging) {
-    const centerX = window.innerWidth / 2 - block.offsetWidth / 2;
     const rect = conveyor.getBoundingClientRect();
-    const centerY = rect.top + (rect.height - block.offsetHeight) / 2;
+    const centerY = rect.top + (rect.height - getBlockHeight()) / 2;
 
-    if (x < centerX) {
-      x += speed;
-      if (x > centerX) x = centerX;
-    }
+    blocks.forEach((block, index) => {
+        const w = block.el.offsetWidth;
+        const targetX = window.innerWidth / 2 - w / 2 - index * (w + BLOCK_GAP);
 
-    block.style.left = x + "px";
-    block.style.top = centerY + "px";
-  }
-  requestAnimationFrame(loop);
+        if (!block.dragging) {
+            // Move block normally along conveyor
+            if (block.x < targetX) {
+                block.x += speed;
+                if (block.x > targetX) block.x = targetX;
+            }
+            block.el.style.left = block.x + "px";
+            block.el.style.top = centerY + "px";
+        }
+
+        // Smooth placeholder movement
+        if (block.dragging && block.placeholder) {
+            if (block.placeholder.x < targetX) {
+                block.placeholder.x += speed;
+                if (block.placeholder.x > targetX) block.placeholder.x = targetX;
+            }
+            block.placeholder.style.left = block.placeholder.x + "px";
+            block.placeholder.style.top = centerY + "px";
+        }
+    });
+
+    requestAnimationFrame(loop);
+}
+
+/* ================== UTILS ================== */
+function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+}
+
+function getBlockHeight() {
+    return blocks[0]?.el.offsetHeight || 0;
 }
 
 /* ================== INIT ================== */
-
-spawnBlock();
 loop();
+setInterval(spawnBlock, spawnInterval);
