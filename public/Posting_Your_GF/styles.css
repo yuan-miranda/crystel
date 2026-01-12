@@ -126,6 +126,7 @@ footer {
     }
 }
 
+/* mobile */
 .photo-container {
     display: block;
     margin-top: 2rem;
@@ -162,6 +163,7 @@ footer {
     text-align: center;
 }
 
+/* desktop */
 @media (min-width: 48rem) {
     .photo-container {
         column-count: 2;
