@@ -1,3 +1,4 @@
+let index = 0;
 const messages = [
     "I loveee youuuuu 😄",
     "AHHAHAHHAA",
@@ -12,8 +13,6 @@ const messages = [
     "Happy 4th Monthsary,",
     "Here's to forever - one month at a time 🥂"
 ];
-
-let index = 0;
 
 function showCarousel() {
     document.getElementById("carousel").style.display = "block";
@@ -56,5 +55,5 @@ function startHearts() {
 
     setTimeout(() => {
         clearInterval(interval);
-    }, 10000000000);
+    }, 10000000000); // lol
 }

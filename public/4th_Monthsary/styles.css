@@ -109,6 +109,8 @@ p {
 }
 
 footer {
+    position: absolute;
+    bottom: 1rem;
     margin-top: 2rem;
 }
 
@@ -125,16 +127,16 @@ footer a:hover {
 
 @media (max-width: 50rem) {
     h1 {
-        font-size: 2rem;
+        font-size: 1.4rem;
     }
 
     p {
         padding: 0 1rem;
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 
     .heart-button {
-        padding: 1rem 1.5rem;
+        padding: 0.8rem 1rem;
         font-size: 1rem;
     }
 
