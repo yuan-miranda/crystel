@@ -148,7 +148,6 @@ body {
 
 footer {
     display: none;
-    margin-top: 2rem;
 }
 
 footer a {
@@ -160,4 +159,8 @@ footer a {
 footer a:hover {
     color: #e754a3;
     text-decoration: underline;
+}
+
+@media (max-width: 50rem) {
+    
 }
