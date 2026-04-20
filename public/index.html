@@ -5,101 +5,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select one</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        window.addEventListener('pageshow', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        });
+
+        const formatMonthYear = (date) => {
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                month: 'long',
+                year: 'numeric'
+            });
+            return formatter.format(date);
+        };
+
+        const updateTimelineMeta = () => {
+            const dateNodes = Array.from(document.querySelectorAll('.cards-grid .date'));
+            if (dateNodes.length === 0) {
+                return;
+            }
+
+            const parsedDates = dateNodes
+                .map((node) => new Date(node.textContent.trim()))
+                .filter((date) => !Number.isNaN(date.getTime()))
+                .sort((a, b) => a - b);
+
+            if (parsedDates.length === 0) {
+                return;
+            }
+
+            const firstDate = parsedDates[0];
+            const lastDate = parsedDates[parsedDates.length - 1];
+
+            const entriesPill = document.getElementById('entries-pill');
+            const rangePill = document.getElementById('range-pill');
+
+            if (entriesPill) {
+                const suffix = dateNodes.length === 1 ? 'entry' : 'entries';
+                entriesPill.textContent = `${dateNodes.length} ${suffix}`;
+            }
+
+            if (rangePill) {
+                rangePill.textContent = `${formatMonthYear(firstDate)} to ${formatMonthYear(lastDate)}`;
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', updateTimelineMeta);
+    </script>
 </head>
 
-<body>
+<body data-theme="forest">
+    <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+
     <div class="selection-container">
-        <h1>When coding is your love language~</h1>
-
-        <div class="selection-item" onclick="location.href='Posting_Your_GF/index.html'">
-            <div class="title">Posting Your GF</div>
-            <div class="description">
-                Webpage for my gf on July 7th "Posting Your GF" SocMed Event ;).
+        <header class="hero">
+            <h1>When coding is your love language</h1>
+            <p class="hero-description">Choose a memory card from the timeline I made for my Crystel.</p>
+            <div class="hero-meta" aria-label="Timeline summary">
+                <span class="meta-pill" id="entries-pill">11 entries</span>
+                <span class="meta-pill" id="range-pill">July 2025 to January 2026</span>
             </div>
-            <pre id="date">July 7, 2025</pre>
+        </header>
+
+        <div class="layout-shell">
+            <aside class="memory-rail" aria-label="Journey summary">
+                <p class="rail-label">Journey</p>
+                <h2 class="rail-title">Thank you for everything.</h2>
+                <p class="rail-copy">
+                    I hope these little digital keepsakes bring a smile to your face and warmth to your heart, just like
+                    you do to mine every day.
+                </p>
+            </aside>
+
+            <section class="cards-grid" aria-label="Memory cards">
+                <a class="selection-item featured" href="Posting_Your_GF/index.html">
+                    <div class="card-head">
+                        <div class="title">Posting Your GF</div>
+                        <span class="card-index">01</span>
+                    </div>
+                    <div class="description">
+                        Webpage for my gf on July 7th "Posting Your GF" SocMed Event ;).
+                    </div>
+                    <pre class="date">July 7, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="4th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">4th Monthsary</div>
+                        <span class="card-index">02</span>
+                    </div>
+                    <div class="description">w/ Words of affirmation carousel</div>
+                    <pre class="date">July 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="National_GF_Day/index.html">
+                    <div class="card-head">
+                        <div class="title">National Girlfriend Day</div>
+                        <span class="card-index">03</span>
+                    </div>
+                    <div class="description">A little something for my girlfriend on National Girlfriend Day.</div>
+                    <pre class="date">August 1, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="5th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">5th Monthsary</div>
+                        <span class="card-index">04</span>
+                    </div>
+                    <div class="description">Yapteractive webpage entry with cool effects!</div>
+                    <pre class="date">August 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="6th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">6th Monthsary</div>
+                        <span class="card-index">05</span>
+                    </div>
+                    <div class="description">"Saveee me!!" ahh entry</div>
+                    <pre class="date">September 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="7th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">7th Monthsary</div>
+                        <span class="card-index">06</span>
+                    </div>
+                    <div class="description">Realtime sticky notes webpage entry</div>
+                    <pre class="date">October 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="8th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">8th Monthsary</div>
+                        <span class="card-index">07</span>
+                    </div>
+                    <div class="description"></div>
+                    <pre class="date">November 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="18th_Birthday/index.html">
+                    <div class="card-head">
+                        <div class="title">18th Birthday</div>
+                        <span class="card-index">08</span>
+                    </div>
+                    <div class="description">Crystel's 18th Birthday webpage with what it feels like a illegal countdown
+                        timer</div>
+                    <pre class="date">December 21, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="9th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">9th Monthsary</div>
+                        <span class="card-index">09</span>
+                    </div>
+                    <div class="description"></div>
+                    <pre class="date">December 27, 2025</pre>
+                </a>
+
+                <a class="selection-item" href="New_Year_2026/index.html">
+                    <div class="card-head">
+                        <div class="title">New Year 2026</div>
+                        <span class="card-index">10</span>
+                    </div>
+                    <div class="description">Celebrate 2026 with our chaotic chibis!</div>
+                    <pre class="date">January 1, 2026</pre>
+                </a>
+
+                <a class="selection-item" href="10th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">10th Monthsary</div>
+                        <span class="card-index">11</span>
+                    </div>
+                    <div class="description"></div>
+                    <pre class="date">January 27, 2026</pre>
+                </a>
+
+                <a class="selection-item" href="11th_Monthsary/index.html">
+                    <div class="card-head">
+                        <div class="title">11th Monthsary</div>
+                        <span class="card-index">12</span>
+                    </div>
+                    <div class="description"></div>
+                    <pre class="date">February 27, 2026</pre>
+                </a>
+
+                <a class="selection-item" href="1st_Anniversary/index.html">
+                    <div class="card-head">
+                        <div class="title">1st Anniversary</div>
+                        <span class="card-index">13</span>
+                    </div>
+                    <div class="description"></div>
+                    <pre class="date">March 27, 2026</pre>
+                </a>
+            </section>
         </div>
 
-        <div class="selection-item" onclick="location.href='4th_Monthsary/index.html'">
-            <div class="title">4th Monthsary</div>
-            <div class="description">
-                w/ Words of affirmation carousel
-            </div>
-            <pre id="date">July 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='National_GF_Day/index.html'">
-            <div class="title">National Girlfriend Day</div>
-            <div class="description">
-                A little something for my girlfriend on National Girlfriend Day.
-            </div>
-            <pre id="date">August 1, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='5th_Monthsary/index.html'">
-            <div class="title">5th Monthsary</div>
-            <div class="description">
-                Yapteractive webpage entry with cool effects!
-            </div>
-            <pre id="date">August 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='6th_Monthsary/index.html'">
-            <div class="title">6th Monthsary</div>
-            <div class="description">
-                "Saveee me!!" ahh entry
-            </div>
-            <pre id="date">September 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='7th_Monthsary/index.html'">
-            <div class="title">7th Monthsary</div>
-            <div class="description">
-                Realtime sticky notes webpage entry
-            </div>
-            <pre id="date">October 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='8th_Monthsary/index.html'">
-            <div class="title">8th Monthsary</div>
-            <div class="description">
-            </div>
-            <pre id="date">November 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='18th_Birthday/index.html'">
-            <div class="title">18th Birthday</div>
-            <div class="description">
-                Crystel's 18th Birthday webpage with what it feels like a illegal countdown timer
-            </div>
-            <pre id="date">December 21, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='9th_Monthsary/index.html'">
-            <div class="title">9th Monthsary</div>
-            <div class="description">
-            </div>
-            <pre id="date">December 27, 2025</pre>
-        </div>
-
-        <div class="selection-item" onclick="location.href='New_Year_2026/index.html'">
-            <div class="title">New Year 2026</div>
-            <div class="description">
-                Celebrate 2026 with our chaotic chibis!
-            </div>
-            <pre id="date">January 1, 2026</pre>
-        </div>
-        
-        <div class="selection-item" onclick="location.href='10th_Monthsary/index.html'">
-            <div class="title">10th Monthsary</div>
-            <div class="description">
-            </div>
-            <pre id="date">January 27, 2026</pre>
-        </div>
-
-        <div style="text-align: center;">
+        <footer class="signature">
             <pre>Made with ❤️ for Crystel Dollegues</pre>
-        </div>
+        </footer>
         <div class="spacer"></div>
     </div>
 
