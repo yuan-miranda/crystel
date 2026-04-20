@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>I love you Crystel!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="openingScreen.css">
     <link rel="stylesheet" href="musicPlayer.css">
@@ -12,62 +17,70 @@
 
 <body>
     <div class="opening-screen" id="openingScreen"></div>
+
     <div class="content">
-        <section class="read-me-section">
-            <h2 class="section-title">Please read mee!! AHAAHAHHHA</h2>
-            <article class="love-letter">
-                <p>To my masungit pero cute na Crystel,</p>
-                <p>Hey sup you know me, di ko papalagpasin 'tong 7.7 <s>Lazada</s> ng walang ganto lmao pinag code pa
-                    instead na mag online shopping djk-</p>
-                <p>Ayon lang just hopping on this trend, Happy <em>"<s>Posting</s> Pag code your Girlfriend in July
-                        7!!"</em></p>
-                <p class="signature">Forever yours,<br>❤️
-                    <span class="cycling-names">
-                        <span class="name-cycle">
-                            <span class="name-item" style="--i:0">Yuan</span>
-                            <span class="name-item" style="--i:1">Arabo</span>
-                            <span class="name-item" style="--i:2">5/6</span>
-                            <span class="name-item" style="--i:3">Indyano</span>
-                            <span class="name-item" style="--i:4">Iputin</span>
-                            <span class="name-item" style="--i:5">Aeta</span>
-                        </span>
-                    </span>
-                </p>
-            </article>
+        <section class="hero-section">
+            <h1 class="hero-title">Posting My Girlfriend</h1>
+            <p class="hero-subtitle">Yup my first entry here AHAHAHAH just bare with itt sweet nman &gt;-&lt;.</p>
         </section>
 
+        <article class="love-letter">
+            <p class="letter-tag">To my masungit pero cute na Crystel,</p>
+            <p>Hey sup you know me, di ko papalagpasin 'tong 7.7 fb event <s>Lazada</s> ng walang ganto lalo na pag gf
+                stuff HAAAHAAHHAHAH pinag code pa nga instead na mag online shopping djk-</p>
+            <p>Ayon lang just tried making my entry in this trend, Happy <em>"<s>Posting</s> Pag code your Girlfriend in
+                    July 7!!"</em></p>
+            <p class="signature">Forever yours,<br>
+                <span class="signature-name-line">
+                    <span class="cycling-names">
+                        <span class="name-cycle">
+                            <span class="name-item" style="--i:0">❤️ Yuan</span>
+                            <span class="name-item" style="--i:1">💖 Arabo</span>
+                            <span class="name-item" style="--i:2">💕 5/6</span>
+                            <span class="name-item" style="--i:3">💗 Indyano</span>
+                            <span class="name-item" style="--i:4">💘 Iputin</span>
+                            <span class="name-item" style="--i:5">💞 Aeta</span>
+                        </span>
+                    </span>
+                </span>
+            </p>
+        </article>
+
         <section class="memories-section">
-            <h2 class="section-title">✨ Memorable Moments Together</h2>
+            <div class="section-heading">
+                <h2 class="section-title">✨ Memorable Moments Together</h2>
+                <p>Hayop sobrang memorable HAHHAHAHHH</p>
+            </div>
             <div class="photo-container">
                 <div class="photo-item">
-                    <img src="media/startofall.png" alt="Our First Date">
+                    <img src="media/startofall.png" alt="Our First Date" loading="lazy" decoding="async">
                     <div class="photo-caption">Yaa dito nagsimula yon eh^^</div>
                 </div>
 
                 <div class="photo-item">
-                    <img src="media/prom.png" alt="When You Said Yes">
+                    <img src="media/prom.png" alt="When You Said Yes" loading="lazy" decoding="async">
                     <div class="photo-caption">The Prom night, the first time na nag meet us. One of the most
                         special and enchanted moments in my life.</div>
                 </div>
 
                 <div class="photo-item">
-                    <img src="media/sf.png" alt="Late Night Talks">
+                    <img src="media/sf.png" alt="Late Night Talks" loading="lazy" decoding="async">
                     <div class="photo-caption">Sportsfest week, or what I would like to say; Tambay sa SM buong
                         lingo! HAHAHAHHA</div>
                 </div>
 
                 <div class="photo-item">
-                    <img src="media/grade_consultation.png" alt="Our Song">
+                    <img src="media/grade_consultation.png" alt="Our Song" loading="lazy" decoding="async">
                     <div class="photo-caption">Grade consultation na nauwi sa takutan magka 80</div>
                 </div>
 
                 <div class="photo-item">
-                    <img src="media/kasal.png" alt="Special Moment">
+                    <img src="media/kasal.png" alt="Special Moment" loading="lazy" decoding="async">
                     <div class="photo-caption">Word of the day: "Bayaw" HAAHAHAHAHHA</div>
                 </div>
 
                 <div class="photo-item">
-                    <img src="media/you.png" alt="Mi Girlfriend">
+                    <img src="media/you.png" alt="Mi Girlfriend" loading="lazy" decoding="async">
                     <div class="photo-caption">Wari'y napakaganda mo!</div>
                 </div>
             </div>
@@ -86,7 +99,7 @@
             <p class="track-artist">Author</p>
         </div>
 
-        <button class="play-btn" id="playBtn">
+        <button class="play-btn" id="playBtn" aria-label="Play or pause background music">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z"></path>
             </svg>

@@ -1,12 +1,24 @@
 import { globalVariables } from "./utils.js";
 
+let isInitialized = false;
+
 function initMusicPlayer() {
     const audio = document.querySelector(globalVariables.musicPlayerElement.audio);
     const playBtn = document.querySelector(globalVariables.musicPlayerElement.playBtn);
     if (!audio || !playBtn) return;
 
+    if (isInitialized) {
+        return;
+    }
+
+    isInitialized = true;
+
     audio.volume = 0.3;
     playBtn.addEventListener('click', toggleMusic);
+    audio.addEventListener('play', () => updateMusicPlayerState(true));
+    audio.addEventListener('pause', () => updateMusicPlayerState(false));
+    audio.addEventListener('ended', () => updateMusicPlayerState(false));
+
     setTrackInfo('I Like U', 'NIKI', 'media/I_Like_U.mp4', 'media/I_Like_U_Cover.jpg');
     enableAudio();
 }
@@ -31,6 +43,8 @@ function setTrackInfo(title, artist, audioSrc, coverImage = null) {
     elements.albumArt.innerHTML = coverImage
         ? `<img src="${coverImage}" alt="Album Cover for ${title}">`
         : '♪';
+
+    elements.albumArt.classList.toggle('has-cover', Boolean(coverImage));
 }
 
 function toggleMusic() {
@@ -38,29 +52,26 @@ function toggleMusic() {
     if (!audio) return;
 
     if (audio.paused) {
-        audio.play().catch(console.error);
-        updateMusicPlayerState(true);
+        audio.play().catch(() => {
+            updateMusicPlayerState(false);
+        });
     } else {
         audio.pause();
-        updateMusicPlayerState(false);
     }
 }
 
 function updateMusicPlayerState(isPlaying) {
     const elements = {
         playBtn: document.querySelector(globalVariables.musicPlayerElement.playBtn),
-        musicPlayer: document.querySelector(globalVariables.musicPlayerElement.musicPlayer),
-        albumArt: document.querySelector(globalVariables.musicPlayerElement.albumArt)
+        musicPlayer: document.querySelector(globalVariables.musicPlayerElement.musicPlayer)
     };
-    
+
     if (isPlaying) {
         elements.playBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
         elements.musicPlayer.classList.add('playing');
-        elements.albumArt.classList.add('playing');
     } else {
         elements.playBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
         elements.musicPlayer.classList.remove('playing');
-        elements.albumArt.classList.remove('playing');
     }
 
     return true;
@@ -71,9 +82,11 @@ function enableAudio() {
     if (!audio) return;
 
     audio.play()
-        .then(() => updateMusicPlayerState(true))
+        .then(() => {
+            // play event listener will update visual state.
+        })
         .catch(() => {
-            // user denied autoplay
+            updateMusicPlayerState(false);
         });
 }
 
