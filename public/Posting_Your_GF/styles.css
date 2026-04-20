@@ -199,6 +199,11 @@ footer {
     line-height: 1.5;
 }
 
+.love-letter p:not(.letter-tag):not(.signature) {
+    text-align: justify;
+    text-justify: inter-word;
+}
+
 .love-letter p:first-child,
 .name-item {
     color: var(--text-accent);
@@ -381,8 +386,12 @@ footer a:hover {
     }
 
     .love-letter p {
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         line-height: 1.42;
+    }
+
+    .love-letter p:nth-of-type(2) {
+        margin-bottom: 1.05rem;
     }
 
     .photo-container {
