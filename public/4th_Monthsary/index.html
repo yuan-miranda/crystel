@@ -5,31 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy 4th Monthsary!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div class="floating-hearts" id="heartContainer"></div>
-
-    <h1>Happy 4th Monthsary Crystel ❤️</h1>
-    <p>
-        I just wanted to say how much I love you and how grateful I am to spend every moment with you.
-        You've made the past 4 months so special, and I can't wait for all the months and years ahead 🥺💕.
-    </p>
-
-    <button class="heart-button" onclick="startHearts(); showCarousel();">Click meeeeeeee</button>
-
-    <div class="carousel" id="carousel">
-        <p id="carousel-text">I loveee youuuuu 😄</p>
-        <div class="carousel-buttons">
-            <button onclick="prev()">Prev</button>
-            <button onclick="next()">Next</button>
-        </div>
+    <div class="ambient-layer" aria-hidden="true">
+        <span class="orb orb-one"></span>
+        <span class="orb orb-two"></span>
+        <span class="orb orb-three"></span>
+        <span class="grain"></span>
     </div>
 
-    <footer>
-        <a href="../index.html">← Go back to selection</a>
-    </footer>
+    <main class="page-shell">
+        <section class="hero-card">
+            <p class="month-badge">Month 04</p>
+
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <h1>Happy 4th Monthsary, Crystel</h1>
+                    <p class="intro-text">
+                        Four months in and my favorite part of every day is still you.
+                        Thank you for every laugh, every kulit moment, and every soft little memory we keep making together.
+                    </p>
+                    <button class="heart-button" onclick="startHearts(); showCarousel();">Open our love notes</button>
+                </div>
+
+                <aside class="hero-side">
+                    <p class="script-line">you + me</p>
+                    <p class="side-title" id="sideTitle">Still my best decision.</p>
+                    <button class="pulse-heart" id="interactiveHeart" type="button" aria-label="Send love burst">
+                        <span class="heart-glyph" aria-hidden="true">&#10084;</span>
+                    </button>
+                </aside>
+            </div>
+        </section>
+
+        <section class="carousel-wrap" aria-live="polite">
+            <div class="carousel" id="carousel">
+                <div class="message-strip" role="group" aria-label="Love message carousel">
+                    <button class="arrow-chip" onclick="prev()" aria-label="Previous message">&lt;</button>
+                    <p id="carousel-text">I loveee youuuuu 😄</p>
+                    <button class="arrow-chip" onclick="next()" aria-label="Next message">&gt;</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-row">
+            <footer>
+                <a href="../index.html">← Go back to selection</a>
+            </footer>
+        </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="main.js"></script>
