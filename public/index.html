@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="theme-picker.css">
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -67,6 +68,13 @@
     <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
     <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
     <div class="bg-grid" aria-hidden="true"></div>
+
+    <div class="theme-picker" role="group" aria-label="Theme selector">
+        <select id="themeSelectHome" data-theme-select aria-label="Choose theme">
+            <option value="forest">Forest</option>
+            <option value="crimson">Crimson</option>
+        </select>
+    </div>
 
     <div class="selection-container">
         <header class="hero">
@@ -222,6 +230,8 @@
             <img src="media/icon/github-mark.svg" alt="GitHub" width="32" height="32" title="GitHub Repository">
         </a>
     </div>
+
+    <script src="theme-switcher.js"></script>
 </body>
 
 </html>

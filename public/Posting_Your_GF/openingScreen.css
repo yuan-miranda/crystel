@@ -112,3 +112,20 @@
         opacity: 1;
     }
 }
+
+@media (max-width: 40rem) {
+    .opening-content {
+        margin: 0 0.7rem;
+        max-width: 96vw;
+    }
+
+    .opening-title {
+        font-size: clamp(1.2rem, 4.9vw, 1.6rem);
+        line-height: 1.08;
+    }
+
+    .click-instruction {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+    }
+}

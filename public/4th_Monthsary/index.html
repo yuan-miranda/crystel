@@ -9,9 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../theme-picker.css">
 </head>
 
-<body>
+<body data-theme="forest">
+    <div class="theme-picker" role="group" aria-label="Theme selector">
+        <select id="themeSelectFourth" data-theme-select aria-label="Choose theme">
+            <option value="forest">Forest</option>
+            <option value="crimson">Crimson</option>
+        </select>
+    </div>
+
     <div class="floating-hearts" id="heartContainer"></div>
     <div class="ambient-layer" aria-hidden="true">
         <span class="orb orb-one"></span>
@@ -62,6 +70,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="../theme-switcher.js"></script>
     <script src="main.js"></script>
 </body>
 

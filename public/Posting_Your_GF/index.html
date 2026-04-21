@@ -11,11 +11,19 @@
         href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../theme-picker.css">
     <link rel="stylesheet" href="openingScreen.css">
     <link rel="stylesheet" href="musicPlayer.css">
 </head>
 
-<body>
+<body data-theme="forest">
+    <div class="theme-picker" role="group" aria-label="Theme selector">
+        <select id="themeSelectPosting" data-theme-select aria-label="Choose theme">
+            <option value="forest">Forest</option>
+            <option value="crimson">Crimson</option>
+        </select>
+    </div>
+
     <div class="opening-screen" id="openingScreen"></div>
 
     <div class="content">
@@ -111,6 +119,7 @@
     </footer>
 
     <script type="module" src="main.js"></script>
+    <script src="../theme-switcher.js"></script>
 </body>
 
 </html>
