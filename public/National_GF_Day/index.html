@@ -265,8 +265,8 @@
         let isRightClick = false;
         let lastX = 0, lastY = 0;
         let rotX = 0, rotY = 0, tRotX = 0, tRotY = 0;
-        let scale = 1;
-        let panX = 0, panY = 0;
+        let scale = 1, tScale = 1;
+        let panX = 0, panY = 0, tPanX = 0, tPanY = 0;
         let fallThreshold = 0, resetStartY = 0;
         let lastFrame = performance.now();
 
@@ -379,6 +379,9 @@
             requestAnimationFrame(animateScene);
             rotX = lerp(rotX, tRotX, 0.1);
             rotY = lerp(rotY, tRotY, 0.1);
+            panX = lerp(panX, tPanX, 0.18);
+            panY = lerp(panY, tPanY, 0.18);
+            scale = lerp(scale, tScale, 0.18);
             updateSceneTransform();
         }
 
@@ -430,8 +433,7 @@
             if (!isDragging) return;
             const dx = e.clientX - lastX, dy = e.clientY - lastY;
             if (isRightClick) {
-                panX += dx; panY += dy;
-                updateSceneTransform();
+                tPanX += dx; tPanY += dy;
             } else {
                 tRotY += dx * 0.3;
                 tRotX -= dy * 0.3;
@@ -474,18 +476,14 @@
                 const newDist = getTouchDist(e.touches);
                 const [midX, midY] = getTouchMid(e.touches);
 
-                // Zoom — multiplicative ratio, direct (no lerp)
+                // Write to target — rAF lerps to it
                 const ratio = newDist / pinchDist;
-                scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale * ratio));
-
-                // Pan — direct, follows fingers exactly
-                panX += midX - lastMidX;
-                panY += midY - lastMidY;
+                tScale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, tScale * ratio));
+                tPanX += midX - lastMidX;
+                tPanY += midY - lastMidY;
 
                 pinchDist = newDist;
                 lastMidX = midX; lastMidY = midY;
-
-                updateSceneTransform();
             }
         }, { passive: true });
 
@@ -499,8 +497,7 @@
 
         document.addEventListener('wheel', e => {
             e.preventDefault();
-            scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale - e.deltaY * 0.001));
-            updateSceneTransform();
+            tScale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, tScale - e.deltaY * 0.001));
         }, { passive: false });
 
         window.addEventListener('resize', vh);
