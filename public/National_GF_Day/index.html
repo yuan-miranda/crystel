@@ -261,11 +261,12 @@
         let imageCount = 0;
         let imagesEnabled = true;
         let paused = false;
+        let isInteracting = false;
         let isDragging = false;
         let isRightClick = false;
         let lastX = 0, lastY = 0;
         let rotX = 0, rotY = 0, tRotX = 0, tRotY = 0;
-        let scale = 1, tScale = 1;
+        let scale = 1;
         let panX = 0, panY = 0, tPanX = 0, tPanY = 0;
         let fallThreshold = 0, resetStartY = 0;
         let lastFrame = performance.now();
@@ -291,7 +292,6 @@
         function resetWord(w) {
             const el = w.element;
 
-            // Release image slot
             if (w.isImage && w.imgSrc) {
                 activeImages.delete(w.imgSrc);
                 imageCount--;
@@ -348,17 +348,15 @@
 
                 resetWord(w);
                 words.push(w);
-
-                // Spread initial y across the whole fall range
                 w.y = Math.random() * fallThreshold;
                 el.style.transform = `translate3d(${w.x}px,${w.y}px,${w.depth}px)`;
             }
         }
 
-        /* ── ANIMATION LOOP ── */
+        /* ── ANIMATION LOOPS ── */
         function animateWords(now) {
             requestAnimationFrame(animateWords);
-            if (paused) return;
+            if (paused || isInteracting) return;
             const delta = now - lastFrame;
             if (delta < CFG.frameTarget) return;
             lastFrame = now - (delta % CFG.frameTarget);
@@ -366,11 +364,7 @@
             for (let i = 0; i < words.length; i++) {
                 const w = words[i];
                 w.y += w.speed;
-
-                if (w.y > fallThreshold) {
-                    resetWord(w);
-                }
-
+                if (w.y > fallThreshold) resetWord(w);
                 w.element.style.transform = `translate3d(${w.x}px,${w.y}px,${w.depth}px)`;
             }
         }
@@ -379,9 +373,8 @@
             requestAnimationFrame(animateScene);
             rotX = lerp(rotX, tRotX, 0.1);
             rotY = lerp(rotY, tRotY, 0.1);
-            panX = lerp(panX, tPanX, 0.18);
-            panY = lerp(panY, tPanY, 0.18);
-            scale = lerp(scale, tScale, 0.18);
+            panX = lerp(panX, tPanX, 0.1);
+            panY = lerp(panY, tPanY, 0.1);
             updateSceneTransform();
         }
 
@@ -423,81 +416,87 @@
 
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // Mouse — left drag = rotate, right drag = pan
+        // Mouse
         document.addEventListener('mousedown', e => {
             isDragging = true;
+            isInteracting = true;
             isRightClick = e.button === 2;
             lastX = e.clientX; lastY = e.clientY;
         });
         document.addEventListener('mousemove', e => {
             if (!isDragging) return;
             const dx = e.clientX - lastX, dy = e.clientY - lastY;
-            if (isRightClick) {
-                tPanX += dx; tPanY += dy;
-            } else {
-                tRotY += dx * 0.3;
-                tRotX -= dy * 0.3;
-            }
+            if (isRightClick) { tPanX += dx; tPanY += dy; }
+            else              { tRotY += dx * 0.3; tRotX -= dy * 0.3; }
             lastX = e.clientX; lastY = e.clientY;
         });
-        document.addEventListener('mouseup', () => { isDragging = false; isRightClick = false; });
+        document.addEventListener('mouseup', () => { isDragging = false; isRightClick = false; isInteracting = false; });
 
-        // Touch — single finger = rotate, two fingers = pan + pinch simultaneously (natural)
+        // Touch — single finger = rotate (via lerp), two fingers = pinch+pan (direct, no lerp)
         let lastTX = 0, lastTY = 0;
-        let pinchActive = false, pinchDist = 0, lastMidX = 0, lastMidY = 0;
+        let pinchStartDist = null, lastMidX = 0, lastMidY = 0;
+        let suppressUntil = 0;
 
         function getTouchDist(t) {
             return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
         }
-        function getTouchMid(t) {
-            return [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2];
-        }
 
         document.addEventListener('touchstart', e => {
+            isInteracting = true;
             if (e.touches.length === 1) {
                 lastTX = e.touches[0].clientX;
                 lastTY = e.touches[0].clientY;
-                pinchActive = false;
-            } else if (e.touches.length >= 2) {
-                pinchActive = true;
-                pinchDist = getTouchDist(e.touches);
-                [lastMidX, lastMidY] = getTouchMid(e.touches);
+            } else if (e.touches.length === 2) {
+                pinchStartDist = getTouchDist(e.touches);
+                lastMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                lastMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
             }
         }, { passive: true });
 
         document.addEventListener('touchmove', e => {
-            if (e.touches.length === 1 && !pinchActive) {
+            if (e.touches.length === 1 && Date.now() > suppressUntil) {
                 const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
                 tRotY += (tx - lastTX) * 0.3;
                 tRotX -= (ty - lastTY) * 0.3;
                 lastTX = tx; lastTY = ty;
 
-            } else if (e.touches.length >= 2 && pinchActive) {
+            } else if (e.touches.length === 2 && pinchStartDist !== null) {
                 const newDist = getTouchDist(e.touches);
-                const [midX, midY] = getTouchMid(e.touches);
+                // additive delta like original — feels more controlled than ratio
+                const delta = newDist - pinchStartDist;
+                scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale + delta * 0.002));
+                pinchStartDist = newDist;
 
-                // Write to target — rAF lerps to it
-                const ratio = newDist / pinchDist;
-                tScale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, tScale * ratio));
-                tPanX += midX - lastMidX;
-                tPanY += midY - lastMidY;
-
-                pinchDist = newDist;
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                // pan is direct — bypass lerp, same as original
+                panX += midX - lastMidX;
+                panY += midY - lastMidY;
+                tPanX = panX; tPanY = panY;
                 lastMidX = midX; lastMidY = midY;
+
+                updateSceneTransform();
             }
         }, { passive: true });
 
         document.addEventListener('touchend', e => {
-            if (e.touches.length < 2) pinchActive = false;
             if (e.touches.length === 1) {
                 lastTX = e.touches[0].clientX;
                 lastTY = e.touches[0].clientY;
+                pinchStartDist = null;
+                suppressUntil = Date.now() + 200;
+            } else if (e.touches.length < 1) {
+                pinchStartDist = null;
+                isInteracting = false;
             }
         });
 
         document.addEventListener('wheel', e => {
             e.preventDefault();
-            tScale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, tScale - e.deltaY * 0.001));
+            isInteracting = true;
+            scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale - e.deltaY * 0.001));
+            updateSceneTransform();
+            setTimeout(() => { isInteracting = false; }, 300);
         }, { passive: false });
 
         window.addEventListener('resize', vh);
