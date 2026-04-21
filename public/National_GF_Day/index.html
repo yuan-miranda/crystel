@@ -70,30 +70,43 @@
             filter: drop-shadow(0 1px 8px rgba(139,92,246,0.18));
         }
 
-        #toggleImages {
+        #controls {
             position: fixed;
             top: 0;
             right: 0;
             z-index: 10;
-            margin: 1rem;
-            padding: 0.45rem 1.1rem;
+            margin: 0.85rem;
+            display: flex;
+            gap: 8px;
+        }
+
+        #controls button {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
             border: 1.5px solid var(--purple-400);
-            border-radius: 999px;
-            background: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.75);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             color: var(--purple-600);
-            font-family: 'DM Sans', sans-serif;
-            font-size: clamp(0.72rem, 2.5vw, 0.85rem);
-            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s, transform 0.15s;
-            box-shadow: 0 2px 12px rgba(139,92,246,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 12px rgba(139,92,246,0.13);
+            transition: transform 0.15s, background 0.15s;
+            padding: 0;
         }
 
-        #toggleImages:active {
-            transform: scale(0.96);
+        #controls button:active {
+            transform: scale(0.93);
             background: var(--purple-100);
+        }
+
+        #controls button svg {
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
         }
 
         footer {
@@ -171,7 +184,16 @@
 </head>
 <body>
     <h3>Happy National Girlfriend Day! 💜</h3>
-    <button id="toggleImages">Hide Photos</button>
+    <div id="controls">
+        <button id="btnPause" title="Pause">
+            <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
+        </button>
+        <button id="btnPhotos" title="Toggle Photos">
+            <svg id="iconPhotoOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <svg id="iconPhotoOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="2" y1="2" x2="22" y2="22"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        </button>
+    </div>
     <footer><a href="../index.html">← Back</a></footer>
     <div id="scene"></div>
 
@@ -238,17 +260,17 @@
         const activeImages = new Set();
         let imageCount = 0;
         let imagesEnabled = true;
+        let paused = false;
         let isDragging = false;
         let isRightClick = false;
         let lastX = 0, lastY = 0;
         let rotX = 0, rotY = 0, tRotX = 0, tRotY = 0;
         let scale = 1;
-        let panX = 0, panY = 0, tPanX = 0, tPanY = 0;
+        let panX = 0, panY = 0;
         let fallThreshold = 0, resetStartY = 0;
         let lastFrame = performance.now();
 
         const scene = document.getElementById('scene');
-        const btn   = document.getElementById('toggleImages');
 
         /* ── UTILS ── */
         function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
@@ -263,13 +285,6 @@
 
         function updateSceneTransform() {
             scene.style.transform = `translate(${panX}px,${panY}px) scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-        }
-
-        function clampPan() {
-            const xA = isMobile ? 400 : 1000;
-            const yA = 600;
-            tPanX = Math.max(-xA, Math.min(xA, tPanX));
-            tPanY = Math.max(-yA, Math.min(yA, tPanY));
         }
 
         /* ── WORD POOL ── */
@@ -343,6 +358,7 @@
         /* ── ANIMATION LOOP ── */
         function animateWords(now) {
             requestAnimationFrame(animateWords);
+            if (paused) return;
             const delta = now - lastFrame;
             if (delta < CFG.frameTarget) return;
             lastFrame = now - (delta % CFG.frameTarget);
@@ -361,29 +377,37 @@
 
         function animateScene() {
             requestAnimationFrame(animateScene);
-            const t = 0.09;
-            rotX = lerp(rotX, tRotX, t);
-            rotY = lerp(rotY, tRotY, t);
-            panX = lerp(panX, tPanX, t);
-            panY = lerp(panY, tPanY, t);
-            clampPan();
+            rotX = lerp(rotX, tRotX, 0.1);
+            rotY = lerp(rotY, tRotY, 0.1);
             updateSceneTransform();
         }
 
         /* ── EVENTS ── */
-        btn.addEventListener('click', () => {
+        const btnPause  = document.getElementById('btnPause');
+        const btnPhotos = document.getElementById('btnPhotos');
+        const iconPause = document.getElementById('iconPause');
+        const iconPlay  = document.getElementById('iconPlay');
+        const iconPhotoOn  = document.getElementById('iconPhotoOn');
+        const iconPhotoOff = document.getElementById('iconPhotoOff');
+
+        btnPause.addEventListener('click', () => {
+            paused = !paused;
+            iconPause.style.display = paused ? 'none' : '';
+            iconPlay.style.display  = paused ? '' : 'none';
+        });
+
+        btnPhotos.addEventListener('click', () => {
             imagesEnabled = !imagesEnabled;
-            btn.textContent = imagesEnabled ? 'Hide Photos' : 'Show Photos';
+            iconPhotoOn.style.display  = imagesEnabled ? '' : 'none';
+            iconPhotoOff.style.display = imagesEnabled ? 'none' : '';
 
             if (!imagesEnabled) {
                 for (const w of words) {
                     if (w.isImage) {
-                        // Replace image with text immediately
                         w.element.innerHTML = '';
                         const sp = document.createElement('span');
                         sp.textContent = TEXTS[Math.floor(Math.random() * TEXTS.length)];
-                        const fs = CFG.minFontSize + Math.random() * (CFG.maxFontSize - CFG.minFontSize);
-                        sp.style.fontSize = fs + 'px';
+                        sp.style.fontSize = (CFG.minFontSize + Math.random() * (CFG.maxFontSize - CFG.minFontSize)) + 'px';
                         w.element.appendChild(sp);
                         activeImages.delete(w.imgSrc);
                         imageCount--;
@@ -405,92 +429,76 @@
         document.addEventListener('mousemove', e => {
             if (!isDragging) return;
             const dx = e.clientX - lastX, dy = e.clientY - lastY;
-            if (isRightClick) { tPanX += dx; tPanY += dy; }
-            else              { tRotY += dx * 0.3; tRotX -= dy * 0.3; }
+            if (isRightClick) {
+                panX += dx; panY += dy;
+                updateSceneTransform();
+            } else {
+                tRotY += dx * 0.3;
+                tRotX -= dy * 0.3;
+            }
             lastX = e.clientX; lastY = e.clientY;
         });
         document.addEventListener('mouseup', () => { isDragging = false; isRightClick = false; });
 
-        // Touch — single finger = rotate, two fingers = pan OR pinch (not both at once)
+        // Touch — single finger = rotate, two fingers = pan + pinch simultaneously (natural)
         let lastTX = 0, lastTY = 0;
-        let pinchDist = null, lastMidX = 0, lastMidY = 0;
-        let twoFingerMode = null; // 'pan' | 'zoom' | null
-        const PINCH_DEAD_ZONE = 8; // px change in spread before we commit to zoom
-        const PAN_DEAD_ZONE = 6;   // px change in midpoint before we commit to pan
+        let pinchActive = false, pinchDist = 0, lastMidX = 0, lastMidY = 0;
 
-        function touchDist(t) {
+        function getTouchDist(t) {
             return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
         }
-        function touchMid(t) {
-            return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+        function getTouchMid(t) {
+            return [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2];
         }
 
         document.addEventListener('touchstart', e => {
             if (e.touches.length === 1) {
                 lastTX = e.touches[0].clientX;
                 lastTY = e.touches[0].clientY;
-                pinchDist = null;
-                twoFingerMode = null;
-            } else if (e.touches.length === 2) {
-                pinchDist = touchDist(e.touches);
-                const mid = touchMid(e.touches);
-                lastMidX = mid.x;
-                lastMidY = mid.y;
-                twoFingerMode = null; // wait for dead-zone to decide
+                pinchActive = false;
+            } else if (e.touches.length >= 2) {
+                pinchActive = true;
+                pinchDist = getTouchDist(e.touches);
+                [lastMidX, lastMidY] = getTouchMid(e.touches);
             }
         }, { passive: true });
 
         document.addEventListener('touchmove', e => {
-            if (e.touches.length === 1) {
+            if (e.touches.length === 1 && !pinchActive) {
                 const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
                 tRotY += (tx - lastTX) * 0.3;
                 tRotX -= (ty - lastTY) * 0.3;
                 lastTX = tx; lastTY = ty;
 
-            } else if (e.touches.length === 2 && pinchDist !== null) {
-                const newDist = touchDist(e.touches);
-                const mid = touchMid(e.touches);
-                const spreadDelta = Math.abs(newDist - pinchDist);
-                const panDelta = Math.hypot(mid.x - lastMidX, mid.y - lastMidY);
+            } else if (e.touches.length >= 2 && pinchActive) {
+                const newDist = getTouchDist(e.touches);
+                const [midX, midY] = getTouchMid(e.touches);
 
-                // Commit to a mode once one gesture clearly wins
-                if (twoFingerMode === null) {
-                    if (spreadDelta > PINCH_DEAD_ZONE) twoFingerMode = 'zoom';
-                    else if (panDelta > PAN_DEAD_ZONE)  twoFingerMode = 'pan';
-                }
+                // Zoom — multiplicative ratio, direct (no lerp)
+                const ratio = newDist / pinchDist;
+                scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale * ratio));
 
-                if (twoFingerMode === 'zoom') {
-                    // Smooth multiplicative zoom — no jumps
-                    const ratio = newDist / pinchDist;
-                    scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale * ratio));
-                    updateSceneTransform();
-                } else if (twoFingerMode === 'pan') {
-                    tPanX += mid.x - lastMidX;
-                    tPanY += mid.y - lastMidY;
-                }
+                // Pan — direct, follows fingers exactly
+                panX += midX - lastMidX;
+                panY += midY - lastMidY;
 
-                // Always update baseline each frame so deltas stay tiny
                 pinchDist = newDist;
-                lastMidX = mid.x;
-                lastMidY = mid.y;
+                lastMidX = midX; lastMidY = midY;
+
+                updateSceneTransform();
             }
         }, { passive: true });
 
         document.addEventListener('touchend', e => {
-            if (e.touches.length < 2) {
-                pinchDist = null;
-                twoFingerMode = null;
-            }
+            if (e.touches.length < 2) pinchActive = false;
             if (e.touches.length === 1) {
                 lastTX = e.touches[0].clientX;
                 lastTY = e.touches[0].clientY;
             }
         });
 
-        let wheelTimer;
         document.addEventListener('wheel', e => {
             e.preventDefault();
-            clearTimeout(wheelTimer);
             scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale - e.deltaY * 0.001));
             updateSceneTransform();
         }, { passive: false });
