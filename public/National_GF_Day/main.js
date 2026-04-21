@@ -2,7 +2,7 @@
     'use strict';
 
     /* ── CONFIG ── */
-    const isMobile = window.innerWidth < 600;
+    const isMobile = window.innerWidth < 768;
     const CFG = {
         wordCount: isMobile ? 40 : 100,
         maxImagesOnScreen: isMobile ? 3 : 6,
@@ -12,7 +12,8 @@
         maxFontSize: isMobile ? 44 : 72,
         minDepth: isMobile ? -1200 : -3000,
         maxDepth: isMobile ? 600 : 1400,
-        widthPadding: isMobile ? 800 : 2400,
+        widthPadding: isMobile ? 1800 : 2400,
+        horizontalSpreadMultiplier: isMobile ? 2.2 : 1.0,
         minZoom: 0.25, maxZoom: 3,
         frameTarget: 16.67,
     };
@@ -128,7 +129,9 @@
 
         // 3. Set Position
         const pad = CFG.widthPadding;
-        w.x = Math.random() * (window.innerWidth + pad) - pad / 2;
+        // Keep mobile layouts wide by expanding horizontal spawn range.
+        const spreadWidth = (window.innerWidth + pad) * CFG.horizontalSpreadMultiplier;
+        w.x = Math.random() * spreadWidth - spreadWidth / 2;
         w.y = resetStartY - Math.random() * 200;
 
         // --- NEW ENTRY ANIMATION LOGIC ---
