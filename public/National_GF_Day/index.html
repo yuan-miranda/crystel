@@ -5,20 +5,485 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>National Girlfriend Day!</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        :root {
+            --purple-50: #f5f3ff;
+            --purple-100: #ede9fe;
+            --purple-200: #ddd6fe;
+            --purple-400: #a78bfa;
+            --purple-500: #8b5cf6;
+            --purple-600: #7c3aed;
+            --purple-800: #4c1d95;
+            --pink-400: #f472b6;
+            --pink-500: #ec4899;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: linear-gradient(160deg, #f5f3ff 0%, #fdf4ff 40%, #fce7f3 100%);
+            font-family: 'DM Sans', sans-serif;
+            user-select: none;
+            overscroll-behavior: none;
+            perspective: 4096px;
+            perspective-origin: 50% 50%;
+        }
+
+        /* subtle noise overlay for texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        h3 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            margin: 1rem 1.25rem;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--purple-600), var(--pink-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.01em;
+            text-shadow: none;
+            filter: drop-shadow(0 1px 8px rgba(139, 92, 246, 0.18));
+        }
+
+        #toggleImages {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 10;
+            margin: 1rem;
+            padding: 0.45rem 1.1rem;
+            border: 1.5px solid var(--purple-400);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: var(--purple-600);
+            font-family: 'DM Sans', sans-serif;
+            font-size: clamp(0.72rem, 2.5vw, 0.85rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 2px 12px rgba(139, 92, 246, 0.12);
+        }
+
+        #toggleImages:active {
+            transform: scale(0.96);
+            background: var(--purple-100);
+        }
+
+        footer {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            margin: 1rem 1.25rem;
+        }
+
+        footer a {
+            font-size: 0.8rem;
+            color: var(--purple-500);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.2s;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--purple-200);
+        }
+
+        footer a:hover {
+            color: var(--purple-800);
+        }
+
+        #scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            transform-style: preserve-3d;
+            will-change: transform;
+            overflow: visible;
+        }
+
+        .word {
+            position: absolute;
+            top: 0;
+            left: 0;
+            will-change: transform;
+            pointer-events: none;
+            overflow: visible;
+            white-space: nowrap;
+        }
+
+        .word span {
+            display: inline-block;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--purple-600);
+            opacity: 0.85;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .word img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 280px;
+            max-height: 280px;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.22), 0 1px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            object-fit: cover;
+        }
+
+        @media (max-width: 500px) {
+            .word img {
+                max-width: 200px;
+                max-height: 200px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h3>Happy National Girlfriend Day!</h3>
-    <button id="toggleImages">Disable Images</button>
-
-    <footer>
-        <a href="../index.html">← Go back to selection</a>
-    </footer>
-
+    <h3>Happy National Girlfriend Day! 💜</h3>
+    <button id="toggleImages">Hide Photos</button>
+    <footer><a href="../index.html">← Back</a></footer>
     <div id="scene"></div>
 
-    <script src="main.js"></script>
+    <script>
+        (() => {
+            'use strict';
+
+            /* ── CONFIG ── */
+            const isMobile = window.innerWidth < 600;
+            const CFG = {
+                wordCount: isMobile ? 40 : 100,
+                maxImagesOnScreen: isMobile ? 3 : 6,
+                minSpeed: isMobile ? 1.8 : 2.4,
+                maxSpeed: isMobile ? 3.2 : 5.0,
+                minFontSize: isMobile ? 20 : 28,
+                maxFontSize: isMobile ? 44 : 72,
+                minDepth: isMobile ? -1200 : -3000,
+                maxDepth: isMobile ? 600 : 1400,
+                widthPadding: isMobile ? 800 : 2400,
+                minZoom: 0.25, maxZoom: 3,
+                frameTarget: 16.67,
+            };
+
+            const TEXTS = shuffle([
+                "I lovee youuuuu", "Hii supp", "Pogi ni yuan", "Mahal kita", "Ingat ka palagi",
+                "you meant alot to me", "Hii bebiii kooooooo", "Forever bagay", "Laging ikaw lang!!", "Asawa ko",
+                "Kiss kiss muahh", "Dionelaaaa", "Love", "Ganda mo crystel", "Crystel", "Tutel", "Yuan", "YxC",
+                "Crysan", "Wattpad", "Prom", "4th monthsary", "03.27.25", "No bingot allowed!!", "Hailey", "Miaaaaa",
+                "Scissors", "BL", "Wonwon", "Wonton", "Hwuang", "Eli", "Rhy", "Armpits", "Happy National Girlfriend Day",
+                "Miss na miss na kita", "Hug pls 🥺", "Goodmorning mahal", "Ikaw lang sapat na", "Puro ikaw nasa isip ko",
+                "Cutiee mo always", "Dito lang ako", "Sama tayo forever", "Uwi ka na pls", "Balik ka na",
+                "Hawak kamay", "Gigil kita eh", "Smile mo cure ko", "Kwentuhan tayo ulit", "Iloveyou always always",
+                "Lambing pls", "Tulog na love", "Proud of youuu", "You're my peace", "Di ako magsasawa",
+                "Yung boses mo 😭", "Kahit kailan ikaw", "Sabay tayo kumain", "Tara na love", "Kahit saan basta ikaw",
+                "May date tayo mamaya", "Pa-kiss dyan", "Yakapin mo ako", "Wala nang iba", "Ikaw lang talaga",
+                "My safe place", "My baby", "Soft hours", "Iyakin kong love", "Chika mo sakin lahat",
+                "Wag ka na tampo pls", "I-ready mo na cheeks mo", "Grabe ka maka-miss", "My person 🫶"
+            ]);
+
+            const IMAGES = [
+                "media/startofall.png", "media/IMG_20250707_220134_775.jpg", "media/IMG_20250707_220147_271.jpg",
+                "media/IMG_20250707_220156_793.jpg", "media/IMG_20250707_220308_684.jpg", "media/IMG_20250707_220404_419.jpg",
+                "media/IMG_20250707_220439_401.jpg", "media/IMG_20250707_222802_345.jpg", "media/IMG_20250707_233534_418.jpg",
+                "media/IMG_20250801_192839_257.jpg", "media/IMG_20250801_192851_118.jpg", "media/IMG_20250801_192859_657.jpg",
+                "media/IMG_20250801_192926_393.jpg", "media/IMG_20250801_192934_237.jpg", "media/IMG_20250801_192956_794.jpg",
+                "media/IMG_20250801_193017_835.jpg", "media/IMG_20250801_193024_312.jpg", "media/IMG_20250801_193034_238.jpg",
+                "media/IMG_20250801_193054_305.jpg", "media/IMG_20250801_193101_123.jpg", "media/IMG_20250801_193103_577.jpg",
+                "media/IMG_20250801_193115_716.jpg", "media/IMG_20250801_193125_430.jpg", "media/IMG_20250801_193138_800.jpg",
+                "media/IMG_20250801_193146_478.jpg", "media/IMG_20250801_193159_292.jpg", "media/IMG_20250801_193206_740.jpg",
+                "media/IMG_20250801_193218_857.jpg", "media/IMG_20250801_193225_751.jpg", "media/IMG_20250801_193239_573.jpg",
+                "media/IMG_20250801_193301_698.jpg", "media/IMG_20250801_193312_418.jpg", "media/IMG_20250801_193315_911.jpg",
+                "media/IMG_20250801_193328_496.jpg", "media/IMG_20250801_193354_524.jpg", "media/IMG_20250802_082912_316.jpg",
+                "media/IMG_20250802_082912_411.jpg", "media/IMG_20250802_082912_459.jpg", "media/IMG_20250802_082912_547.jpg",
+                "media/IMG_20250802_082912_549.jpg", "media/IMG_20250802_082912_710.jpg", "media/IMG_20250802_082912_733.jpg",
+                "media/IMG_20250802_082912_750.jpg", "media/IMG_20250802_082912_955.jpg", "media/IMG_20250802_082913_024.jpg",
+                "media/IMG_20250802_082938_686.jpg", "media/IMG_20250802_082938_805.jpg", "media/IMG_20250802_082938_851.jpg",
+                "media/IMG_20250802_082938_966.jpg", "media/IMG_20250802_082939_003.jpg", "media/IMG_20250802_082939_194.jpg",
+                "media/IMG_20250802_082939_254.jpg", "media/IMG_20250802_082939_257.jpg", "media/IMG_20250802_082939_259.jpg",
+                "media/IMG_20250802_082939_280.jpg"
+            ];
+
+            /* ── STATE ── */
+            const words = [];
+            const activeImages = new Set();
+            let imageCount = 0;
+            let imagesEnabled = true;
+            let isDragging = false;
+            let isRightClick = false;
+            let lastX = 0, lastY = 0;
+            let rotX = 0, rotY = 0, tRotX = 0, tRotY = 0;
+            let scale = 1;
+            let panX = 0, panY = 0, tPanX = 0, tPanY = 0;
+            let fallThreshold = 0, resetStartY = 0;
+            let lastFrame = performance.now();
+
+            const scene = document.getElementById('scene');
+            const btn = document.getElementById('toggleImages');
+
+            /* ── UTILS ── */
+            function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
+
+            function vh() {
+                fallThreshold = window.innerHeight + 1500;
+                resetStartY = -(window.innerHeight * 0.5);
+                document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+            }
+
+            function lerp(a, b, t) { return a + (b - a) * t; }
+
+            function updateSceneTransform() {
+                scene.style.transform = `translate(${panX}px,${panY}px) scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            }
+
+            function clampPan() {
+                const xA = isMobile ? 400 : 1000;
+                const yA = 600;
+                tPanX = Math.max(-xA, Math.min(xA, tPanX));
+                tPanY = Math.max(-yA, Math.min(yA, tPanY));
+            }
+
+            /* ── WORD POOL ── */
+            function resetWord(w) {
+                const el = w.element;
+
+                // Release image slot
+                if (w.isImage && w.imgSrc) {
+                    activeImages.delete(w.imgSrc);
+                    imageCount--;
+                    w.isImage = false;
+                    w.imgSrc = null;
+                }
+
+                const canImg = imagesEnabled && imageCount < CFG.maxImagesOnScreen;
+                const avail = canImg ? IMAGES.filter(s => !activeImages.has(s)) : [];
+                const doImg = canImg && avail.length > 0 && Math.random() < 0.15;
+
+                el.innerHTML = '';
+
+                if (doImg) {
+                    const src = avail[Math.floor(Math.random() * avail.length)];
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    el.appendChild(img);
+                    activeImages.add(src);
+                    imageCount++;
+                    w.isImage = true;
+                    w.imgSrc = src;
+                } else {
+                    const sp = document.createElement('span');
+                    sp.textContent = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+                    const fs = CFG.minFontSize + Math.random() * (CFG.maxFontSize - CFG.minFontSize);
+                    sp.style.fontSize = fs + 'px';
+                    el.appendChild(sp);
+                    w.isImage = false;
+                }
+
+                const pad = CFG.widthPadding;
+                w.x = Math.random() * (window.innerWidth + pad) - pad / 2;
+                w.y = resetStartY - Math.random() * 200;
+            }
+
+            function initWords() {
+                for (let i = 0; i < CFG.wordCount; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'word';
+                    scene.appendChild(el);
+
+                    const w = {
+                        element: el,
+                        y: Math.random() * fallThreshold,
+                        x: 0,
+                        speed: CFG.minSpeed + Math.random() * (CFG.maxSpeed - CFG.minSpeed),
+                        depth: CFG.minDepth + Math.random() * (CFG.maxDepth - CFG.minDepth),
+                        isImage: false,
+                        imgSrc: null,
+                    };
+
+                    resetWord(w);
+                    words.push(w);
+
+                    // Spread initial y across the whole fall range
+                    w.y = Math.random() * fallThreshold;
+                    el.style.transform = `translate3d(${w.x}px,${w.y}px,${w.depth}px)`;
+                }
+            }
+
+            /* ── ANIMATION LOOP ── */
+            function animateWords(now) {
+                requestAnimationFrame(animateWords);
+                const delta = now - lastFrame;
+                if (delta < CFG.frameTarget) return;
+                lastFrame = now - (delta % CFG.frameTarget);
+
+                for (let i = 0; i < words.length; i++) {
+                    const w = words[i];
+                    w.y += w.speed;
+
+                    if (w.y > fallThreshold) {
+                        resetWord(w);
+                    }
+
+                    w.element.style.transform = `translate3d(${w.x}px,${w.y}px,${w.depth}px)`;
+                }
+            }
+
+            function animateScene() {
+                requestAnimationFrame(animateScene);
+                const t = 0.09;
+                rotX = lerp(rotX, tRotX, t);
+                rotY = lerp(rotY, tRotY, t);
+                panX = lerp(panX, tPanX, t);
+                panY = lerp(panY, tPanY, t);
+                clampPan();
+                updateSceneTransform();
+            }
+
+            /* ── EVENTS ── */
+            btn.addEventListener('click', () => {
+                imagesEnabled = !imagesEnabled;
+                btn.textContent = imagesEnabled ? 'Hide Photos' : 'Show Photos';
+
+                if (!imagesEnabled) {
+                    for (const w of words) {
+                        if (w.isImage) {
+                            // Replace image with text immediately
+                            w.element.innerHTML = '';
+                            const sp = document.createElement('span');
+                            sp.textContent = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+                            const fs = CFG.minFontSize + Math.random() * (CFG.maxFontSize - CFG.minFontSize);
+                            sp.style.fontSize = fs + 'px';
+                            w.element.appendChild(sp);
+                            activeImages.delete(w.imgSrc);
+                            imageCount--;
+                            w.isImage = false;
+                            w.imgSrc = null;
+                        }
+                    }
+                }
+            });
+
+            document.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Mouse — left drag = rotate, right drag = pan
+            document.addEventListener('mousedown', e => {
+                isDragging = true;
+                isRightClick = e.button === 2;
+                lastX = e.clientX; lastY = e.clientY;
+            });
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const dx = e.clientX - lastX, dy = e.clientY - lastY;
+                if (isRightClick) { tPanX += dx; tPanY += dy; }
+                else { tRotY += dx * 0.3; tRotX -= dy * 0.3; }
+                lastX = e.clientX; lastY = e.clientY;
+            });
+            document.addEventListener('mouseup', () => { isDragging = false; isRightClick = false; });
+
+            // Touch — single finger = rotate, two fingers = pan + pinch zoom
+            let pinchDist = null, lastMidX = 0, lastMidY = 0, lastTX = 0, lastTY = 0;
+
+            function touchDist(t) {
+                return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+            }
+
+            document.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) {
+                    lastTX = e.touches[0].clientX;
+                    lastTY = e.touches[0].clientY;
+                    pinchDist = null;
+                } else if (e.touches.length === 2) {
+                    pinchDist = touchDist(e.touches);
+                    lastMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    lastMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', e => {
+                if (e.touches.length === 1 && pinchDist === null) {
+                    const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+                    tRotY += (tx - lastTX) * 0.3;
+                    tRotX -= (ty - lastTY) * 0.3;
+                    lastTX = tx; lastTY = ty;
+                } else if (e.touches.length === 2 && pinchDist !== null) {
+                    const d = touchDist(e.touches);
+                    scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale + (d - pinchDist) * 0.003));
+                    pinchDist = d;
+                    const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    tPanX += mx - lastMidX; tPanY += my - lastMidY;
+                    lastMidX = mx; lastMidY = my;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', e => {
+                if (e.touches.length < 2) pinchDist = null;
+                if (e.touches.length === 1) {
+                    lastTX = e.touches[0].clientX;
+                    lastTY = e.touches[0].clientY;
+                }
+            });
+
+            let wheelTimer;
+            document.addEventListener('wheel', e => {
+                e.preventDefault();
+                clearTimeout(wheelTimer);
+                scale = Math.min(CFG.maxZoom, Math.max(CFG.minZoom, scale - e.deltaY * 0.001));
+                updateSceneTransform();
+            }, { passive: false });
+
+            window.addEventListener('resize', vh);
+
+            /* ── INIT ── */
+            vh();
+            initWords();
+            animateWords(performance.now());
+            animateScene();
+        })();
+    </script>
 </body>
 
 </html>
